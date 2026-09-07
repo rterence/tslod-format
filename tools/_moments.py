@@ -27,6 +27,22 @@ bit-identical:
 A single-level rule would not have made the parallel case identical, which is
 why there are two.
 
+## Only the four operations IEEE-754 rounds exactly
+
+The order alone is not enough to make the fold reproducible. `+`, `-`, `*` and
+`/` on float64 are correctly rounded and give the same bits on every IEEE-754
+machine; `pow` does not, and is not required to. Raising a value to the third
+or fourth power with `**` calls the platform's `pow`, whose last bit differs
+between one C library and another, so the same samples folded in the same order
+produced different files on two machines.
+
+Every power in the merge is therefore written as multiplication: `d3` and `d4`
+from `d2`, and `n3` from `n2`. `x * x` and `x ** 2` agree, but the association
+is written out anyway so the expression says what it computes. An implementation
+in another language must do the same and must not reach for a `powi`, `powf` or
+`cbrt`: the stored moments are a byte-for-byte obligation, and only the four
+exact operations can carry one.
+
 ## NaN
 
 `count` is the number of **non-NaN** elements and the moments are over the
@@ -75,14 +91,18 @@ def merge_arrays(a, b):
     safe_n = np.where(n > 0, n, 1.0)
     delta = mb - ma
     d2 = delta * delta
+    d3 = d2 * delta
+    d4 = d2 * d2
+    n2 = safe_n * safe_n
+    n3 = n2 * safe_n
 
     m2 = m2a + m2b + d2 * ca * cb / safe_n
     m3 = (m3a + m3b
-          + delta ** 3 * ca * cb * (ca - cb) / (safe_n * safe_n)
+          + d3 * ca * cb * (ca - cb) / n2
           + 3.0 * delta * (ca * m2b - cb * m2a) / safe_n)
     m4 = (m4a + m4b
-          + delta ** 4 * ca * cb * (ca * ca - ca * cb + cb * cb) / (safe_n ** 3)
-          + 6.0 * d2 * (ca * ca * m2b + cb * cb * m2a) / (safe_n * safe_n)
+          + d4 * ca * cb * (ca * ca - ca * cb + cb * cb) / n3
+          + 6.0 * d2 * (ca * ca * m2b + cb * cb * m2a) / n2
           + 4.0 * delta * (ca * m3b - cb * m3a) / safe_n)
     mean = (ca * ma + cb * mb) / safe_n
 

@@ -82,9 +82,22 @@ shape of the fold changes the answer's last bits.
 - **A range query**: the strict left-to-right fold *within each block* in ascending bucket index,
   then the strict left-to-right fold of the per-block results in ascending block index.
 
+⛔ **The arithmetic is normative too.** The order alone does not pin the bits. The merge is
+evaluated using only `+`, `-`, `*` and `/` on float64 — the operations IEEE-754 requires to be
+correctly rounded, and so the only ones that give the same answer on every conforming machine. `pow`
+is not one of them and is not required to be correctly rounded, so an implementation must not reach
+for `pow`, `powi`, `powf` or `cbrt` anywhere in the merge. Where an identity calls for a power it is
+written as multiplication, in this association: with `d2 = delta * delta`, the cube of `delta` is
+`d2 * delta` and its fourth power is `d2 * d2`; with `n2 = n * n`, the cubed count is `n2 * n`. The
+association is stated because it is the association that fixes the last bits — two implementations
+that agree on the order and differ here write different files.
+
 A single-level rule is not enough, and this is measured rather than argued: a flat fold and a
-per-block fold of the same 16 buckets differ in **9 of 15** cases (`set4-chan-pebay-range`). Two
-levels is what makes a per-block parallel implementation and a serial one bit-identical.
+per-block fold of the same 16 buckets differ in **8 of 15** cases (`set4-chan-pebay-range`). Six of
+the seven that agree are the degenerate block sizes — one bucket per block, or every bucket in one
+block — where the two folds are the same computation; of the nine cases where a block boundary
+actually falls inside the range, eight differ and one agrees by luck. Two levels is what makes a
+per-block parallel implementation and a serial one bit-identical.
 
 Accuracy, so it is not assumed: the merge is exact in real arithmetic but not in float64, and its
 error grows **linearly with `|mean|/σ`** — reaching `1.4 × 10⁻⁵` relative on `M2` for data offset to

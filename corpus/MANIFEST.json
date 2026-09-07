@@ -613,7 +613,7 @@
       "files": [
         {
           "path": "set3-build-level/set3-bucket-moments.json",
-          "sha256": "641a4ad17c749148059d5fcb0dee1418e5d805e426a7dc17071ae59f2b253933"
+          "sha256": "1e42a86d1bc41cc7d6d76a761a3bf71001a0d1bd74ede0732f3b5981ce5179fd"
         },
         {
           "path": "set3-build-level/mom_float32_bf256_n512_input.bin",
@@ -930,27 +930,27 @@
       "files": [
         {
           "path": "set4-chan-pebay/set4-chan-pebay-range.json",
-          "sha256": "06884fbacd3adc8582eaa3da03a624a8e91f5b5f15040e0b91ee3a24c40f10df"
+          "sha256": "68cdc0ec6f80edcd361ca28f00f8333bb2fa0e220ef67fb678dd5fd12e49ee69"
         },
         {
           "path": "set4-chan-pebay/range_uniform_buckets.bin",
-          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+          "sha256": "d03da4cc0d08e74700ee8daedddda794f07e30c5c762dc950bf0ef5826771f8c"
         },
         {
           "path": "set4-chan-pebay/range_uniform_buckets.bin",
-          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+          "sha256": "d03da4cc0d08e74700ee8daedddda794f07e30c5c762dc950bf0ef5826771f8c"
         },
         {
           "path": "set4-chan-pebay/range_uniform_buckets.bin",
-          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+          "sha256": "d03da4cc0d08e74700ee8daedddda794f07e30c5c762dc950bf0ef5826771f8c"
         },
         {
           "path": "set4-chan-pebay/range_uniform_buckets.bin",
-          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+          "sha256": "d03da4cc0d08e74700ee8daedddda794f07e30c5c762dc950bf0ef5826771f8c"
         },
         {
           "path": "set4-chan-pebay/range_uniform_buckets.bin",
-          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+          "sha256": "d03da4cc0d08e74700ee8daedddda794f07e30c5c762dc950bf0ef5826771f8c"
         },
         {
           "path": "set4-chan-pebay/range_large-offset_buckets.bin",
@@ -974,23 +974,23 @@
         },
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
-          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+          "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
         },
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
-          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+          "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
         },
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
-          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+          "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
         },
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
-          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+          "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
         },
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
-          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+          "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
         }
       ]
     },
@@ -1013,11 +1013,11 @@
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         }
       ]
     },
@@ -1059,59 +1059,59 @@
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+          "sha256": "4c058cb5bef6b8378b83be3804dea29e244858f93744b287117541b79cac18fa"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+          "sha256": "2e16b325aa7fc80e7ef49867430b576b126cad6e187064be45a3850eceebf493"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+          "sha256": "2e16b325aa7fc80e7ef49867430b576b126cad6e187064be45a3850eceebf493"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+          "sha256": "2e16b325aa7fc80e7ef49867430b576b126cad6e187064be45a3850eceebf493"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+          "sha256": "2e16b325aa7fc80e7ef49867430b576b126cad6e187064be45a3850eceebf493"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+          "sha256": "2e16b325aa7fc80e7ef49867430b576b126cad6e187064be45a3850eceebf493"
         }
       ]
     },
@@ -1136,19 +1136,19 @@
         },
         {
           "path": "v1-format/files/v1_all_ten_dtypes.tslod",
-          "sha256": "42f6d94e9c225ff3e1f79efc71c3b15f8096f560e27d689da0de10ec5be93e76"
+          "sha256": "84fd40ae10798bcee85eca0eb76e827f9f153f0a6f8717774cd94838eabb9fd0"
         },
         {
           "path": "v1-format/files/v1_both_timing_modes.tslod",
-          "sha256": "593a9ff4e4feaabde10c515aaf216449b95a548e7a42fddec3349b99c183796e"
+          "sha256": "3a3e1219f3f3cdd22325fa7cac734b3d0b37cef1df13a78cd9d6611f07909962"
         },
         {
           "path": "v1-format/files/v1_enums_and_units.tslod",
-          "sha256": "da442a35ea992a7851064ce7265ab2aafc79c6bccde5ec8cdec98a9d513977ed"
+          "sha256": "e1034685d8257aeef9c2345df66c64580efa168a8998d01056e9ac6c925dbda9"
         },
         {
           "path": "v1-format/files/v1_active_file_state.tslod",
-          "sha256": "d39a007879abeb1a27b4cb32424e2f906467683cf543bbdba1e4abf6faf38faf"
+          "sha256": "c6854a948064043fb4383a9450d9ebe910c51838e252958bac04dfd52f41d1d8"
         },
         {
           "path": "v1-format/files/v1_no_moment_stream.tslod",
@@ -1156,15 +1156,15 @@
         },
         {
           "path": "v1-format/files/v1_block_samples_256.tslod",
-          "sha256": "39bd1a06cb788fde3cc6eb0e9f124fc632e533f067829e9f9b2603eb3960e80b"
+          "sha256": "1208d581e907b0067dc487f35cad7cc2386e7994106547a290b290907df443ad"
         },
         {
           "path": "v1-format/files/v1_block_samples_512.tslod",
-          "sha256": "38f91864b2ede1f1cf6c6891554596cd6eba380404fa103c4efd13487cd1085b"
+          "sha256": "b760f10fa9e2b433f8246f558b5d9255871e26d38a0094a057bd9e029fa9dbc0"
         },
         {
           "path": "v1-format/files/v1_block_samples_1024.tslod",
-          "sha256": "9af6f74bdb6e674d93bce945e80901d2c226d6b7b540ec9bd6220ac94f3929a5"
+          "sha256": "66288c81f3892ffd42602bc60ccfc45c8973b7253a6a47de17c91867f467c1d2"
         },
         {
           "path": "v1-format/files/v1_branching_factor_2.tslod",
@@ -1172,11 +1172,11 @@
         },
         {
           "path": "v1-format/files/v1_branching_factor_16.tslod",
-          "sha256": "7093251ec893695669a9f20fff4cc1ff9d44ce781d183ce467d34a45e911db86"
+          "sha256": "a7fe1ac9929575cbf12554341c6bf201f7a0ad3a78ee15adc955d0531a0c1219"
         },
         {
           "path": "v1-format/files/v1_branching_factor_1024.tslod",
-          "sha256": "ba7db276c97d9b5c36f825c6273f0f2eefeadc898fe134761c7451f5e5e2edea"
+          "sha256": "5dd98b431d1246d2dcbdba5260c6e6b278cf1de1e223906e28a84a8440c8cf4d"
         }
       ]
     },

@@ -35,7 +35,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -45,7 +45,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_is_identical": true,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -75,7 +75,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408748159FDC328CBF6C982258003395408978FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408748159FDC328CBF6C982258003395408578FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -85,7 +85,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_is_identical": false,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -115,7 +115,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6B982258003395409278FF7324F11F409FE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6B982258003395409478FF7324F11F409FE7165A5F6A8940"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -125,7 +125,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_is_identical": false,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -155,7 +155,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408A78FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -165,11 +165,11 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
-      "flat_fold_is_identical": false,
+      "flat_fold_is_identical": true,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
-      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+      "note": "the flat fold agrees here by luck, not by rule"
     },
     {
       "name": "uniform/block_size=16",
@@ -195,7 +195,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -205,7 +205,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408C78FF7324F11F409EE7165A5F6A8940"
       },
       "flat_fold_is_identical": true,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -435,7 +435,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -445,7 +445,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_is_identical": true,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -475,7 +475,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE04000134748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE04000164748B46419C0127DA3E75F961E41"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -485,7 +485,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_is_identical": false,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -515,7 +515,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405788F90CA4FEA3BF52061C2AED4BE0404C144748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405788F90CA4FEA3BF52061C2AED4BE040CC164748B46419C0127DA3E75F961E41"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -525,7 +525,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_is_identical": false,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -555,7 +555,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE04056104748B46419C0137DA3E75F961E41"
+        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE040D6124748B46419C0137DA3E75F961E41"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -565,7 +565,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_is_identical": false,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
@@ -595,7 +595,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_would_give": {
         "dtype": "float64",
@@ -605,7 +605,7 @@
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE04000124748B46419C0127DA3E75F961E41"
       },
       "flat_fold_is_identical": true,
       "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
