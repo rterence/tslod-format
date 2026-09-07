@@ -383,13 +383,68 @@ def c_geometry(v, c):
     assert int(c["raw_span_of_block"]) == bs * span
 
 
+#: The five v1 record sizes, stated rather than derived, because "the record is
+#: whatever its format string adds up to" is exactly the bug the vector exists
+#: to catch.
+V1_RECORD_SIZES = {"v1/header": 128, "v1/group_entry": 64,
+                   "v1/channel_entry": 160, "v1/level_entry": 24,
+                   "v1/block_index_entry": 48}
+
+_SCALAR_WIDTH = {"b": 1, "B": 1, "h": 2, "H": 2, "i": 4, "I": 4,
+                 "q": 8, "Q": 8, "f": 4, "d": 8}
+
+
+def _format_fields(fmt: str):
+    """`(offset, width)` per component of a struct format, in order."""
+    assert fmt[0] == "<", "every v1 record is little-endian"
+    out, offset = [], 0
+    for count, code in re.findall(r"(\d*)([a-zA-Z])", fmt[1:]):
+        n = int(count) if count else 1
+        if code == "s":
+            out.append((offset, n))
+            offset += n
+        else:
+            for _ in range(n):
+                out.append((offset, _SCALAR_WIDTH[code]))
+                offset += _SCALAR_WIDTH[code]
+    return out
+
+
 def c_layout(v, c):
+    """The record is these bytes at these offsets, proved against the golden.
+
+    Comparing calcsize with the vector's own size_bytes only proves the vector
+    agrees with itself, and walking the field table's widths only proves the
+    table is contiguous. Neither notices a field table that has drifted from
+    the format string it claims to describe, which is the "right names, wrong
+    padding" failure the vector exists to catch.
+    """
     fmt, raw = c["struct_format"], bytes.fromhex(c["golden_encoding_hex"])
+    assert c["size_bytes"] == V1_RECORD_SIZES[c["name"]], (
+        f"{c['name']} is {c['size_bytes']} bytes, v1 fixes it at "
+        f"{V1_RECORD_SIZES[c['name']]}")
     assert struct.calcsize(fmt) == c["size_bytes"] == len(raw)
     assert struct.pack(fmt, *struct.unpack(fmt, raw)) == raw
+
+    # The field table must describe the format string, component for component.
+    components = _format_fields(fmt)
+    assert len(components) == len(c["fields"]), (
+        f"{len(c['fields'])} fields listed for a format with "
+        f"{len(components)} components")
     cursor = 0
-    for fld in c["fields"]:
+    values = struct.unpack(fmt, raw)
+    codes = [code for count, code in re.findall(r"(\d*)([a-zA-Z])", fmt[1:])
+             for _ in range(1 if code == "s" else (int(count) if count else 1))]
+    for fld, (offset, width), value, code in zip(c["fields"], components,
+                                                 values, codes):
         assert fld["offset"] == cursor, f"{fld['name']}: gap or overlap"
+        assert (fld["offset"], fld["width"]) == (offset, width), (
+            f"{fld['name']} is listed at {fld['offset']}+{fld['width']} but the "
+            f"format puts it at {offset}+{width}")
+        # and the golden bytes at that offset really are that field
+        packed = value if code == "s" else struct.pack("<" + code, value)
+        assert raw[offset:offset + width] == packed, (
+            f"{fld['name']}: the golden bytes at {offset} are not this field")
         cursor += fld["width"]
     assert cursor == c["size_bytes"]
 
