@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import struct
 import sys
 import traceback
@@ -879,6 +880,118 @@ CHECKS = {
 # --------------------------------------------------------------------------
 
 
+#: Number words the prose uses where a digit would read badly.
+_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+          "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+          "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+          "sixteen": 16, "seventeen": 17}
+
+
+def _num(text: str) -> int:
+    t = text.strip().lower().replace(",", "")
+    return int(t) if t.isdigit() else _WORDS[t]
+
+
+def _find(problems, doc: str, text: str, pattern: str, label: str, want):
+    """Pull the numbers a sentence claims and compare them with the truth."""
+    m = re.search(pattern, text)
+    if m is None:
+        problems.append(f"{doc}: cannot find the sentence stating {label}; "
+                        f"the check that keeps it honest no longer matches it")
+        return
+    got = tuple(_num(g) for g in m.groups())
+    want = tuple(want)
+    if got != want:
+        problems.append(f"{doc}: {label} says {got}, the corpus says {want}")
+
+
+def check_documented_counts(manifest: dict) -> list[str]:
+    """Every count written by hand in prose, checked against the data.
+
+    Prose does not regenerate. A vector added without touching these sentences
+    leaves the repository describing a corpus it no longer has, and the first
+    person to notice is someone comparing the README with the manifest and
+    deciding which of the two to believe.
+    """
+    problems: list[str] = []
+    vectors = manifest["counts"]["vectors"]
+    cases = manifest["counts"]["cases"]
+
+    readme = (REPO_ROOT / "README.md").read_text()
+    golden = len(list((VECTORS / "v1-format" / "files").glob("*.tslod")))
+    _find(problems, "README.md", readme,
+          r"holds ([\d,]+) test cases across (\d+) vectors",
+          "the corpus size", (cases, vectors))
+    _find(problems, "README.md", readme,
+          r"\| `v1-format` \| (\d+) golden",
+          "the golden file count", (golden,))
+
+    # The illustrative run: tied to the manifest where it can be, and
+    # internally consistent everywhere else.
+    _find(problems, "README.md", readme,
+          r"corpus: (\d+) vectors, (\d+) cases",
+          "the illustrative run's header", (vectors, cases))
+    m = re.search(r"passed (\d+)\s+failed (\d+)\s+skipped (\d+)", readme)
+    skips = [int(n) for n in re.findall(r"^\s+(\d+) cases need ", readme, re.M)]
+    if m is None or not skips:
+        problems.append("README.md: the illustrative run block no longer parses")
+    else:
+        passed, failed, skipped = (int(g) for g in m.groups())
+        if passed + failed + skipped != cases:
+            problems.append(
+                f"README.md: the illustrative run adds up to "
+                f"{passed + failed + skipped}, the corpus has {cases} cases")
+        if sum(skips) != skipped:
+            problems.append(
+                f"README.md: the illustrative run skips {skipped} but its "
+                f"per-package lines add up to {sum(skips)}")
+
+    # CONVENTIONS: the hex encodings, counted from the data they describe.
+    hexes: dict[str, int] = {}
+    for path in sorted(VECTORS.rglob("*.json")):
+        _count_hex(json.loads(path.read_text()), None, hexes)
+    integer_fields = sorted(set(hexes) - {"bits", "sample_rate_bits"})
+    conv = (CORPUS_ROOT / "CONVENTIONS.md").read_text()
+    _find(problems, "corpus/CONVENTIONS.md", conv,
+          r"(\w+) fields are written this way",
+          "the hex integer field count", (len(integer_fields),))
+    _find(problems, "corpus/CONVENTIONS.md", conv,
+          r"`recipe` \(the largest, at ([\d,]+)\s*\n?occurrences",
+          "the `recipe` occurrence count", (hexes.get("recipe", 0),))
+    _find(problems, "corpus/CONVENTIONS.md", conv,
+          r"all ([\d,]+) of them, sits inside a `bits` descriptor",
+          "the `bits` occurrence count", (hexes.get("bits", 0),))
+    if sorted(hexes.get("sample_rate_bits", 0) and ["sample_rate_bits"] or []) and \
+            len([k for k in hexes if k.endswith("_bits")]) != 1:
+        problems.append("corpus/CONVENTIONS.md: `sample_rate_bits` is no longer "
+                        "the only bare bit-pattern field")
+
+    # spec: the measured claim about the two-level fold.
+    rng = json.loads(
+        (VECTORS / "set4-chan-pebay" / "set4-chan-pebay-range.json").read_text())
+    same = sum(1 for c in rng["cases"] if c.get("flat_fold_is_identical"))
+    total = len(rng["cases"])
+    spec = (REPO_ROOT / "spec" / "v1" / "README.md").read_text()
+    _find(problems, "spec/v1/README.md", spec,
+          r"differ in \*\*(\d+) of (\d+)\*\* cases",
+          "the flat-versus-per-block fold count", (total - same, total))
+    _find(problems, "spec/v1/README.md", spec,
+          r"Six of\s*\n?the (\w+) that agree",
+          "how many of those cases agree", (same,))
+    return problems
+
+
+def _count_hex(o, key, out: dict) -> None:
+    if isinstance(o, dict):
+        for k, v in o.items():
+            _count_hex(v, k, out)
+    elif isinstance(o, list):
+        for v in o:
+            _count_hex(v, key, out)
+    elif isinstance(o, str) and re.fullmatch(r"0[xX][0-9a-fA-F]+", o):
+        out[key] = out.get(key, 0) + 1
+
+
 def verify_hashes(manifest: dict) -> list[str]:
     problems = []
     for entry in manifest["vectors"]:
@@ -905,6 +1018,13 @@ def main() -> int:
         for p in problems:
             print(f"    {p}")
         return 2
+
+    stale = check_documented_counts(manifest)
+    if stale:
+        print("the prose does not describe this corpus:")
+        for p in stale:
+            print(f"    {p}")
+        return 1
 
     print(f"corpus: {manifest['counts']['vectors']} vectors, "
           f"{manifest['counts']['cases']} cases\n")

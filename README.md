@@ -34,7 +34,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,270 test cases across 24 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,275 test cases across 25 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -45,7 +45,7 @@ contract between implementations rather than one implementation's private detail
 
 | set | what it pins |
 |---|---|
-| `v1-format` | 14 golden `.tslod` files, the profile-0 conformance set, block framing, the CRC, the time axis, and the read-time rejections |
+| `v1-format` | 17 golden `.tslod` files, the profile-0 and profile-2 conformance sets, block framing, the CRC, the time axis, and the read-time rejections |
 | `record-layouts` | every field of all five records, with a golden encoding, and the wire enums |
 | `set1-tick-timebase` | the tick conversions and the one rounding rule they share |
 | `set2-anchored-fold` | where a bucket sits, and how deep the pyramid is |
@@ -122,13 +122,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 24 vectors, 1270 cases
+corpus: 25 vectors, 1275 cases
 
 skipped, because an optional codec is not installed:
-    42 cases need pcodec — pip install pcodec
-    104 cases need zstandard — pip install zstandard
+    44 cases need pcodec — pip install pcodec
+    105 cases need zstandard — pip install zstandard
 
-passed 1124  failed 0  skipped 146
+passed 1126  failed 0  skipped 149
 RESULT: PASS, with codec cases skipped
 ```
 
