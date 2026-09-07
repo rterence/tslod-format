@@ -144,8 +144,10 @@ python3 tools/generate_all.py
 Rebuilds every vector from the generators in `tools/`, then rebuilds `corpus/MANIFEST.json`. You do
 not need this to use the suite: the data is committed, so an implementation in Rust or C runs the
 suite with no Python toolchain, and a change to a generator arrives in review as the change it makes
-to the expected values. CI runs it and byte-compares the result against the committed tree, so the
-data cannot drift from the code that defines it.
+to the expected values. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the generators
+on every push and pull request and fails if the rebuilt tree differs from the commit by a single
+byte, so the data cannot drift from the code that defines it. The same job then runs
+`check_corpus.py` and requires that nothing failed and nothing was skipped.
 
 Requires numpy, plus `zstandard` and `pcodec` to rebuild the compression cases. The exact
 versions the committed data was generated with are pinned in
@@ -178,7 +180,8 @@ implementation, it is an oracle and must carry a tolerance.
 
 ## Status
 
-Version 1 is not released and carries no stability guarantee.
+Version 1 is not released and carries no stability guarantee. From this commit on, history on
+`main` is never rewritten, so a consumer may pin any commit.
 
 ## Licence
 
