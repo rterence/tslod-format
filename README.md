@@ -147,7 +147,13 @@ suite with no Python toolchain, and a change to a generator arrives in review as
 to the expected values. CI runs it and byte-compares the result against the committed tree, so the
 data cannot drift from the code that defines it.
 
-Requires numpy, plus `zstandard` and `pcodec` to rebuild the compression cases.
+Requires numpy, plus `zstandard` and `pcodec` to rebuild the compression cases. The exact
+versions the committed data was generated with are pinned in
+[`tools/requirements.txt`](tools/requirements.txt):
+
+```bash
+pip install -r tools/requirements.txt
+```
 
 ---
 

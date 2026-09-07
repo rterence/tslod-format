@@ -1,0 +1,5 @@
+# The exact versions the committed corpus was generated with.
+# Pinned, because tools/generate_all.py must reproduce the committed bytes.
+numpy==2.4.6
+zstandard==0.25.0
+pcodec==1.0.3
