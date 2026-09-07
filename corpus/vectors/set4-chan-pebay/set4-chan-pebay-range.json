@@ -1,0 +1,615 @@
+{
+  "id": "set4-chan-pebay-range",
+  "set": "set4-chan-pebay",
+  "kind": "fixture",
+  "asserts": "A range query's merged moments are the strict left-to-right fold WITHIN each block in ascending bucket index, then the strict left-to-right fold of the per-block results in ascending block index \u2014 which is bit-identical for a per-block parallel engine and a serial reader, and is NOT the same as a flat fold over every bucket in the range.",
+  "source": "tools/_moments.py:range_merge, the one shared fold",
+  "contract": "A parallel implementation and a serial one must return the same bits for the same range, which holds only if the block boundary is part of the rule.",
+  "requires": [
+    "feature:moments"
+  ],
+  "notes": "FIXTURE, not oracle: with the order fixed the answer is exact bytes, which is the whole reason the order was ruled. Each case carries what a FLAT fold would have given, so an implementation that ignores the block boundary fails on data rather than on a reading of the spec.",
+  "case_count": 15,
+  "cases": [
+    {
+      "name": "uniform/block_size=1",
+      "dataset": "uniform",
+      "bucket_count": 16,
+      "buckets_per_block": 1,
+      "block_count": 16,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_uniform_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold agrees here by luck, not by rule"
+    },
+    {
+      "name": "uniform/block_size=2",
+      "dataset": "uniform",
+      "bucket_count": 16,
+      "buckets_per_block": 2,
+      "block_count": 8,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_uniform_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408748159FDC328CBF6C982258003395408978FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "uniform/block_size=4",
+      "dataset": "uniform",
+      "bucket_count": 16,
+      "buckets_per_block": 4,
+      "block_count": 4,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_uniform_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6B982258003395409278FF7324F11F409FE7165A5F6A8940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "uniform/block_size=8",
+      "dataset": "uniform",
+      "bucket_count": 16,
+      "buckets_per_block": 8,
+      "block_count": 2,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_uniform_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408A78FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "uniform/block_size=16",
+      "dataset": "uniform",
+      "bucket_count": 16,
+      "buckets_per_block": 16,
+      "block_count": 1,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_uniform_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0408848159FDC328CBF6C982258003395408878FF7324F11F409EE7165A5F6A8940"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "block_size = bucket_count is the degenerate single-block case, where the two rules necessarily coincide"
+    },
+    {
+      "name": "large-offset/block_size=1",
+      "dataset": "large-offset",
+      "bucket_count": 16,
+      "buckets_per_block": 1,
+      "block_count": 16,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_large-offset_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold agrees here by luck, not by rule"
+    },
+    {
+      "name": "large-offset/block_size=2",
+      "dataset": "large-offset",
+      "bucket_count": 16,
+      "buckets_per_block": 2,
+      "block_count": 8,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_large-offset_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405639130084D79741BF5A0749701595401977C33B617A43C0860EC7BACC488940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "large-offset/block_size=4",
+      "dataset": "large-offset",
+      "bucket_count": 16,
+      "buckets_per_block": 4,
+      "block_count": 4,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_large-offset_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405639130084D79741CD8F0C4970159540B18A7839617A43C0848AA5BACC488940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "large-offset/block_size=8",
+      "dataset": "large-offset",
+      "bucket_count": 16,
+      "buckets_per_block": 8,
+      "block_count": 2,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_large-offset_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405639130084D797410A240D497015954047B92E35617A43C0AAC0BFBACC488940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "large-offset/block_size=16",
+      "dataset": "large-offset",
+      "bucket_count": 16,
+      "buckets_per_block": 16,
+      "block_count": 1,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_large-offset_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000B0405539130084D797417BC749497015954018452238617A43C0B1263DBBCC488940"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "block_size = bucket_count is the degenerate single-block case, where the two rules necessarily coincide"
+    },
+    {
+      "name": "with-nan/block_size=1",
+      "dataset": "with-nan",
+      "bucket_count": 16,
+      "buckets_per_block": 1,
+      "block_count": 16,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_with-nan_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold agrees here by luck, not by rule"
+    },
+    {
+      "name": "with-nan/block_size=2",
+      "dataset": "with-nan",
+      "bucket_count": 16,
+      "buckets_per_block": 2,
+      "block_count": 8,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_with-nan_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE04000134748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "with-nan/block_size=4",
+      "dataset": "with-nan",
+      "bucket_count": 16,
+      "buckets_per_block": 4,
+      "block_count": 4,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_with-nan_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405788F90CA4FEA3BF52061C2AED4BE0404C144748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "with-nan/block_size=8",
+      "dataset": "with-nan",
+      "bucket_count": 16,
+      "buckets_per_block": 8,
+      "block_count": 2,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_with-nan_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405788F90CA4FEA3BF51061C2AED4BE04056104748B46419C0137DA3E75F961E41"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_is_identical": false,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "the flat fold DIFFERS \u2014 this case is the one that catches an implementation ignoring the block boundary"
+    },
+    {
+      "name": "with-nan/block_size=16",
+      "dataset": "with-nan",
+      "bucket_count": 16,
+      "buckets_per_block": 16,
+      "block_count": 1,
+      "buckets": {
+        "dtype": "float64",
+        "shape": [
+          16,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set4-chan-pebay/range_with-nan_buckets.bin"
+      },
+      "expected_merged": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_would_give": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000064AF405688F90CA4FEA3BF51061C2AED4BE040000F4748B46419C0127DA3E75F961E41"
+      },
+      "flat_fold_is_identical": true,
+      "fold_order": "left-to-right within each block in ascending bucket index, then left-to-right over the per-block results in ascending block index",
+      "note": "block_size = bucket_count is the degenerate single-block case, where the two rules necessarily coincide"
+    }
+  ]
+}

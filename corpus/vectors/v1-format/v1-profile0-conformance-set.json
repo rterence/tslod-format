@@ -1,0 +1,199 @@
+{
+  "id": "v1-profile0-conformance-set",
+  "set": "v1-format",
+  "kind": "fixture",
+  "asserts": "The profile-0 conformance files are readable with no codec at all: compression_id = 0 means every recipe byte in the file is 0x00 and every payload is the array's little-endian row-major bytes, so a reader needs only struct unpacking and zlib.crc32 to pass this set.",
+  "source": "written by tools/_tslod_build.py",
+  "contract": "A profile that needs no codec at all is what lets an implementation be checked before it has one.",
+  "requires": [
+    "format:v1",
+    "profile:0",
+    "recipe:0x00",
+    "feature:crc"
+  ],
+  "notes": "Profile 0 exists so the reference reader can be written against the SPEC with the standard library alone (the one exemption is pco and zstd for profile-2 files, and profile 0 needs neither). Every file below is decodable by hand.",
+  "case_count": 11,
+  "cases": [
+    {
+      "name": "v1_all_ten_dtypes.tslod",
+      "file": "v1-format/files/v1_all_ten_dtypes.tslod",
+      "file_size_bytes": "52300",
+      "block_count": 60,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "all ten wire dtypes in one file; six of them appear in no .tslod that exists",
+      "dtypes": [
+        "float32",
+        "float64",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64"
+      ]
+    },
+    {
+      "name": "v1_both_timing_modes.tslod",
+      "file": "v1-format/files/v1_both_timing_modes.tslod",
+      "file_size_bytes": "35174",
+      "block_count": 24,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "all six rows of the stream table in one file \u2014 which streams a block has is fixed by its KIND, and this is the file that proves each shape exists",
+      "timing_modes": [
+        0,
+        1
+      ],
+      "aggregation_modes": [
+        0,
+        1
+      ],
+      "stream_shapes": {
+        "fixed/L0": "one stream: values (N,)",
+        "fixed/L>=1 numeric": "two: positions (N,2) i64 [min_ts,max_ts], then tuples (N,4)",
+        "fixed/L>=1 bitfield": "one: tuples (N,4)",
+        "variable/L0": "two: timestamps (N,) i64, then values (N,)",
+        "variable/L>=1 numeric": "two: timestamps (N,4) [first,last,min,max], then tuples (N,4)",
+        "variable/L>=1 bitfield": "two: timestamps (N,) [first], then tuples (N,4)"
+      }
+    },
+    {
+      "name": "v1_enums_and_units.tslod",
+      "file": "v1-format/files/v1_enums_and_units.tslod",
+      "file_size_bytes": "13294",
+      "block_count": 18,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "two units, both scaling types, both timing flags, and a zero-sample channel \u2014 the list of what the conformance files must carry",
+      "units": [
+        "m/s^2",
+        "V",
+        "degC",
+        "raw"
+      ],
+      "scaling_types": [
+        0,
+        1
+      ],
+      "timing_flags": 3,
+      "zero_sample_channel": "empty"
+    },
+    {
+      "name": "v1_active_file_state.tslod",
+      "file": "v1-format/files/v1_active_file_state.tslod",
+      "file_size_bytes": "5194",
+      "block_count": 6,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "readable up to the last flushed block; num_levels derived by walking the level table; the stored field authoritative once sealed. The spec's 'potentially corrupt' advisory is dropped",
+      "file_state": 1,
+      "file_state_name": "active"
+    },
+    {
+      "name": "v1_no_moment_stream.tslod",
+      "file": "v1-format/files/v1_no_moment_stream.tslod",
+      "file_size_bytes": "18244",
+      "block_count": 18,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "the same data with NO moment stream. A reader must handle both, because bitfield buckets never carry moments and a writer may omit them; the stream count is a function of the block KIND plus this presence, and both shapes are in the corpus so neither can be assumed",
+      "has_moment_stream": false
+    },
+    {
+      "name": "v1_block_samples_256.tslod",
+      "file": "v1-format/files/v1_block_samples_256.tslod",
+      "file_size_bytes": "37254",
+      "block_count": 34,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "every_crc_verifies": true,
+      "note": "block_samples = 256 = 1x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
+      "block_samples_multiple_of_bf": 1
+    },
+    {
+      "name": "v1_block_samples_512.tslod",
+      "file": "v1-format/files/v1_block_samples_512.tslod",
+      "file_size_bytes": "36470",
+      "block_count": 18,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 512,
+      "every_crc_verifies": true,
+      "note": "block_samples = 512 = 2x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
+      "block_samples_multiple_of_bf": 2
+    },
+    {
+      "name": "v1_block_samples_1024.tslod",
+      "file": "v1-format/files/v1_block_samples_1024.tslod",
+      "file_size_bytes": "36078",
+      "block_count": 10,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 1024,
+      "every_crc_verifies": true,
+      "note": "block_samples = 1024 = 4x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
+      "block_samples_multiple_of_bf": 4
+    },
+    {
+      "name": "v1_branching_factor_2.tslod",
+      "file": "v1-format/files/v1_branching_factor_2.tslod",
+      "file_size_bytes": "533072",
+      "block_count": 4096,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 2,
+      "block_samples": 2,
+      "every_crc_verifies": true,
+      "note": "BF=2; no file that exists uses anything but 256",
+      "num_levels": 13
+    },
+    {
+      "name": "v1_branching_factor_16.tslod",
+      "file": "v1-format/files/v1_branching_factor_16.tslod",
+      "file_size_bytes": "50094",
+      "block_count": 274,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 16,
+      "block_samples": 16,
+      "every_crc_verifies": true,
+      "note": "BF=16; no file that exists uses anything but 256",
+      "num_levels": 4
+    },
+    {
+      "name": "v1_branching_factor_1024.tslod",
+      "file": "v1-format/files/v1_branching_factor_1024.tslod",
+      "file_size_bytes": "17482",
+      "block_count": 6,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 1024,
+      "block_samples": 1024,
+      "every_crc_verifies": true,
+      "note": "BF=1024; no file that exists uses anything but 256",
+      "num_levels": 3
+    }
+  ]
+}

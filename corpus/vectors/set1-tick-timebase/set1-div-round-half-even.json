@@ -1,0 +1,156 @@
+{
+  "id": "set1-div-round-half-even",
+  "set": "set1-tick-timebase",
+  "kind": "fixture",
+  "asserts": "Integer division rounds half to even over the exact rational: ties go to the even quotient, and negative numerators floor before the tie test rather than truncating toward zero.",
+  "source": "authored: round-half-even over fractions.Fraction, derived from the rule rather than from any implementation of it",
+  "contract": "One rounding rule, stated: three implementations rounding three ways put the same instant in three different places.",
+  "requires": [
+    "feature:tick-timebase"
+  ],
+  "case_count": 23,
+  "cases": [
+    {
+      "name": "rhe(5/2)",
+      "n": "5",
+      "d": "2",
+      "expected": "2"
+    },
+    {
+      "name": "rhe(7/2)",
+      "n": "7",
+      "d": "2",
+      "expected": "4"
+    },
+    {
+      "name": "rhe(-5/2)",
+      "n": "-5",
+      "d": "2",
+      "expected": "-2"
+    },
+    {
+      "name": "rhe(-7/2)",
+      "n": "-7",
+      "d": "2",
+      "expected": "-4"
+    },
+    {
+      "name": "rhe(1/2)",
+      "n": "1",
+      "d": "2",
+      "expected": "0"
+    },
+    {
+      "name": "rhe(3/2)",
+      "n": "3",
+      "d": "2",
+      "expected": "2"
+    },
+    {
+      "name": "rhe(-1/2)",
+      "n": "-1",
+      "d": "2",
+      "expected": "0"
+    },
+    {
+      "name": "rhe(-3/2)",
+      "n": "-3",
+      "d": "2",
+      "expected": "-2"
+    },
+    {
+      "name": "rhe(7/3)",
+      "n": "7",
+      "d": "3",
+      "expected": "2"
+    },
+    {
+      "name": "rhe(8/3)",
+      "n": "8",
+      "d": "3",
+      "expected": "3"
+    },
+    {
+      "name": "rhe(-7/3)",
+      "n": "-7",
+      "d": "3",
+      "expected": "-2"
+    },
+    {
+      "name": "rhe(-8/3)",
+      "n": "-8",
+      "d": "3",
+      "expected": "-3"
+    },
+    {
+      "name": "rhe(10/5)",
+      "n": "10",
+      "d": "5",
+      "expected": "2"
+    },
+    {
+      "name": "rhe(0/7)",
+      "n": "0",
+      "d": "7",
+      "expected": "0"
+    },
+    {
+      "name": "rhe(-10/5)",
+      "n": "-10",
+      "d": "5",
+      "expected": "-2"
+    },
+    {
+      "name": "rhe(9007199254740993/2)",
+      "n": "9007199254740993",
+      "d": "2",
+      "expected": "4503599627370496"
+    },
+    {
+      "name": "rhe(9007199254740995/2)",
+      "n": "9007199254740995",
+      "d": "2",
+      "expected": "4503599627370498"
+    },
+    {
+      "name": "rhe(-9007199254740993/2)",
+      "n": "-9007199254740993",
+      "d": "2",
+      "expected": "-4503599627370496"
+    },
+    {
+      "name": "rhe(9223372036854775807/3)",
+      "n": "9223372036854775807",
+      "d": "3",
+      "expected": "3074457345618258602"
+    },
+    {
+      "name": "rhe(-9223372036854775808/3)",
+      "n": "-9223372036854775808",
+      "d": "3",
+      "expected": "-3074457345618258603"
+    },
+    {
+      "name": "rhe(1000000000000000000000000000005/10)",
+      "n": "1000000000000000000000000000005",
+      "d": "10",
+      "expected": "100000000000000000000000000000"
+    },
+    {
+      "name": "divisor-zero-rejected",
+      "n": "1",
+      "d": "0",
+      "expected": null,
+      "rejection_class": "divisor-not-positive",
+      "message": "the divisor is positive or the quotient is undefined; a zero or negative divisor is refused, never silently floored"
+    },
+    {
+      "name": "divisor-negative-rejected",
+      "n": "1",
+      "d": "-2",
+      "expected": null,
+      "rejection_class": "divisor-not-positive",
+      "message": "the divisor is positive or the quotient is undefined"
+    }
+  ]
+}

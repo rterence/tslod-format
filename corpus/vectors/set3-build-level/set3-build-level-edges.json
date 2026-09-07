@@ -1,0 +1,193 @@
+{
+  "id": "set3-build-level-edges",
+  "set": "set3-build-level",
+  "kind": "fixture",
+  "asserts": "build_level refuses an empty input and a branching factor below 2 rather than returning an empty level, and a single-bucket fold of a bucket shorter than the branching factor is the identity on values.",
+  "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+  "contract": "The fold refuses an empty input and a branching factor below two rather than returning something plausible.",
+  "requires": [],
+  "notes": "`k == 1` is NOT handled here: the fold is defined for a branching factor of 2 or more, and a caller that wants one bucket per element is asking for the input back rather than for a fold.",
+  "case_count": 6,
+  "cases": [
+    {
+      "name": "branching-factor-0-refused",
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F000000000000004000000000000008400000000000001040000000000000144000000000000018400000000000001C40"
+      },
+      "branching_factor": 0,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "rejection_class": "branching-factor-below-two",
+      "message": "branching_factor must be >= 2, got 0"
+    },
+    {
+      "name": "branching-factor-1-refused",
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F000000000000004000000000000008400000000000001040000000000000144000000000000018400000000000001C40"
+      },
+      "branching_factor": 1,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "rejection_class": "branching-factor-below-two",
+      "message": "branching_factor must be >= 2, got 1"
+    },
+    {
+      "name": "empty-input-refused",
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          0
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": ""
+      },
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "rejection_class": "empty-input",
+      "message": "empty array"
+    },
+    {
+      "name": "n1-shorter-than-bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E40"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E400000000000001E400000000000001E400000000000001E40"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "n2-shorter-than-bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E400000000000002140"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E4000000000000021400000000000001E400000000000002140"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 2,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "n3-shorter-than-bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          3
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E4000000000000021400000000000002340"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E4000000000000023400000000000001E400000000000002340"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 3,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    }
+  ]
+}

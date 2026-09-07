@@ -1,0 +1,336 @@
+{
+  "id": "set4-chan-pebay-nan",
+  "set": "set4-chan-pebay",
+  "kind": "oracle",
+  "asserts": "NaN is excluded from count and from every sum, so an all-NaN part is the identity of the merge and a part containing NaN contributes only its non-NaN elements \u2014 the same NaN rule the stored moments follow, carried to the merge.",
+  "source": "AUTHORED: exact rational arithmetic over the non-NaN elements only",
+  "contract": "Counting invalid samples poisons every statistic above them, permanently and silently.",
+  "requires": [],
+  "notes": "An implementation that counts NaN elements instead lets one NaN poison sum, mean and every moment for the whole range, permanently: once an accumulator's mean is NaN, every merge above it is NaN too. A channel with one bad sample in a billion then reports nothing at all, and the pyramid is worse than useless because it looks like data.",
+  "case_count": 7,
+  "cases": [
+    {
+      "name": "no-nan",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x3FF0000000000000",
+          "repr": "1.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4000000000000000",
+          "repr": "2.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4008000000000000",
+          "repr": "3.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4010000000000000",
+          "repr": "4.0"
+        }
+      ],
+      "expected_count": "4",
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4004000000000000",
+        "repr": "2.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4014000000000000",
+        "repr": "5.0"
+      },
+      "expected_M3": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "expected_M4": {
+        "dtype": "float64",
+        "bits": "0x4024800000000000",
+        "repr": "10.25"
+      },
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": false,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "one-nan",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x3FF0000000000000",
+          "repr": "1.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4008000000000000",
+          "repr": "3.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4010000000000000",
+          "repr": "4.0"
+        }
+      ],
+      "expected_count": "3",
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4005555555555555",
+        "repr": "2.6666666666666665"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4012AAAAAAAAAAAB",
+        "repr": "4.666666666666667"
+      },
+      "expected_M3": {
+        "dtype": "float64",
+        "bits": "0xC001C71C71C71C72",
+        "repr": "-2.2222222222222223"
+      },
+      "expected_M4": {
+        "dtype": "float64",
+        "bits": "0x4025C71C71C71C72",
+        "repr": "10.88888888888889"
+      },
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": false,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "all-nan",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        }
+      ],
+      "expected_count": "0",
+      "expected_mean": null,
+      "expected_M2": null,
+      "expected_M3": null,
+      "expected_M4": null,
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": true,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "nan-first",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4000000000000000",
+          "repr": "2.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4008000000000000",
+          "repr": "3.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4010000000000000",
+          "repr": "4.0"
+        }
+      ],
+      "expected_count": "3",
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4008000000000000",
+        "repr": "3.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4000000000000000",
+        "repr": "2.0"
+      },
+      "expected_M3": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "expected_M4": {
+        "dtype": "float64",
+        "bits": "0x4000000000000000",
+        "repr": "2.0"
+      },
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": false,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "nan-last",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x3FF0000000000000",
+          "repr": "1.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4000000000000000",
+          "repr": "2.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x4008000000000000",
+          "repr": "3.0"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        }
+      ],
+      "expected_count": "3",
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4000000000000000",
+        "repr": "2.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4000000000000000",
+        "repr": "2.0"
+      },
+      "expected_M3": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "expected_M4": {
+        "dtype": "float64",
+        "bits": "0x4000000000000000",
+        "repr": "2.0"
+      },
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": false,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "single-value-rest-nan",
+      "values": [
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x401E000000000000",
+          "repr": "7.5"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        }
+      ],
+      "expected_count": "1",
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x401E000000000000",
+        "repr": "7.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "expected_M3": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "expected_M4": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "count_counts_non_nan_only": true,
+      "all_nan_part_is_merge_identity": false,
+      "element_count_including_nan": "4",
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      }
+    },
+    {
+      "name": "all-nan-part-is-identity",
+      "left_count": "4",
+      "right_count": "0",
+      "merged_equals_left": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4004000000000000",
+        "repr": "2.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4014000000000000",
+        "repr": "5.0"
+      },
+      "tolerance": {
+        "metric": "relative",
+        "max": 1e-13
+      },
+      "note": "count 0 on either side short-circuits the merge; without that branch the delta is NaN and the whole accumulator is poisoned"
+    }
+  ]
+}

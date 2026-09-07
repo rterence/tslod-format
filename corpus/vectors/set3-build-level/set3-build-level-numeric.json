@@ -1,0 +1,4535 @@
+{
+  "id": "set3-build-level-numeric",
+  "set": "set3-build-level",
+  "kind": "fixture",
+  "asserts": "build_level in numeric mode produces [min, max, first, last] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
+  "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+  "contract": "All four columns share a type, so a swapped pair is invisible in the data; the order is pinned because nothing else can recover it.",
+  "requires": [
+    "feature:positions",
+    "dtype:float32",
+    "dtype:float64",
+    "dtype:int8",
+    "dtype:int16",
+    "dtype:int32",
+    "dtype:int64",
+    "dtype:uint8",
+    "dtype:uint16",
+    "dtype:uint32",
+    "dtype:uint64"
+  ],
+  "notes": "\u27e2 Column order is [min, max, first, last], NOT the first/last/min/max ordering the format is often described with. Getting this backwards is silent: all four are the same dtype and a swapped pair only shows on data where min != first.",
+  "case_count": 110,
+  "cases": [
+    {
+      "name": "raw/float32/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000800000803F000080BF0486FD432FAD5C44CD9430C442D00F44"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000080BF0000803F0000803F000080BF0486FD432FAD5C440486FD432FAD5C44CD9430C442D00F44CD9430C442D00F44"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000010000000000000000000000000000000000000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000080BF0000803F0000803F000080BF0486FD432FAD5C440486FD432FAD5C44CD9430C442D00F44CD9430C442D00F44"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000080BF0000803F00000000000080BFCD9430C42FAD5C440486FD4342D00F44"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float32/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000800000803F000080BF4240A9C32BA77043711D1F444AD43DC4F68804C429DCF242DD243F42DF9FE4C3F6183BC48BE4574412031A4368C121C4"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000080BF0000803F00000000000080BF4AD43DC4711D1F444240A9C34AD43DC4F68804C429DCF242F68804C4DF9FE4C3F6183BC48BE45744F6183BC468C121C4"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "03000000000000000200000000000000030000000000000002000000000000000000000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000080BF0000803F00000000000080BF4AD43DC4711D1F444240A9C34AD43DC4F68804C429DCF242F68804C4DF9FE4C3F6183BC48BE45744F6183BC468C121C4"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "4AD43DC4711D1F44000000004AD43DC4F6183BC48BE45744F68804C468C121C4"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000001000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float32/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_float32_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "9E7778C4FC9179440000000037B15444C5E072C4C36D79445869D9C3B6E36EC4"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "32000000000000003F00000000000000D600000000000000BB00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float32/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "9E7778C4FC9179440000000037B15444C5E072C4C36D79445869D9C3B6E36EC4"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "9E7778C4FC91794400000000B6E36EC4"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float32/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_float32_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "2DCA79C49E57764400000000FE7C0344A46077C4AA997744C7CB5942BCE41D44AC7C75C4102079444A6CF443606D44C4"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "4800000000000000B200000000000000BD000000000000002F00000000000000A3000000000000009F00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float32/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "2DCA79C49E57764400000000FE7C0344A46077C4AA997744C7CB5942BCE41D44AC7C75C4102079444A6CF443606D44C4"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "2DCA79C4AA99774400000000BCE41D44AC7C75C4102079444A6CF443606D44C4"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000010000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float32/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000800000803F000080BF29BC7844C9DE50444A8C39C47B8456C468391F4435065244"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000803F000000000000803F000080BF29BC7844000080BFC9DE50447B8456C468391F444A8C39C468391F4435065244350652443506524435065244"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000200000000000000000000000000000001000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000803F000000000000803F000080BF29BC7844000080BFC9DE50447B8456C468391F444A8C39C468391F4435065244350652443506524435065244"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000080BF29BC784400000000C9DE50447B8456C4350652444A8C39C435065244"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float32/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000800000803F000080BF7F921CC40CBA6844AE478942CB1194431B9722C489890AC43D0A79C22130734362B05D4475934FC38F426642D578B3C2148E1FC327B1F9C3969302C487EE3644DFA71DC400A01D4321906344914D2A44CBE10EC352B8A1426FF25843757347447FEAEDC2BC7484C1AAD1944366968A435453C5431934A5434E6288C3FE4464C466A672C4D93E51C42F9D15C3895151C414566DC4912D904348E910442B474A4383881444E3C53F436D4F684417A161C46FA23D4419C4BCC242286144F8C332444676E7425C0F394252D81BC379392544FE3C3044775E76438F72E4C3295C57443313ABC3CDCC16C2719DC9C37B0467C4"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "66A672C40CBA6844000000007B0467C4"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "24000000000000000500000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000000000000F03F000000000000F0BF986E1283C0B07F40CEF753E3A5958B409A999999991286C078E9263108FA8140"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000080000000000000F0BF000000000000F03F000000000000F03F000000000000F0BF986E1283C0B07F40CEF753E3A5958B40986E1283C0B07F40CEF753E3A5958B409A999999991286C078E9263108FA81409A999999991286C078E9263108FA8140"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000010000000000000000000000000000000000000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000080000000000000F0BF000000000000F03F000000000000F03F000000000000F0BF986E1283C0B07F40CEF753E3A5958B40986E1283C0B07F40CEF753E3A5958B409A999999991286C078E9263108FA81409A999999991286C078E9263108FA8140"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F0BF9A999999991286C0CEF753E3A5958B40986E1283C0B07F4078E9263108FA8140"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000000000000F03F000000000000F0BF78E92631082875C038894160E5146E4048E17A14AEE38340A8C64B3789BA87C085EB51B81E9180C0F051B81E855B5E400054E3A59BE44740448B6CE7FB937CC085EB51B81E6387C020B0726891FC8A40A8F1D24D624063401804560E2D3884C0"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F0BFA8C64B3789BA87C048E17A14AEE3834078E92631082875C0A8C64B3789BA87C085EB51B81E9180C0F051B81E855B5E4085EB51B81E9180C0448B6CE7FB937CC085EB51B81E6387C020B0726891FC8A4085EB51B81E6387C01804560E2D3884C0"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "03000000000000000200000000000000030000000000000002000000000000000000000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F0BFA8C64B3789BA87C048E17A14AEE3834078E92631082875C0A8C64B3789BA87C085EB51B81E9180C0F051B81E855B5E4085EB51B81E9180C0448B6CE7FB937CC085EB51B81E6387C020B0726891FC8A4085EB51B81E6387C01804560E2D3884C0"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "A8C64B3789BA87C048E17A14AEE383400000000000000000A8C64B3789BA87C085EB51B81E6387C020B0726891FC8A4085EB51B81E9180C01804560E2D3884C0"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000001000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_float64_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F400000000000000000FED478E926968A406ABC7493185C8EC01E85EB51B82D8F40BA490C022B2D7BC05839B4C876DC8DC0"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "32000000000000003F00000000000000D600000000000000BB00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float64/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F400000000000000000FED478E926968A406ABC7493185C8EC01E85EB51B82D8F40BA490C022B2D7BC05839B4C876DC8DC0"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F4000000000000000005839B4C876DC8DC0"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_float64_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "83C0CAA145398FC0CAA145B6F3CA8E400000000000000000B4C876BE9F6F8040AE47E17A14EC8EC092ED7C3F35F38E40C0F3FDD478394B403CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E40EA263108AC8D88C0"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "4800000000000000B200000000000000BD000000000000002F00000000000000A3000000000000009F00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float64/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "83C0CAA145398FC0CAA145B6F3CA8E400000000000000000B4C876BE9F6F8040AE47E17A14EC8EC092ED7C3F35F38E40C0F3FDD478394B403CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E40EA263108AC8D88C0"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "83C0CAA145398FC092ED7C3F35F38E4000000000000000003CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E40EA263108AC8D88C0"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000010000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000000000000F03F000000000000F0BFEC51B81E85178F40022B8716D91B8A40A8C64B37893187C0C2F5285C8FD08AC01804560E2DE78340B29DEFA7C6408A40"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F0000000000000000000000000000F03F000000000000F0BFEC51B81E85178F40000000000000F0BF022B8716D91B8A40C2F5285C8FD08AC01804560E2DE78340A8C64B37893187C01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000200000000000000000000000000000001000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/float64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F0000000000000000000000000000F03F000000000000F0BFEC51B81E85178F40000000000000F0BF022B8716D91B8A40C2F5285C8FD08AC01804560E2DE78340A8C64B37893187C01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F0BFEC51B81E85178F400000000000000000022B8716D91B8A40C2F5285C8FD08AC0B29DEFA7C6408A40A8C64B37893187C0B29DEFA7C6408A40"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0100000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/float64/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000080000000000000F03F000000000000F0BF5A643BDF4F9283C0C64B378941178D40305C8FC2F52851404C62105839827240D9CEF753E35284C0D578E926315181C0E07A14AE47214FC0C074931804666E40365EBA490CB68B40E04F8D976EF269C0C01E85EB51C84C40C876BE9F1A6F56C0F4285C8FC2F163C0A01A2FDD24367FC09CC420B0725280C08A4160E5D0DD8640448B6CE7FBB483C00000000000B46340BC74931804728C4004560E2DB24985404C62105839DC61C0D0A3703D0A375440F8A9F1D24D1E6B40E04F8D976EEE884058643BDF4FBD5DC040DF4F8D978E30C090ED7C3F359A7240CCCCCCCCCC52714024DBF97E6AAA78408C976E1283A6744040355EBA490C71C0B4C876BE9F888CC0CDCCCCCCCC548EC060E5D022DB278AC0D0F753E3A5B362C0D578E926312A8AC0F6285C8FC2AA8DC004560E2DB20572405C8FC2F5281D824038894160E5486940F2D24D6210918240D8F97E6ABCF86740B0726891ED098D404260E5D022348CC0FCA9F1D24DB4874090976E12839857C078E9263108258C40D022DBF97E588640105839B4C8EE5C4060B81E85EB214740D8A3703D0A7B63C076BE9F1A2FA78440B4C876BE9F078640288716D9CECB6E40B81E85EB518E7CC0EC51B81E85EB8A4066666666666275C0A099999999D942C048E17A14AE3379C0C2F5285C8FE08CC0"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "CDCCCCCCCC548EC0C64B378941178D400000000000000000C2F5285C8FE08CC0"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "24000000000000000500000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F00FFEA712C0B"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F807FFF0000FFEA71EA710B2C2C0B"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000000000000000000010000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F807FFF0000FFEA71EA710B2C2C0B"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80FFEA71EA0B"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F00FFDCFB6EA5505F02A90403D6ED"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80FFA56EDCA5A95F50A9D60404ED"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000030000000000000002000000000000000300000000000000010000000000000002000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80FFA56EDCA5A95F50A9D60404ED"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80A5A95F50ED"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F00FFF8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E94443162D38272AB16C4B7E75E0AF12799453E6BD8837FA41BC5B4E0530BFE209E463B64DD847CAD10C6B1E9580CFB299347386DD28579A615C7BEE25D0DF82298483566D78676AF1AC8BBEB520EF52B9D49326FDC8773A81FC9B8E4570FF224924A3F68D18870A114CAB5ED5C00FF2D974B3C61D6897DAA19CBB2E65101FC269C4C396ADB8A7AA31ECCBFEF5602F92F914D3663D08B77AC13CDBCE85B03F628964E336CD58C74A518CEB9E15004F3219B4F3065DA8D71AE1DCFB6EA5505F02A90403D6EDF8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E94443162D38272AB16C4B7E75E0AF12799453E6BD8837FA41BC5B4E0530BFE209E463B64DD847CAD10C6B1E9580CFB299347386DD28579A615C7BEE25D0DF82298483566D78676AF1AC8BBEB520EF52B9D49326FDC8773A81FC9B8E4570FF224924A3F68D18870A114CAB5ED5C00FF2D974B3C61D6897DAA19CBB2E65101FC269C4C396ADB8A7AA31ECCBFEF5602F92F914D3663D08B77AC13CDBCE85B03F628964E336CD58C74A518CEB9E15004F3219B4F3065DA8D71AE1DCFB6EA5505F02A9"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80A9807F04A9"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000006C000000000000001D00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int8/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80A9807F04A9"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80A9"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int8_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F802D807F382D807E38A9"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000002800000000000000D90000000000000028000000000000000600000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int8/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F802D807F382D807E38A9"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F802D807E38A9"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F00FFFDC8773A81FC"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F8000C8FFFFC881777781FCFCFCFC"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000020000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F8000C8FFFFC881777781FCFCFCFC"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80C8817777FC"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int8/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F00FFF8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E9"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F80E9"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0000FFFFEAF571D12C610B6A"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080FF7FFFFF00000000FFFF71D1EAF5EAF571D12C610B6A2C610B6A"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000100000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080FF7FFFFF00000000FFFF71D1EAF5EAF571D12C610B6A2C610B6A"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080FFFF71D10B6AEAF50B6A"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0000FFFFDC27FBA66E60A50650875FFA02A5A98004F603BCD60AED92"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080FFFFFBA66E60DC27A506A9805FFA5087A980ED92D60A04F6ED92"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000002000000000000000300000000000000010000000000000003000000000000000200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080FFFFFBA66E60DC27A506A9805FFA5087A980ED92D60A04F6ED92"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080A506A980D60A5087ED92"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int16_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080A9E46F82D27F048AA9ED"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000000D000000000000000E00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int16/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080A9E46F82D27F048AA9ED"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080A9ED"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int16_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F00802D2B6F81DB7F386B2DC4A783AA7E3850A944"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000C900000000000000950000000000000081000000000000008200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int16/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F00802D2B6F81DB7F386B2DC4A783AA7E3850A944"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F00802DC4A783AA7E3850A944"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0000FFFFFD41C89D77753A3081C1FC83"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F00800000C89DFD41FFFFC89D81C17775777581C1FC83FC83FC83FC83"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000020000000000000001000000000000000200000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F00800000C89DFD41FFFFC89D81C17775777581C1FC83FC83FC83FC83"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080C89DFC8377757775FC83"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int16/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0000FFFFF82BE743EA0971552C950B8E3EEE3524A0296F32D26F3957541D1355A6E27DB248E4F759BADA013A7C321BE50E2CC531F0FB7FDAA2EAC91DA474235E766A0DC2981007D48A3F9122CC832BE0DE3D558340C28F6672795968F4FF338B46469D95E8B017B25A38210F1C893B7FAE23E518907C9FD6421CE936"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0080E936"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000000FFFFFFFFEAF57E8C71D1E93E2C612D780B6A3239"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080FFFFFF7FFFFFFFFF0000000000000000FFFFFFFFEAF57E8C71D1E93EEAF57E8C71D1E93E0B6A32392C612D782C612D780B6A3239"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000000000000000000010000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080FFFFFF7FFFFFFFFF0000000000000000FFFFFFFFEAF57E8C71D1E93EEAF57E8C71D1E93E0B6A32392C612D782C612D780B6A3239"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080FFFFFFFFEAF57E8C2C612D78EAF57E8C0B6A3239"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000000FFFFFFFFDC277D56FBA639C56E6077F0A506403D5087FD585FFAA8E302A59BBDA980C92404F6037403BC79B3D60AD239ED92412B"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080FFFFFFFFFBA639C5DC277D56DC277D56A506403D02A59BBD5087FD585087FD58A980C92403BC79B304F6037404F60374ED92412B"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000200000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080FFFFFFFFFBA639C5DC277D56DC277D56A506403D02A59BBD5087FD585087FD58A980C92403BC79B304F6037404F60374ED92412B"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080A506403D03BC79B304F603745087FD58ED92412B"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int32_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080A9E43EE56AD0E480A9EDF87E048A42B9A9EDF87E"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000008600000000000000FF00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int32/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080A9E43EE56AD0E480A9EDF87E048A42B9A9EDF87E"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080A9EDF87E"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int32_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F000000802D2BCD4FD9EA2F803FA1377F386B14442DC4FE272885908069624E7E3850B3ECA9443833"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000006B00000000000000990000000000000030000000000000007B00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int32/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F000000802D2BCD4FD9EA2F803FA1377F386B14442DC4FE272885908069624E7E3850B3ECA9443833"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F000000802DC4FE272885908069624E7E3850B3ECA9443833"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000000FFFFFFFFFD414965C89D45A17775520F3A306F4381C1A144FC83EA32"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F0000008000000000C89D45A1FD414965FFFFFFFFC89D45A17775520F81C1A1447775520F81C1A144FC83EA32FC83EA32FC83EA32FC83EA32"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000020000000000000001000000000000000000000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F0000008000000000C89D45A1FD414965FFFFFFFFC89D45A17775520F81C1A1447775520F81C1A144FC83EA32FC83EA32FC83EA32FC83EA32"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080C89D45A17775520F81C1A1447775520FFC83EA32"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int32/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000000FFFFFFFFF82B7A6EE7430936EA092B29715515CB2C954F860B8E01F13EEE8B0A3524474FA029B8006F328D2ED26FD980395753E9541D800313555D25A6E212FE7DB2C73148E4CEC7F759EDF7BADA84FC013A86C97C325B091BE5A60C0E2C1D59C53189E6F0FBDE007FDA45A0A2EAFEAAC91DE724A474CB1D235E7CB6766A56EC0DC2166098103DF307D4D6CC8A3F6D0891227398CC832F0C2BE0DFF3DE3DFE225583FF2840C2F19A8F6684327279C9AC59686BD1F4FFD937338BB757464668999D955658E8B0392317B2569E5A38614A210FD5C91C8991BE3B7F4DC7AE237C03E5183396907C05319FD6F98D421C56FCE936F914"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000080E936F914"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000000FFFFFFFFFFFFFFFFEAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F71D1E93ED5C6EFC10B6A32399BB140D22C612D7852C6142F2C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000100000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F71D1E93ED5C6EFC10B6A32399BB140D22C612D7852C6142F2C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F0B6A32399BB140D2"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000000FFFFFFFFFFFFFFFFDC277D5607149E6FFBA639C50AD54AAF6E6077F07AC463F1A506403DD833AC3B5087FD5822F6D8FA5FFAA8E379E285DC02A59BBD3DFDD536A980C924571AC22C04F603743F455FC403BC79B33FE4F062D60AD239EDB680D4ED92412BF7349888"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFFFFFBA639C50AD54AAFDC277D5607149E6FDC277D5607149E6FA506403DD833AC3B5FFAA8E379E285DC02A59BBD3DFDD5365087FD5822F6D8FAA980C924571AC22CED92412BF734988803BC79B33FE4F06204F603743F455FC4ED92412BF7349888"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000000000000000000000100000000000000020000000000000003000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFFFFFBA639C50AD54AAFDC277D5607149E6FDC277D5607149E6FA506403DD833AC3B5FFAA8E379E285DC02A59BBD3DFDD5365087FD5822F6D8FAA980C924571AC22CED92412BF734988803BC79B33FE4F06204F603743F455FC4ED92412BF7349888"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080A506403DD833AC3BED92412BF734988803BC79B33FE4F0625087FD5822F6D8FAED92412BF7349888"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int64_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080A9E43EE538FF71A093DD4145E0495380706EF6F2C53FCF7E048A42B96BF150F5A9EDF87ED38B2C68"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000010000000000000091000000000000009C00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int64/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080A9E43EE538FF71A093DD4145E0495380706EF6F2C53FCF7E048A42B96BF150F5A9EDF87ED38B2C68"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080A9EDF87ED38B2C68"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_int64_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000802D2BCD4F4D83FD7F423FE97A0A131A800A4CFD1A8D325B7F386B1444D1C0DD6C2DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000FA00000000000000620000000000000049000000000000005B00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int64/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000802D2BCD4F4D83FD7F423FE97A0A131A800A4CFD1A8D325B7F386B1444D1C0DD6C2DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000802DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000000FFFFFFFFFFFFFFFFFD414965F0B6C0EBC89D45A1B35676717775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000800000000000000000FD414965F0B6C0EBC89D45A1B3567671FFFFFFFFFFFFFFFFC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE581C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000010000000000000002000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/int64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000800000000000000000FD414965F0B6C0EBC89D45A1B3567671FFFFFFFFFFFFFFFFC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE581C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080C89D45A1B35676713A306F439C2F42AAFC83EA32DDEB84257775520F98BA2AE5FC83EA32DDEB8425"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/int64/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000000FFFFFFFFFFFFFFFFF82B7A6EF2952E7FE7430936ACC859D1EA092B29BB7F1190715515CBF14BACD22C954F86640AF27A0B8E01F1222332713EEE8B0A352E4A3E3524474F1F924663A029B800CDD7754C6F328D2E8F06FF44D26FD9806C5745EC395753E927093B91541D8003AF1842B613555D2509EFD61BA6E212FE8E8E4E6A7DB2C7312206139948E4CEC7644CDDACF759EDF72D6086EDBADA84FCD731564C013A86C9B089418C7C325B0911AEC4EC1BE5A60CFF1C06CE0E2C1D598106EEFCC53189E6F5686007F0FBDE0058587C0C7FDA45A029697267A2EAFEAA2B18D420C91DE724813F2D0DA474CB1D329E366E235E7CB6F5B5F1EF766A56ECB367A0730DC21660035D8BE898103DF3E5B038AE07D4D6CCC52570838A3F6D0819317AC891227398C8915B18CC832F0C26D083812BE0DFF3DEBFBBEFDE3DFE22159CFE2E5583FF28F0B7CC2140C2F19AB2C631738F668432631D30D17279C9ACA3E40FF459686BD157410A8CF4FFD937F67A05AE338BB7573E065A8246466899162158BA9D9556586ED3142CE8B039232073845617B2569E7F83BD715A38614ADA071D3B210FD5C9E6FE6DC01C8991BE7D9E5E073B7F4DC778A22A1CAE237C03D9902309E5183396CD995B18907C053188BDD60D9FD6F98D3DABDD8B421C56FCD332B338E936F9140DE3FB84"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080E936F9140DE3FB84"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF0001EA712C0B"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00FF0001000171EAEA710B2C2C0B"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000100000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00FF0001000171EAEA710B2C2C0B"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00010BEAEA0B"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF0001DCFB6EA5505F02A90403D6ED"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00016EFBDCA502A950A903ED04ED"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000020000000000000001000000000000000200000000000000030000000000000001000000000000000300000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00016EFBDCA502A950A903ED04ED"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00A502ED50ED"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF0001F8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E94443162D38272AB16C4B7E75E0AF12799453E6BD8837FA41BC5B4E0530BFE209E463B64DD847CAD10C6B1E9580CFB299347386DD28579A615C7BEE25D0DF82298483566D78676AF1AC8BBEB520EF52B9D49326FDC8773A81FC9B8E4570FF224924A3F68D18870A114CAB5ED5C00FF2D974B3C61D6897DAA19CBB2E65101FC269C4C396ADB8A7AA31ECCBFEF5602F92F914D3663D08B77AC13CDBCE85B03F628964E336CD58C74A518CEB9E15004F3219B4F3065DA8D71AE1DCFB6EA5505F02A90403D6EDF8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E94443162D38272AB16C4B7E75E0AF12799453E6BD8837FA41BC5B4E0530BFE209E463B64DD847CAD10C6B1E9580CFB299347386DD28579A615C7BEE25D0DF82298483566D78676AF1AC8BBEB520EF52B9D49326FDC8773A81FC9B8E4570FF224924A3F68D18870A114CAB5ED5C00FF2D974B3C61D6897DAA19CBB2E65101FC269C4C396ADB8A7AA31ECCBFEF5602F92F914D3663D08B77AC13CDBCE85B03F628964E336CD58C74A518CEB9E15004F3219B4F3065DA8D71AE1DCFB6EA5505F02A9"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00A900FF04A9"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000EC000000000000009D00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint8/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00A900FF04A9"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00A9"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint8_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF002D00FF382D00FF38A9"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000A8000000000000005900000000000000A8000000000000005900000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint8/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF002D00FF382D00FF38A9"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF002D00FF38A9"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF0001FDC8773A81FC"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF000001FD01C83A817781FCFCFCFC"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint8/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF000001FD01C83A817781FCFCFCFC"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00C83AFC77FC"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint8/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF0001F8E7EA712C0B3E35A06FD2395413A67D48F7BA017C1B0EC5F07FA2C9A423760D98078A91CC2BDE55408F7259F433469DE8175A211C3BAEE5909F42E9"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00E9"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100EAF571D12C610B6A"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000FFFF000001000000010071D1EAF5EAF571D12C610B6A2C610B6A"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000100000000000000000000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000FFFF000001000000010071D1EAF5EAF571D12C610B6A2C610B6A"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF000001002C61EAF5EAF50B6A"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100DC27FBA66E60A50650875FFA02A5A98004F603BCD60AED92"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100A506FBA6DC27A506A9805FFA5087A980D60A04F604F6ED92"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000030000000000000001000000000000000300000000000000010000000000000002000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100A506FBA6DC27A506A9805FFA5087A980D60A04F604F6ED92"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000A506D60A5FFA5087ED92"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint16_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000A9E4C50145FE048AA9ED"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000001B000000000000009B00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint16/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000A9E4C50145FE048AA9ED"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000A9ED"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint16_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00002D2B4900EDFD386B2DC41E007AFF3850A944"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000005B00000000000000BF0000000000000026000000000000009200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint16/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00002D2B4900EDFD386B2DC41E007AFF3850A944"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00002DC41E007AFF3850A944"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100FD41C89D77753A3081C1FC83"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF000000000100C89D0100C89D3A3081C1777581C1FC83FC83FC83FC83"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000002000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint16/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF000000000100C89D0100C89D3A3081C1777581C1FC83FC83FC83FC83"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000C89D3A3081C17775FC83"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint16/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF00000100F82BE743EA0971552C950B8E3EEE3524A0296F32D26F3957541D1355A6E27DB248E4F759BADA013A7C321BE50E2CC531F0FB7FDAA2EAC91DA474235E766A0DC2981007D48A3F9122CC832BE0DE3D558340C28F6672795968F4FF338B46469D95E8B017B25A38210F1C893B7FAE23E518907C9FD6421CE936"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000E936"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000EAF57E8C71D1E93E2C612D780B6A3239"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000FFFFFFFF0000000001000000000000000100000071D1E93EEAF57E8CEAF57E8C71D1E93E0B6A32392C612D782C612D780B6A3239"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000100000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000FFFFFFFF0000000001000000000000000100000071D1E93EEAF57E8CEAF57E8C71D1E93E0B6A32392C612D782C612D780B6A3239"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000010000000B6A3239EAF57E8CEAF57E8C0B6A3239"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000DC277D56FBA639C56E6077F0A506403D5087FD585FFAA8E302A59BBDA980C92404F6037403BC79B3D60AD239ED92412B"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000A506403D6E6077F0DC277D56A506403DA980C9245FFAA8E35087FD58A980C924ED92412B03BC79B304F60374ED92412B"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000030000000000000002000000000000000300000000000000010000000000000003000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000A506403D6E6077F0DC277D56A506403DA980C9245FFAA8E35087FD58A980C924ED92412B03BC79B304F60374ED92412B"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000A506403DA980C9245FFAA8E35087FD58ED92412B"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint32_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000A9E43EE5D56FFA03DFCE5FFF048A42B9A9EDF87E"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000AB000000000000007D00000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint32/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000A9E43EE5D56FFA03DFCE5FFF048A42B9A9EDF87E"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000A9EDF87E"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint32_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF000000002D2BCD4F0E9F99008F353CFF386B14442DC4FE2778298D00AA7EB3FF3850B3ECA9443833"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000D600000000000000E90000000000000040000000000000008200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint32/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF000000002D2BCD4F0E9F99008F353CFF386B14442DC4FE2778298D00AA7EB3FF3850B3ECA9443833"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF000000002DC4FE2778298D00AA7EB3FF3850B3ECA9443833"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000FD414965C89D45A17775520F3A306F4381C1A144FC83EA32"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF000000000000000001000000C89D45A101000000C89D45A17775520F81C1A1447775520F81C1A144FC83EA32FC83EA32FC83EA32FC83EA32"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000002000000000000000000000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint32/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF000000000000000001000000C89D45A101000000C89D45A17775520F81C1A1447775520F81C1A144FC83EA32FC83EA32FC83EA32FC83EA32"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000C89D45A17775520F81C1A1447775520FFC83EA32"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint32/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF0000000001000000F82B7A6EE7430936EA092B29715515CB2C954F860B8E01F13EEE8B0A3524474FA029B8006F328D2ED26FD980395753E9541D800313555D25A6E212FE7DB2C73148E4CEC7F759EDF7BADA84FC013A86C97C325B091BE5A60C0E2C1D59C53189E6F0FBDE007FDA45A0A2EAFEAAC91DE724A474CB1D235E7CB6766A56EC0DC2166098103DF307D4D6CC8A3F6D0891227398CC832F0C2BE0DFF3DE3DFE225583FF2840C2F19A8F6684327279C9AC59686BD1F4FFD937338BB757464668999D955658E8B0392317B2569E5A38614A210FD5C91C8991BE3B7F4DC7AE237C03E5183396907C05319FD6F98D421C56FCE936F914"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000E936F914"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf2/n8",
+      "branching_factor": 2,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000010000000000000000000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC1EAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D22C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000010000000000000000000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC1EAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D22C612D7852C6142F0B6A32399BB140D2"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000001000000000000002C612D7852C6142F0B6A32399BB140D2EAF57E8CCA9F952F0B6A32399BB140D2"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf4/n16",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000DC277D5607149E6FFBA639C50AD54AAF6E6077F07AC463F1A506403DD833AC3B5087FD5822F6D8FA5FFAA8E379E285DC02A59BBD3DFDD536A980C924571AC22C04F603743F455FC403BC79B33FE4F062D60AD239EDB680D4ED92412BF7349888"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000A506403DD833AC3B6E6077F07AC463F1DC277D5607149E6FA506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FAA980C924571AC22C03BC79B33FE4F062D60AD239EDB680D404F603743F455FC4ED92412BF7349888"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000030000000000000002000000000000000300000000000000000000000000000001000000000000000200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000A506403DD833AC3B6E6077F07AC463F1DC277D5607149E6FA506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FAA980C924571AC22C03BC79B33FE4F062D60AD239EDB680D404F603743F455FC4ED92412BF7349888"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000A506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FAED92412BF7349888"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf256/n512",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          512
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint64_bf256_n512_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000A9E43EE538FF71A05A48A83C01BD6900F3EF948167F46DFD048A42B96BF150F5A9EDF87ED38B2C68"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000003600000000000000F100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint64/bf2/n2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000A9E43EE538FF71A05A48A83C01BD6900F3EF948167F46DFD048A42B96BF150F5A9EDF87ED38B2C68"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000A9EDF87ED38B2C68"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf256/n700",
+      "branching_factor": 256,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          700
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set3-build-level/raw_uint64_bf256_n700_input.bin"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000002D2BCD4F4D83FD7F456C6BED25B0C100763DC85D9197DBFF386B1444D1C0DD6C2DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_bucket_count": "3",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 188,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          3,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000000001000000000000005700000000000000DE0000000000000023000000000000009900000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint64/bf2/n3",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          3,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000002D2BCD4F4D83FD7F456C6BED25B0C100763DC85D9197DBFF386B1444D1C0DD6C2DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000002DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B56A944383399F7A861"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf3/n10",
+      "branching_factor": 3,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000FD414965F0B6C0EBC89D45A1B35676717775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000000000000100000000000000FD414965F0B6C0EB0100000000000000C89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE581C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
+      },
+      "expected_bucket_count": "4",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 1,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000000000000000000001000000000000000100000000000000020000000000000000000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "agg/uint64/bf2/n4",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000000000000100000000000000FD414965F0B6C0EB0100000000000000C89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE581C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000C89D45A1B3567671FC83EA32DDEB842581C1A144A5631BF87775520F98BA2AE5FC83EA32DDEB8425"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000001000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "raw/uint64/bf64/n64",
+      "branching_factor": 64,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000F82B7A6EF2952E7FE7430936ACC859D1EA092B29BB7F1190715515CBF14BACD22C954F86640AF27A0B8E01F1222332713EEE8B0A352E4A3E3524474F1F924663A029B800CDD7754C6F328D2E8F06FF44D26FD9806C5745EC395753E927093B91541D8003AF1842B613555D2509EFD61BA6E212FE8E8E4E6A7DB2C7312206139948E4CEC7644CDDACF759EDF72D6086EDBADA84FCD731564C013A86C9B089418C7C325B0911AEC4EC1BE5A60CFF1C06CE0E2C1D598106EEFCC53189E6F5686007F0FBDE0058587C0C7FDA45A029697267A2EAFEAA2B18D420C91DE724813F2D0DA474CB1D329E366E235E7CB6F5B5F1EF766A56ECB367A0730DC21660035D8BE898103DF3E5B038AE07D4D6CCC52570838A3F6D0819317AC891227398C8915B18CC832F0C26D083812BE0DFF3DEBFBBEFDE3DFE22159CFE2E5583FF28F0B7CC2140C2F19AB2C631738F668432631D30D17279C9ACA3E40FF459686BD157410A8CF4FFD937F67A05AE338BB7573E065A8246466899162158BA9D9556586ED3142CE8B039232073845617B2569E7F83BD715A38614ADA071D3B210FD5C9E6FE6DC01C8991BE7D9E5E073B7F4DC778A22A1CAE237C03D9902309E5183396CD995B18907C053188BDD60D9FD6F98D3DABDD8B421C56FCD332B338E936F9140DE3FB84"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000E936F9140DE3FB84"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    }
+  ]
+}

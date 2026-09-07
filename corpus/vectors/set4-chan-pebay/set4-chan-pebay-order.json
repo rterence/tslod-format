@@ -1,0 +1,1593 @@
+{
+  "id": "set4-chan-pebay-order",
+  "set": "set4-chan-pebay",
+  "kind": "oracle",
+  "asserts": "The Chan/P\u00e9bay identities are order-independent in exact arithmetic \u2014 a left-to-right fold and a balanced-tree fold of the same parts agree exactly \u2014 so any divergence an implementation sees is float64 rounding and not a defect in the merge, and the format must therefore STATE the fold order for merged moments to be reproducible.",
+  "source": "AUTHORED: both folds evaluated over exact Fractions and asserted equal",
+  "contract": "The identities are exact in real arithmetic, so any divergence an implementation sees is its own rounding rather than a defect in the algebra.",
+  "requires": [],
+  "notes": "This vector exists because the float64 divergence is easy to mistake for a bug in the merge. It is not. The identities are exact and associative over the rationals; float64 addition is not associative, so the fold SHAPE leaks into the answer. The measured float64 divergence \u2014 left-to-right versus balanced tree over 256 real buckets \u2014 is in the design note; what is asserted here is the other half: that nothing is wrong with the algebra.",
+  "case_count": 40,
+  "cases": [
+    {
+      "name": "uniform/parts=2",
+      "dataset": "uniform",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF9EAAE58F3A2B85",
+        "repr": "-0.029948794237991478"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4077480675B6FF2F",
+        "repr": "372.50157710536126"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "uniform/parts=4",
+      "dataset": "uniform",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF9EAAE58F3A2B85",
+        "repr": "-0.029948794237991478"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4077480675B6FF2F",
+        "repr": "372.50157710536126"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "uniform/parts=8",
+      "dataset": "uniform",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF9EAAE58F3A2B85",
+        "repr": "-0.029948794237991478"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4077480675B6FF2F",
+        "repr": "372.50157710536126"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "uniform/parts=64",
+      "dataset": "uniform",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF9EAAE58F3A2B85",
+        "repr": "-0.029948794237991478"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4077480675B6FF2F",
+        "repr": "372.50157710536126"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "large-offset/parts=2",
+      "dataset": "large-offset",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4197D783FFECA66B",
+        "repr": "99999999.98110358"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074DA35045326A7",
+        "repr": "333.6379435775838"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "large-offset/parts=4",
+      "dataset": "large-offset",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4197D783FFECA66B",
+        "repr": "99999999.98110358"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074DA35045326A7",
+        "repr": "333.6379435775838"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "large-offset/parts=8",
+      "dataset": "large-offset",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4197D783FFECA66B",
+        "repr": "99999999.98110358"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074DA35045326A7",
+        "repr": "333.6379435775838"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "large-offset/parts=64",
+      "dataset": "large-offset",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4197D783FFECA66B",
+        "repr": "99999999.98110358"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074DA35045326A7",
+        "repr": "333.6379435775838"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "huge-offset/parts=2",
+      "dataset": "huge-offset",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x426D1A94A1FFFFC0",
+        "repr": "999999999999.9922"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074A1065B1DFF00",
+        "repr": "330.06405173985695"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "huge-offset/parts=4",
+      "dataset": "huge-offset",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x426D1A94A1FFFFC0",
+        "repr": "999999999999.9922"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074A1065B1DFF00",
+        "repr": "330.06405173985695"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "huge-offset/parts=8",
+      "dataset": "huge-offset",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x426D1A94A1FFFFC0",
+        "repr": "999999999999.9922"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074A1065B1DFF00",
+        "repr": "330.06405173985695"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "huge-offset/parts=64",
+      "dataset": "huge-offset",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x426D1A94A1FFFFC0",
+        "repr": "999999999999.9922"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4074A1065B1DFF00",
+        "repr": "330.06405173985695"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "constant/parts=2",
+      "dataset": "constant",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x400A000000000000",
+        "repr": "3.25"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "constant/parts=4",
+      "dataset": "constant",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x400A000000000000",
+        "repr": "3.25"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "constant/parts=8",
+      "dataset": "constant",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x400A000000000000",
+        "repr": "3.25"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "constant/parts=64",
+      "dataset": "constant",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x400A000000000000",
+        "repr": "3.25"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x0000000000000000",
+        "repr": "0.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "two-levels/parts=2",
+      "dataset": "two-levels",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x3FE0000000000000",
+        "repr": "0.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4070000000000000",
+        "repr": "256.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "two-levels/parts=4",
+      "dataset": "two-levels",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x3FE0000000000000",
+        "repr": "0.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4070000000000000",
+        "repr": "256.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "two-levels/parts=8",
+      "dataset": "two-levels",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x3FE0000000000000",
+        "repr": "0.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4070000000000000",
+        "repr": "256.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "two-levels/parts=64",
+      "dataset": "two-levels",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x3FE0000000000000",
+        "repr": "0.5"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4070000000000000",
+        "repr": "256.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "one-outlier/parts=2",
+      "dataset": "one-outlier",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x408E848000000000",
+        "repr": "976.5625"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x426D134DFCD78000",
+        "repr": "999023437500.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "one-outlier/parts=4",
+      "dataset": "one-outlier",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x408E848000000000",
+        "repr": "976.5625"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x426D134DFCD78000",
+        "repr": "999023437500.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "one-outlier/parts=8",
+      "dataset": "one-outlier",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x408E848000000000",
+        "repr": "976.5625"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x426D134DFCD78000",
+        "repr": "999023437500.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "one-outlier/parts=64",
+      "dataset": "one-outlier",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x408E848000000000",
+        "repr": "976.5625"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x426D134DFCD78000",
+        "repr": "999023437500.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "wide-dynamic-range/parts=2",
+      "dataset": "wide-dynamic-range",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4158D5D42AAAAAB6",
+        "repr": "6510416.666666677"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x439F3BD941439016",
+        "repr": "5.6265782828282816e+17"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "wide-dynamic-range/parts=4",
+      "dataset": "wide-dynamic-range",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4158D5D42AAAAAB6",
+        "repr": "6510416.666666677"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x439F3BD941439016",
+        "repr": "5.6265782828282816e+17"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "wide-dynamic-range/parts=8",
+      "dataset": "wide-dynamic-range",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4158D5D42AAAAAB6",
+        "repr": "6510416.666666677"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x439F3BD941439016",
+        "repr": "5.6265782828282816e+17"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "wide-dynamic-range/parts=64",
+      "dataset": "wide-dynamic-range",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x4158D5D42AAAAAB6",
+        "repr": "6510416.666666677"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x439F3BD941439016",
+        "repr": "5.6265782828282816e+17"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "alternating-sign/parts=2",
+      "dataset": "alternating-sign",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF40624DD2F1A9FC",
+        "repr": "-0.0005"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40A2F9E215336DEC",
+        "repr": "2428.941568"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "alternating-sign/parts=4",
+      "dataset": "alternating-sign",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF40624DD2F1A9FC",
+        "repr": "-0.0005"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40A2F9E215336DEC",
+        "repr": "2428.941568"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "alternating-sign/parts=8",
+      "dataset": "alternating-sign",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF40624DD2F1A9FC",
+        "repr": "-0.0005"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40A2F9E215336DEC",
+        "repr": "2428.941568"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "alternating-sign/parts=64",
+      "dataset": "alternating-sign",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBF40624DD2F1A9FC",
+        "repr": "-0.0005"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40A2F9E215336DEC",
+        "repr": "2428.941568"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "with-nan/parts=2",
+      "dataset": "with-nan",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBFA3CB4A238D8B88",
+        "repr": "-0.03866035160060394"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40BF589FFD071DC4",
+        "repr": "8024.624954647796"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "with-nan/parts=4",
+      "dataset": "with-nan",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBFA3CB4A238D8B88",
+        "repr": "-0.03866035160060394"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40BF589FFD071DC4",
+        "repr": "8024.624954647796"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "with-nan/parts=8",
+      "dataset": "with-nan",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBFA3CB4A238D8B88",
+        "repr": "-0.03866035160060394"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40BF589FFD071DC4",
+        "repr": "8024.624954647796"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "with-nan/parts=64",
+      "dataset": "with-nan",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0xBFA3CB4A238D8B88",
+        "repr": "-0.03866035160060394"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x40BF589FFD071DC4",
+        "repr": "8024.624954647796"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "mostly-nan/parts=2",
+      "dataset": "mostly-nan",
+      "part_count": 2,
+      "split_sizes": [
+        "512",
+        "512"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x407FF00000000000",
+        "repr": "511.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4168BD1B40000000",
+        "repr": "12970202.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "mostly-nan/parts=4",
+      "dataset": "mostly-nan",
+      "part_count": 4,
+      "split_sizes": [
+        "256",
+        "256",
+        "256",
+        "256"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x407FF00000000000",
+        "repr": "511.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4168BD1B40000000",
+        "repr": "12970202.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "mostly-nan/parts=8",
+      "dataset": "mostly-nan",
+      "part_count": 8,
+      "split_sizes": [
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128",
+        "128"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x407FF00000000000",
+        "repr": "511.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4168BD1B40000000",
+        "repr": "12970202.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    },
+    {
+      "name": "mostly-nan/parts=64",
+      "dataset": "mostly-nan",
+      "part_count": 64,
+      "split_sizes": [
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16",
+        "16"
+      ],
+      "folds_agree_in_exact_arithmetic": true,
+      "expected_mean": {
+        "dtype": "float64",
+        "bits": "0x407FF00000000000",
+        "repr": "511.0"
+      },
+      "expected_M2": {
+        "dtype": "float64",
+        "bits": "0x4168BD1B40000000",
+        "repr": "12970202.0"
+      },
+      "float64_folds_may_differ": true,
+      "note": "in float64 these two folds differ in the last bits; that is the reason the format must state which one it means"
+    }
+  ]
+}

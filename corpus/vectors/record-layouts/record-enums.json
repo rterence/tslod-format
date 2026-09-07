@@ -1,0 +1,131 @@
+{
+  "id": "record-enums",
+  "set": "record-layouts",
+  "kind": "fixture",
+  "asserts": "The wire enums are closed sets with these exact codes: ten dtypes 0..9, two aggregation modes, two timing modes, two timing-flag bits, two file states, two scaling types, and the compression/profile codes; an unrecognised value in any of them is a read-time rejection, never a default.",
+  "source": "the enum definitions in spec/v1, cross-checked against the dtype widths and the recipe registry the rest of the corpus uses",
+  "contract": "An enum is a closed set: a reader that defaults an unknown value reads a file its writer never wrote.",
+  "requires": [],
+  "case_count": 9,
+  "cases": [
+    {
+      "name": "enum/dtype",
+      "enum": "dtype",
+      "values": {
+        "float32": 0,
+        "float64": 1,
+        "int8": 2,
+        "int16": 3,
+        "int32": 4,
+        "int64": 5,
+        "uint8": 6,
+        "uint16": 7,
+        "uint32": 8,
+        "uint64": 9
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "the wire dtype enum: an implementation's dtype type carries these exact codes"
+    },
+    {
+      "name": "enum/aggregation_mode",
+      "enum": "aggregation_mode",
+      "values": {
+        "numeric": 0,
+        "bitfield": 1
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "bitfield mode is rejected at read time on a float dtype"
+    },
+    {
+      "name": "enum/timing_mode",
+      "enum": "timing_mode",
+      "values": {
+        "fixed": 0,
+        "variable": 1
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "timing is a property of the GROUP, not the block"
+    },
+    {
+      "name": "enum/file_state",
+      "enum": "file_state",
+      "values": {
+        "sealed": 0,
+        "active": 1
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "one byte at header offset 13; there is NO per-block open/closed flag"
+    },
+    {
+      "name": "enum/scaling_type",
+      "enum": "scaling_type",
+      "values": {
+        "identity": 0,
+        "linear": 1
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "a linear channel stores float64 gain then float64 offset in scaling_params"
+    },
+    {
+      "name": "enum/timing_flags",
+      "enum": "timing_flags",
+      "values": {
+        "TIMEBASE_PRESENT": 1,
+        "EPOCH_SYNCED": 2
+      },
+      "reserved_bits": "2-7",
+      "reserved_bits_must_be_zero": true,
+      "unknown_value_is_rejected": true,
+      "note": "a set reserved bit is rejected at open"
+    },
+    {
+      "name": "enum/compression_id-v1-profile",
+      "enum": "compression_id",
+      "format_version": 1,
+      "values": {
+        "none": 0,
+        "recipe": 2
+      },
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "v1 reinterprets the field as the file PROFILE: 0 = none, where every recipe byte must be 0x00 (the interchange and conformance profile); 2 = recipe. Every other value, 1 included, is reserved and rejected"
+    },
+    {
+      "name": "enum/recipe-registry-v1",
+      "enum": "recipe",
+      "format_version": 1,
+      "values": {
+        "identity": 0,
+        "zstd": 1,
+        "pco": 2,
+        "transpose_zstd": 3
+      },
+      "experimental_range": "0xF0-0xFF",
+      "experimental_never_in_a_released_file": true,
+      "closed": true,
+      "unknown_value_is_rejected": true,
+      "note": "one recipe byte per stream. Every other value is reserved and rejected with an actionable error naming the byte; there is no registry escape"
+    },
+    {
+      "name": "dtype-widths",
+      "table": {
+        "float32": 4,
+        "float64": 8,
+        "int8": 1,
+        "int16": 2,
+        "int32": 4,
+        "int64": 8,
+        "uint8": 1,
+        "uint16": 2,
+        "uint32": 4,
+        "uint64": 8
+      },
+      "note": "byte width per dtype; a bucket tuple is 4 * width, a position pair is 16"
+    }
+  ]
+}

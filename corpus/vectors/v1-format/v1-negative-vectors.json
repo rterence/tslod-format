@@ -1,0 +1,297 @@
+{
+  "id": "v1-negative-vectors",
+  "set": "v1-format",
+  "kind": "negative",
+  "asserts": "A v1 reader reads EXACTLY version 1 and rejects every other value, and rejects block_samples that is zero or not a multiple of branching_factor, any must-understand feature bit it does not know, a profile byte outside {0, 2}, and any recipe byte outside the registry \u2014 while skipping may-ignore feature bits it does not know.",
+  "source": "the version-1 header and framing rules",
+  "contract": "A reader that accepts a malformed file produces wrong answers where it should have produced an error.",
+  "requires": [
+    "format:v1",
+    "feature:read-rejection"
+  ],
+  "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
+  "case_count": 22,
+  "cases": [
+    {
+      "name": "v1-version-must-be-exactly-1",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-version-must-be-exactly-1",
+      "patch": {
+        "offset": "6",
+        "width_bytes": 2,
+        "original_hex": "0100",
+        "patched_hex": "0400"
+      },
+      "field": "header.version",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the wire version of this format is 1. A version-1 reader reads EXACTLY 1 and rejects every other value. The error should name the version it found, because a user holding a file this reader cannot read needs to know what they are holding"
+    },
+    {
+      "name": "v1-version-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-version-zero",
+      "patch": {
+        "offset": "6",
+        "width_bytes": 2,
+        "original_hex": "0100",
+        "patched_hex": "0000"
+      },
+      "field": "header.version",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "zero is not a version; it is what an uninitialised or truncated header reads as"
+    },
+    {
+      "name": "v1-version-unassigned",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-version-unassigned",
+      "patch": {
+        "offset": "6",
+        "width_bytes": 2,
+        "original_hex": "0100",
+        "patched_hex": "0300"
+      },
+      "field": "header.version",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "no version other than 1 is assigned, so a file claiming any of them is refused rather than read on a guess"
+    },
+    {
+      "name": "v1-block-samples-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-block-samples-zero",
+      "patch": {
+        "offset": "20",
+        "width_bytes": 4,
+        "original_hex": "00010000",
+        "patched_hex": "00000000"
+      },
+      "field": "header.block_samples",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "block_samples that is zero is rejected"
+    },
+    {
+      "name": "v1-block-samples-not-multiple-of-bf",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-block-samples-not-multiple-of-bf",
+      "patch": {
+        "offset": "20",
+        "width_bytes": 4,
+        "original_hex": "00010000",
+        "patched_hex": "2C010000"
+      },
+      "field": "header.block_samples",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "300 is not a multiple of branching_factor 256; the block-length parameter requires a multiple so that a level k+1 block is built from exactly branching_factor complete level k blocks and position chaining is unchanged"
+    },
+    {
+      "name": "v1-profile-unassigned-1",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-profile-unassigned-1",
+      "patch": {
+        "offset": "12",
+        "width_bytes": 1,
+        "original_hex": "00",
+        "patched_hex": "01"
+      },
+      "field": "header.compression_id",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the profile is 0 (none) or 2 (recipe); 1 is not assigned and a file carrying it is rejected rather than guessed at"
+    },
+    {
+      "name": "v1-profile-unknown",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-profile-unknown",
+      "patch": {
+        "offset": "12",
+        "width_bytes": 1,
+        "original_hex": "00",
+        "patched_hex": "03"
+      },
+      "field": "header.compression_id",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the v1 profile is 0 (none) or 2 (recipe); nothing else"
+    },
+    {
+      "name": "v1-unknown-must-understand-feature-bit",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "v1-unknown-must-understand-feature-bit",
+      "patch": {
+        "offset": "92",
+        "width_bytes": 8,
+        "original_hex": "0000000000000000",
+        "patched_hex": "0100000000000000"
+      },
+      "field": "header.features",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the low 32 bits are must-understand: a reader that does not know bit 0 must refuse the file rather than read it as though the feature were absent"
+    },
+    {
+      "name": "v1-unknown-may-ignore-feature-bit-is-ACCEPTED",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": null,
+      "patch": {
+        "offset": "92",
+        "width_bytes": 8,
+        "original_hex": "0000000000000000",
+        "patched_hex": "0000000001000000"
+      },
+      "field": "header.features",
+      "expected_error": null,
+      "must_open": true,
+      "verified_against_an_implementation": false,
+      "reason": "the HIGH 32 bits are may-ignore. This is the case that proves the split is real: the same field, a different half, and the opposite outcome. A reader that refuses both has no forward compatibility at all; a reader that accepts both has no safety"
+    },
+    {
+      "name": "v1-stream-length-prefix-exceeds-block",
+      "rejection_class": "stream-length-prefix-out-of-range",
+      "field": "block.stream[0].length_prefix",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a stream's u32 length prefix that runs past the block's compressed_size must be refused before any decode. With k streams there are k-1 such prefixes and each is a rejection site"
+    },
+    {
+      "name": "v1-stream-length-prefix-zero",
+      "rejection_class": "stream-length-prefix-zero",
+      "field": "block.stream[0].length_prefix",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a length of 0 leaves no room for the stream's own recipe byte, so it cannot describe a well-formed stream; the minimum is 1"
+    },
+    {
+      "name": "v1-stream-length-prefixes-leave-no-last-stream",
+      "rejection_class": "stream-length-prefix-consumes-block",
+      "field": "block stream framing",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the prefixes of the first k-1 streams must leave at least one byte for the last stream, which has no prefix and runs to compressed_size. Prefixes summing to the whole block describe a block with no values"
+    },
+    {
+      "name": "v1-tick-rate-numer-zero",
+      "file": "v1-format/files/v1_negative_tick_rate_base.tslod",
+      "rejection_class": "v1-tick-rate-numer-zero",
+      "patch": {
+        "offset": "160",
+        "width_bytes": 8,
+        "original_hex": "00366E0100000000",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "group_entry.tick_rate_numer",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "with TIMEBASE_PRESENT set, a numerator of zero makes every tick the same instant; the field is >= 1 or the group is malformed"
+    },
+    {
+      "name": "v1-tick-rate-denom-zero",
+      "file": "v1-format/files/v1_negative_tick_rate_base.tslod",
+      "rejection_class": "v1-tick-rate-denom-zero",
+      "patch": {
+        "offset": "168",
+        "width_bytes": 8,
+        "original_hex": "0100000000000000",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "group_entry.tick_rate_denom",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a denominator of zero is a division by zero in both tick conversions; the field is >= 1 or the group is malformed"
+    },
+    {
+      "name": "v1-tick-rate-numer-exceeds-2p32",
+      "file": "v1-format/files/v1_negative_tick_rate_base.tslod",
+      "rejection_class": "v1-tick-rate-numer-exceeds-2p32",
+      "patch": {
+        "offset": "160",
+        "width_bytes": 8,
+        "original_hex": "00366E0100000000",
+        "patched_hex": "0100000001000000"
+      },
+      "field": "group_entry.tick_rate_numer",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "both rate fields are at most 2^32. That bound is what lets an implementation evaluate the tick conversions in 128-bit integers rather than arbitrary precision: the widest intermediate is |ticks - anchor| * 10^9 * denom, below 2^125 for |ticks - anchor| < 2^63 and denom <= 2^32"
+    },
+    {
+      "name": "v1-tick-rate-at-2p32-is-ACCEPTED",
+      "file": "v1-format/files/v1_negative_tick_rate_base.tslod",
+      "rejection_class": null,
+      "patch": {
+        "offset": "160",
+        "width_bytes": 8,
+        "original_hex": "00366E0100000000",
+        "patched_hex": "0000000001000000"
+      },
+      "field": "group_entry.tick_rate_numer",
+      "expected_error": null,
+      "must_open": true,
+      "verified_against_an_implementation": false,
+      "reason": "2^32 is the largest legal value, not the first illegal one. This is the case that makes the bound inclusive: a reader that treats it as exclusive refuses a valid file and passes every rejection case above"
+    },
+    {
+      "name": "v1-tick-rate-denom-exceeds-2p32",
+      "file": "v1-format/files/v1_negative_tick_rate_base.tslod",
+      "rejection_class": "v1-tick-rate-denom-exceeds-2p32",
+      "patch": {
+        "offset": "168",
+        "width_bytes": 8,
+        "original_hex": "0100000000000000",
+        "patched_hex": "0100000001000000"
+      },
+      "field": "group_entry.tick_rate_denom",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same bound on the denominator, which is the field the widest intermediate is actually multiplied by"
+    },
+    {
+      "name": "v1-unknown-recipe-0x04",
+      "rejection_class": "unknown-recipe-byte",
+      "recipe_byte": "0x04",
+      "expected_error": "CorruptFileError",
+      "error_must_name_the_byte": true,
+      "verified_against_an_implementation": false,
+      "reason": "every value outside {0x00, 0x01, 0x02, 0x03} and the 0xF0-0xFF experimental range is reserved and rejected with an actionable error naming the byte; there is no registry escape"
+    },
+    {
+      "name": "v1-unknown-recipe-0x7f",
+      "rejection_class": "unknown-recipe-byte",
+      "recipe_byte": "0x7F",
+      "expected_error": "CorruptFileError",
+      "error_must_name_the_byte": true,
+      "verified_against_an_implementation": false,
+      "reason": "every value outside {0x00, 0x01, 0x02, 0x03} and the 0xF0-0xFF experimental range is reserved and rejected with an actionable error naming the byte; there is no registry escape"
+    },
+    {
+      "name": "v1-unknown-recipe-0xef",
+      "rejection_class": "unknown-recipe-byte",
+      "recipe_byte": "0xEF",
+      "expected_error": "CorruptFileError",
+      "error_must_name_the_byte": true,
+      "verified_against_an_implementation": false,
+      "reason": "every value outside {0x00, 0x01, 0x02, 0x03} and the 0xF0-0xFF experimental range is reserved and rejected with an actionable error naming the byte; there is no registry escape"
+    },
+    {
+      "name": "v1-unknown-recipe-0xff",
+      "rejection_class": "unknown-recipe-byte",
+      "recipe_byte": "0xFF",
+      "expected_error": "CorruptFileError",
+      "error_must_name_the_byte": true,
+      "verified_against_an_implementation": false,
+      "reason": "every value outside {0x00, 0x01, 0x02, 0x03} and the 0xF0-0xFF experimental range is reserved and rejected with an actionable error naming the byte; there is no registry escape"
+    },
+    {
+      "name": "v1-profile0-with-non-identity-recipe",
+      "rejection_class": "profile0-recipe-mismatch",
+      "compression_id": 0,
+      "recipe_byte": "0x01",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "under profile 0 EVERY recipe byte must be 0x00. A profile-0 file carrying a zstd recipe is the file that would make the stdlib-only reference reader need a codec, which is the whole point of the profile"
+    }
+  ]
+}

@@ -1,0 +1,404 @@
+{
+  "id": "record-layouts-v1",
+  "set": "record-layouts",
+  "kind": "fixture",
+  "asserts": "The five records are exactly 128, 64, 160, 24 and 48 bytes, little-endian throughout except session_id which is the 16 RFC 4122 bytes in network order, and each field sits at the offset given \u2014 proved by a golden encoding and not only by a field table, so a struct with the right names and the wrong padding fails.",
+  "source": "the version-1 record definitions, with a golden encoding produced from them",
+  "contract": "A struct with the right field names and the wrong padding reads plausible nonsense, so the layout is pinned as bytes and not only as a table.",
+  "requires": [
+    "format:v1"
+  ],
+  "notes": "channel_dict_version is DROPPED, not reserved: it was written 0 and read by nothing (it was written zero and read by nothing), so offset 20 is reused rather than left dead. A v1 reader rejects block_samples that is zero or not a multiple of branching_factor, and rejects any must-understand feature bit it does not know.",
+  "case_count": 5,
+  "cases": [
+    {
+      "name": "v1/header",
+      "record": "header",
+      "format_version": 1,
+      "struct_format": "<6sHIBBHIIQQ16sI32sQ28s",
+      "size_bytes": 128,
+      "byte_order": "little",
+      "fields": [
+        {
+          "offset": 0,
+          "width": 6,
+          "type": "bytes",
+          "name": "magic",
+          "note": "b'TSLOD\\x00'"
+        },
+        {
+          "offset": 6,
+          "width": 2,
+          "type": "uint16",
+          "name": "version",
+          "note": "1"
+        },
+        {
+          "offset": 8,
+          "width": 4,
+          "type": "uint32",
+          "name": "branching_factor",
+          "note": ">= 2"
+        },
+        {
+          "offset": 12,
+          "width": 1,
+          "type": "uint8",
+          "name": "compression_id",
+          "note": "v1: the file PROFILE. 0 = none (every recipe byte must be 0x00), 2 = recipe. Every other value is reserved and rejected"
+        },
+        {
+          "offset": 13,
+          "width": 1,
+          "type": "uint8",
+          "name": "file_state",
+          "note": "0 sealed, 1 active"
+        },
+        {
+          "offset": 14,
+          "width": 2,
+          "type": "uint16",
+          "name": "num_groups",
+          "note": ""
+        },
+        {
+          "offset": 16,
+          "width": 4,
+          "type": "uint32",
+          "name": "num_channels",
+          "note": ""
+        },
+        {
+          "offset": 20,
+          "width": 4,
+          "type": "uint32",
+          "name": "block_samples",
+          "note": "buckets per block; must be non-zero and a multiple of branching_factor, and defaults to it"
+        },
+        {
+          "offset": 24,
+          "width": 8,
+          "type": "uint64",
+          "name": "group_table_offset",
+          "note": ""
+        },
+        {
+          "offset": 32,
+          "width": 8,
+          "type": "uint64",
+          "name": "channel_table_offset",
+          "note": ""
+        },
+        {
+          "offset": 40,
+          "width": 16,
+          "type": "bytes",
+          "name": "session_id",
+          "note": "the 16 RFC 4122 bytes in network order \u2014 the one exception to little-endian"
+        },
+        {
+          "offset": 56,
+          "width": 4,
+          "type": "uint32",
+          "name": "sequence_number",
+          "note": ""
+        },
+        {
+          "offset": 60,
+          "width": 32,
+          "type": "bytes",
+          "name": "prev_file_hash",
+          "note": "SHA-256 over the ENTIRE previous file"
+        },
+        {
+          "offset": 92,
+          "width": 8,
+          "type": "uint64",
+          "name": "features",
+          "note": "low 32 bits must-understand (an unknown one is fatal), high 32 may-ignore (an unknown one is skipped)"
+        },
+        {
+          "offset": 100,
+          "width": 28,
+          "type": "bytes",
+          "name": "reserved",
+          "note": "written zero, ignored on read"
+        }
+      ],
+      "golden_encoding_hex": "54534C4F440001000001000000000300520000000001000080000000000000004001000000000000101112131415161718191A1B1C1D1E1F07000000202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F000000000000000000000000000000000000000000000000000000000000000000000000",
+      "golden_encoding_len": 128
+    },
+    {
+      "name": "v1/group_entry",
+      "record": "group_entry",
+      "format_version": 1,
+      "struct_format": "<dqQBB6sQQq8s",
+      "size_bytes": 64,
+      "byte_order": "little",
+      "fields": [
+        {
+          "offset": 0,
+          "width": 8,
+          "type": "float64",
+          "name": "sample_rate",
+          "note": "FROZEN offset"
+        },
+        {
+          "offset": 8,
+          "width": 8,
+          "type": "int64",
+          "name": "start_timestamp",
+          "note": "FROZEN offset; writer patches in place"
+        },
+        {
+          "offset": 16,
+          "width": 8,
+          "type": "uint64",
+          "name": "total_samples",
+          "note": "FROZEN offset; writer patches in place"
+        },
+        {
+          "offset": 24,
+          "width": 1,
+          "type": "uint8",
+          "name": "timing_mode",
+          "note": "FROZEN offset; 0 fixed, 1 variable"
+        },
+        {
+          "offset": 25,
+          "width": 1,
+          "type": "uint8",
+          "name": "timing_flags",
+          "note": "bit 0 TIMEBASE_PRESENT, bit 1 EPOCH_SYNCED"
+        },
+        {
+          "offset": 26,
+          "width": 6,
+          "type": "bytes",
+          "name": "reserved",
+          "note": "written zero"
+        },
+        {
+          "offset": 32,
+          "width": 8,
+          "type": "uint64",
+          "name": "tick_rate_numer",
+          "note": ">= 1 when TIMEBASE_PRESENT"
+        },
+        {
+          "offset": 40,
+          "width": 8,
+          "type": "uint64",
+          "name": "tick_rate_denom",
+          "note": ">= 1 when TIMEBASE_PRESENT"
+        },
+        {
+          "offset": 48,
+          "width": 8,
+          "type": "int64",
+          "name": "anchor_ticks",
+          "note": ""
+        },
+        {
+          "offset": 56,
+          "width": 8,
+          "type": "bytes",
+          "name": "reserved2",
+          "note": "written zero"
+        }
+      ],
+      "golden_encoding_hex": "0000000060E3764100002A36FE9C9717B5802C0000000000010300000000000000366E01000000000100000000000000C01DFEFFFFFFFFFF0000000000000000",
+      "golden_encoding_len": 64
+    },
+    {
+      "name": "v1/channel_entry",
+      "record": "channel_entry",
+      "format_version": 1,
+      "struct_format": "<64sBBHIQ16sB1s16s32s14s",
+      "size_bytes": 160,
+      "byte_order": "little",
+      "fields": [
+        {
+          "offset": 0,
+          "width": 64,
+          "type": "bytes",
+          "name": "name",
+          "note": "UTF-8, NUL-padded; invalid UTF-8 rejected at open"
+        },
+        {
+          "offset": 64,
+          "width": 1,
+          "type": "uint8",
+          "name": "dtype",
+          "note": "wire codes 0..9"
+        },
+        {
+          "offset": 65,
+          "width": 1,
+          "type": "uint8",
+          "name": "aggregation_mode",
+          "note": "0 numeric, 1 bitfield"
+        },
+        {
+          "offset": 66,
+          "width": 2,
+          "type": "uint16",
+          "name": "group_id",
+          "note": ""
+        },
+        {
+          "offset": 68,
+          "width": 4,
+          "type": "uint32",
+          "name": "num_levels",
+          "note": "counts level 0"
+        },
+        {
+          "offset": 72,
+          "width": 8,
+          "type": "uint64",
+          "name": "level_table_offset",
+          "note": ""
+        },
+        {
+          "offset": 80,
+          "width": 16,
+          "type": "bytes",
+          "name": "unit",
+          "note": "UTF-8, NUL-padded"
+        },
+        {
+          "offset": 96,
+          "width": 1,
+          "type": "uint8",
+          "name": "scaling_type",
+          "note": "0 identity, 1 linear"
+        },
+        {
+          "offset": 97,
+          "width": 1,
+          "type": "bytes",
+          "name": "_pad_scaling",
+          "note": "explicit pad, never checked"
+        },
+        {
+          "offset": 98,
+          "width": 16,
+          "type": "bytes",
+          "name": "scaling_params",
+          "note": "float64 gain, float64 offset when linear"
+        },
+        {
+          "offset": 114,
+          "width": 32,
+          "type": "bytes",
+          "name": "calibration_id",
+          "note": "UTF-8, NUL-padded"
+        },
+        {
+          "offset": 146,
+          "width": 14,
+          "type": "bytes",
+          "name": "reserved",
+          "note": "written zero"
+        }
+      ],
+      "golden_encoding_hex": "6D6F746F725F7669625F780000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000300000000100000000000006D2F735E3200000000000000000000000100000000000000603F00000000000029C063616C2D323032362D30390000000000000000000000000000000000000000000000000000000000000000000000",
+      "golden_encoding_len": 160
+    },
+    {
+      "name": "v1/level_entry",
+      "record": "level_entry",
+      "format_version": 1,
+      "struct_format": "<QQQ",
+      "size_bytes": 24,
+      "byte_order": "little",
+      "fields": [
+        {
+          "offset": 0,
+          "width": 8,
+          "type": "uint64",
+          "name": "block_count",
+          "note": ""
+        },
+        {
+          "offset": 8,
+          "width": 8,
+          "type": "uint64",
+          "name": "allocated_blocks",
+          "note": "block_count > allocated_blocks is rejected"
+        },
+        {
+          "offset": 16,
+          "width": 8,
+          "type": "uint64",
+          "name": "block_index_offset",
+          "note": ""
+        }
+      ],
+      "golden_encoding_hex": "892C00000000000000400000000000000000100000000000",
+      "golden_encoding_len": 24
+    },
+    {
+      "name": "v1/block_index_entry",
+      "record": "block_index_entry",
+      "format_version": 1,
+      "struct_format": "<QQQQqII",
+      "size_bytes": 48,
+      "byte_order": "little",
+      "fields": [
+        {
+          "offset": 0,
+          "width": 8,
+          "type": "uint64",
+          "name": "file_offset",
+          "note": ""
+        },
+        {
+          "offset": 8,
+          "width": 8,
+          "type": "uint64",
+          "name": "compressed_size",
+          "note": "the WHOLE block as stored \u2014 framing, recipe bytes, payloads"
+        },
+        {
+          "offset": 16,
+          "width": 8,
+          "type": "uint64",
+          "name": "uncompressed_size",
+          "note": "the VALUES stream's decoded bytes only; a timestamp stream's decoded size is sample_count * columns * 8"
+        },
+        {
+          "offset": 24,
+          "width": 8,
+          "type": "uint64",
+          "name": "sample_count",
+          "note": "zero is rejected"
+        },
+        {
+          "offset": 32,
+          "width": 8,
+          "type": "int64",
+          "name": "start_timestamp",
+          "note": ""
+        },
+        {
+          "offset": 40,
+          "width": 4,
+          "type": "uint32",
+          "name": "crc32",
+          "note": "IEEE CRC-32 as zlib computes it, over exactly [file_offset, file_offset + compressed_size), checked BEFORE decode"
+        },
+        {
+          "offset": 44,
+          "width": 4,
+          "type": "uint32",
+          "name": "reserved",
+          "note": "written zero, ignored on read"
+        }
+      ],
+      "golden_encoding_hex": "000000000100000010040000000000000008000000000000000100000000000000002A36FE9C97172639F4CB00000000",
+      "golden_encoding_len": 48
+    }
+  ]
+}

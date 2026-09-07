@@ -1,0 +1,449 @@
+{
+  "id": "set2-compute-num-levels",
+  "set": "set2-anchored-fold",
+  "kind": "fixture",
+  "asserts": "num_levels counts level 0, so it is ceil(log N / log BF) + 1; it is 1 for a zero- or one-sample channel, and branching_factor < 2 is refused rather than looping.",
+  "source": "derived here from the depth law: fold by branching_factor until one bucket remains, counting level 0",
+  "contract": "The pyramid's depth is stored in the file, and a reader that derives it differently builds a level table of the wrong length.",
+  "requires": [],
+  "notes": "num_levels counts level 0, so it is one MORE than the number of aggregation levels. A reader that counts only the aggregation levels builds a level table one entry short and reads the block index of the level above the one it wanted.",
+  "case_count": 72,
+  "cases": [
+    {
+      "name": "N=0,BF=2",
+      "total_samples": "0",
+      "branching_factor": "2",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=1,BF=2",
+      "total_samples": "1",
+      "branching_factor": "2",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=2",
+      "total_samples": "2",
+      "branching_factor": "2",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=2",
+      "total_samples": "3",
+      "branching_factor": "2",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=1,BF=2",
+      "total_samples": "1",
+      "branching_factor": "2",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=2",
+      "total_samples": "2",
+      "branching_factor": "2",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=2",
+      "total_samples": "3",
+      "branching_factor": "2",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=3,BF=2",
+      "total_samples": "3",
+      "branching_factor": "2",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=4,BF=2",
+      "total_samples": "4",
+      "branching_factor": "2",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=5,BF=2",
+      "total_samples": "5",
+      "branching_factor": "2",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=1000,BF=2",
+      "total_samples": "1000",
+      "branching_factor": "2",
+      "expected_num_levels": "11"
+    },
+    {
+      "name": "N=65536,BF=2",
+      "total_samples": "65536",
+      "branching_factor": "2",
+      "expected_num_levels": "17"
+    },
+    {
+      "name": "N=1000000,BF=2",
+      "total_samples": "1000000",
+      "branching_factor": "2",
+      "expected_num_levels": "21"
+    },
+    {
+      "name": "N=2916533,BF=2",
+      "total_samples": "2916533",
+      "branching_factor": "2",
+      "expected_num_levels": "23"
+    },
+    {
+      "name": "N=0,BF=4",
+      "total_samples": "0",
+      "branching_factor": "4",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=1,BF=4",
+      "total_samples": "1",
+      "branching_factor": "4",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=4",
+      "total_samples": "2",
+      "branching_factor": "4",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=4",
+      "total_samples": "3",
+      "branching_factor": "4",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=4",
+      "total_samples": "3",
+      "branching_factor": "4",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=4,BF=4",
+      "total_samples": "4",
+      "branching_factor": "4",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=5,BF=4",
+      "total_samples": "5",
+      "branching_factor": "4",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=15,BF=4",
+      "total_samples": "15",
+      "branching_factor": "4",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=16,BF=4",
+      "total_samples": "16",
+      "branching_factor": "4",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=17,BF=4",
+      "total_samples": "17",
+      "branching_factor": "4",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=1000,BF=4",
+      "total_samples": "1000",
+      "branching_factor": "4",
+      "expected_num_levels": "6"
+    },
+    {
+      "name": "N=65536,BF=4",
+      "total_samples": "65536",
+      "branching_factor": "4",
+      "expected_num_levels": "9"
+    },
+    {
+      "name": "N=1000000,BF=4",
+      "total_samples": "1000000",
+      "branching_factor": "4",
+      "expected_num_levels": "11"
+    },
+    {
+      "name": "N=2916533,BF=4",
+      "total_samples": "2916533",
+      "branching_factor": "4",
+      "expected_num_levels": "12"
+    },
+    {
+      "name": "N=0,BF=16",
+      "total_samples": "0",
+      "branching_factor": "16",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=1,BF=16",
+      "total_samples": "1",
+      "branching_factor": "16",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=16",
+      "total_samples": "2",
+      "branching_factor": "16",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=16",
+      "total_samples": "3",
+      "branching_factor": "16",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=15,BF=16",
+      "total_samples": "15",
+      "branching_factor": "16",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=16,BF=16",
+      "total_samples": "16",
+      "branching_factor": "16",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=17,BF=16",
+      "total_samples": "17",
+      "branching_factor": "16",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=255,BF=16",
+      "total_samples": "255",
+      "branching_factor": "16",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=256,BF=16",
+      "total_samples": "256",
+      "branching_factor": "16",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=257,BF=16",
+      "total_samples": "257",
+      "branching_factor": "16",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=1000,BF=16",
+      "total_samples": "1000",
+      "branching_factor": "16",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=65536,BF=16",
+      "total_samples": "65536",
+      "branching_factor": "16",
+      "expected_num_levels": "5"
+    },
+    {
+      "name": "N=1000000,BF=16",
+      "total_samples": "1000000",
+      "branching_factor": "16",
+      "expected_num_levels": "6"
+    },
+    {
+      "name": "N=2916533,BF=16",
+      "total_samples": "2916533",
+      "branching_factor": "16",
+      "expected_num_levels": "7"
+    },
+    {
+      "name": "N=0,BF=256",
+      "total_samples": "0",
+      "branching_factor": "256",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=1,BF=256",
+      "total_samples": "1",
+      "branching_factor": "256",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=256",
+      "total_samples": "2",
+      "branching_factor": "256",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=256",
+      "total_samples": "3",
+      "branching_factor": "256",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=255,BF=256",
+      "total_samples": "255",
+      "branching_factor": "256",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=256,BF=256",
+      "total_samples": "256",
+      "branching_factor": "256",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=257,BF=256",
+      "total_samples": "257",
+      "branching_factor": "256",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=65535,BF=256",
+      "total_samples": "65535",
+      "branching_factor": "256",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=65536,BF=256",
+      "total_samples": "65536",
+      "branching_factor": "256",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=65537,BF=256",
+      "total_samples": "65537",
+      "branching_factor": "256",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=1000,BF=256",
+      "total_samples": "1000",
+      "branching_factor": "256",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=65536,BF=256",
+      "total_samples": "65536",
+      "branching_factor": "256",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=1000000,BF=256",
+      "total_samples": "1000000",
+      "branching_factor": "256",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=2916533,BF=256",
+      "total_samples": "2916533",
+      "branching_factor": "256",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=0,BF=1000",
+      "total_samples": "0",
+      "branching_factor": "1000",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=1,BF=1000",
+      "total_samples": "1",
+      "branching_factor": "1000",
+      "expected_num_levels": "1"
+    },
+    {
+      "name": "N=2,BF=1000",
+      "total_samples": "2",
+      "branching_factor": "1000",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=3,BF=1000",
+      "total_samples": "3",
+      "branching_factor": "1000",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=999,BF=1000",
+      "total_samples": "999",
+      "branching_factor": "1000",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=1000,BF=1000",
+      "total_samples": "1000",
+      "branching_factor": "1000",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=1001,BF=1000",
+      "total_samples": "1001",
+      "branching_factor": "1000",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=999999,BF=1000",
+      "total_samples": "999999",
+      "branching_factor": "1000",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=1000000,BF=1000",
+      "total_samples": "1000000",
+      "branching_factor": "1000",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=1000001,BF=1000",
+      "total_samples": "1000001",
+      "branching_factor": "1000",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "N=1000,BF=1000",
+      "total_samples": "1000",
+      "branching_factor": "1000",
+      "expected_num_levels": "2"
+    },
+    {
+      "name": "N=65536,BF=1000",
+      "total_samples": "65536",
+      "branching_factor": "1000",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=1000000,BF=1000",
+      "total_samples": "1000000",
+      "branching_factor": "1000",
+      "expected_num_levels": "3"
+    },
+    {
+      "name": "N=2916533,BF=1000",
+      "total_samples": "2916533",
+      "branching_factor": "1000",
+      "expected_num_levels": "4"
+    },
+    {
+      "name": "branching-factor-0-rejected",
+      "total_samples": "1000",
+      "branching_factor": "0",
+      "expected_num_levels": null,
+      "rejection_class": "branching-factor-below-two",
+      "message": "the pyramid has no depth for a branching factor below two: each level would hold at least as many buckets as the one below it"
+    },
+    {
+      "name": "branching-factor-1-rejected",
+      "total_samples": "1000",
+      "branching_factor": "1",
+      "expected_num_levels": null,
+      "rejection_class": "branching-factor-below-two",
+      "message": "the pyramid has no depth for a branching factor below two: each level would hold at least as many buckets as the one below it"
+    }
+  ]
+}

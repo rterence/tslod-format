@@ -1,0 +1,1203 @@
+{
+  "manifest_version": 1,
+  "format_target": "tslod v1",
+  "conventions": "corpus/CONVENTIONS.md",
+  "generated_from": "tools/generate_all.py",
+  "counts": {
+    "vectors": 24,
+    "cases": 1270,
+    "by_set": {
+      "codec-vectors": 1,
+      "record-layouts": 2,
+      "set1-tick-timebase": 4,
+      "set2-anchored-fold": 2,
+      "set3-build-level": 6,
+      "set4-chan-pebay": 4,
+      "v1-format": 5
+    },
+    "by_kind": {
+      "fixture": 20,
+      "negative": 1,
+      "oracle": 3
+    }
+  },
+  "vectors": [
+    {
+      "id": "codec-decode-per-recipe",
+      "set": "codec-vectors",
+      "kind": "fixture",
+      "asserts": "For every registered v1 recipe \u2014 0x00 identity, 0x01 zstd, 0x02 pco, 0x03 byte-transpose+zstd \u2014 decoding the stored bytes yields exactly the expected payload, bit for bit. Encoder output is NEVER compared; two conforming encoders may differ and both be right.",
+      "source": "encoded with pcodec 1.0.3 (standalone format) and zstandard (level 3, content size on, checksum off); every vector is decoded back and checked bit-exact before it is written",
+      "contract": "A file written by one implementation has to decode in another, so what a recipe byte means is part of the format while how an encoder chooses to use it is not.",
+      "requires": [
+        "format:v1",
+        "recipe:0x00",
+        "recipe:0x01",
+        "recipe:0x02",
+        "recipe:0x03"
+      ],
+      "case_count": 209,
+      "files": [
+        {
+          "path": "codec-vectors/codec-decode-per-recipe.json",
+          "sha256": "468d555b68bc1a8bcd434f76f32b6433c47ef6a70ca993f49009413b26aca871"
+        },
+        {
+          "path": "codec-vectors/int32_constant_payload.bin",
+          "sha256": "d98d17306c886fb0b8652e44e4925f6481d42304115378ea73f527569a1c9c62"
+        },
+        {
+          "path": "codec-vectors/int32_constant_payload.bin",
+          "sha256": "d98d17306c886fb0b8652e44e4925f6481d42304115378ea73f527569a1c9c62"
+        },
+        {
+          "path": "codec-vectors/int32_constant_payload.bin",
+          "sha256": "d98d17306c886fb0b8652e44e4925f6481d42304115378ea73f527569a1c9c62"
+        },
+        {
+          "path": "codec-vectors/int32_constant_payload.bin",
+          "sha256": "d98d17306c886fb0b8652e44e4925f6481d42304115378ea73f527569a1c9c62"
+        },
+        {
+          "path": "codec-vectors/int32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/int32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/int32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/int32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/int32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/int32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/int32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/int32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/int32_extremes_payload.bin",
+          "sha256": "f9d63991720ab9ce290434c2583538decfc636b6855dd7e2593ab07602cf16c2"
+        },
+        {
+          "path": "codec-vectors/int32_extremes_payload.bin",
+          "sha256": "f9d63991720ab9ce290434c2583538decfc636b6855dd7e2593ab07602cf16c2"
+        },
+        {
+          "path": "codec-vectors/int32_extremes_payload.bin",
+          "sha256": "f9d63991720ab9ce290434c2583538decfc636b6855dd7e2593ab07602cf16c2"
+        },
+        {
+          "path": "codec-vectors/int32_extremes_payload.bin",
+          "sha256": "f9d63991720ab9ce290434c2583538decfc636b6855dd7e2593ab07602cf16c2"
+        },
+        {
+          "path": "codec-vectors/int64_constant_payload.bin",
+          "sha256": "b8e654405e98d56fec71f45415a1cf9b43a064ef152a14716ae5adf01d3bbecd"
+        },
+        {
+          "path": "codec-vectors/int64_constant_payload.bin",
+          "sha256": "b8e654405e98d56fec71f45415a1cf9b43a064ef152a14716ae5adf01d3bbecd"
+        },
+        {
+          "path": "codec-vectors/int64_constant_payload.bin",
+          "sha256": "b8e654405e98d56fec71f45415a1cf9b43a064ef152a14716ae5adf01d3bbecd"
+        },
+        {
+          "path": "codec-vectors/int64_constant_payload.bin",
+          "sha256": "b8e654405e98d56fec71f45415a1cf9b43a064ef152a14716ae5adf01d3bbecd"
+        },
+        {
+          "path": "codec-vectors/int64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/int64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/int64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/int64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/int64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/int64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/int64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/int64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/int64_extremes_payload.bin",
+          "sha256": "927021406aaa578ceff11942a78a52395f4837fce993dc2781897c4e272da5ad"
+        },
+        {
+          "path": "codec-vectors/int64_extremes_payload.bin",
+          "sha256": "927021406aaa578ceff11942a78a52395f4837fce993dc2781897c4e272da5ad"
+        },
+        {
+          "path": "codec-vectors/int64_extremes_payload.bin",
+          "sha256": "927021406aaa578ceff11942a78a52395f4837fce993dc2781897c4e272da5ad"
+        },
+        {
+          "path": "codec-vectors/int64_extremes_payload.bin",
+          "sha256": "927021406aaa578ceff11942a78a52395f4837fce993dc2781897c4e272da5ad"
+        },
+        {
+          "path": "codec-vectors/uint32_constant_payload.bin",
+          "sha256": "ff805d35bb5ab81bef36548994b0b5558f1f8374aaf58c9aed3275442d020358"
+        },
+        {
+          "path": "codec-vectors/uint32_constant_payload.bin",
+          "sha256": "ff805d35bb5ab81bef36548994b0b5558f1f8374aaf58c9aed3275442d020358"
+        },
+        {
+          "path": "codec-vectors/uint32_constant_payload.bin",
+          "sha256": "ff805d35bb5ab81bef36548994b0b5558f1f8374aaf58c9aed3275442d020358"
+        },
+        {
+          "path": "codec-vectors/uint32_constant_payload.bin",
+          "sha256": "ff805d35bb5ab81bef36548994b0b5558f1f8374aaf58c9aed3275442d020358"
+        },
+        {
+          "path": "codec-vectors/uint32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/uint32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/uint32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/uint32_ramp_payload.bin",
+          "sha256": "8808405eec6fbe306fe3369f88daed79dd5613ddbb5e801f632b01d6218c5f08"
+        },
+        {
+          "path": "codec-vectors/uint32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/uint32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/uint32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/uint32_noise_payload.bin",
+          "sha256": "d6dc19b9369fb50e2196419c489a049f0ab74ff6fceb8f37d4a3d3ad88ccfa95"
+        },
+        {
+          "path": "codec-vectors/uint32_extremes_payload.bin",
+          "sha256": "601cd15c2edd6d8e61edf1d990251012964291e885b7053a18e4f81c2c8185da"
+        },
+        {
+          "path": "codec-vectors/uint32_extremes_payload.bin",
+          "sha256": "601cd15c2edd6d8e61edf1d990251012964291e885b7053a18e4f81c2c8185da"
+        },
+        {
+          "path": "codec-vectors/uint32_extremes_payload.bin",
+          "sha256": "601cd15c2edd6d8e61edf1d990251012964291e885b7053a18e4f81c2c8185da"
+        },
+        {
+          "path": "codec-vectors/uint32_extremes_payload.bin",
+          "sha256": "601cd15c2edd6d8e61edf1d990251012964291e885b7053a18e4f81c2c8185da"
+        },
+        {
+          "path": "codec-vectors/uint64_constant_payload.bin",
+          "sha256": "4243540c5ccefe23ede20eadc44edf3f89dd705d35ea0183de110eff461d04df"
+        },
+        {
+          "path": "codec-vectors/uint64_constant_payload.bin",
+          "sha256": "4243540c5ccefe23ede20eadc44edf3f89dd705d35ea0183de110eff461d04df"
+        },
+        {
+          "path": "codec-vectors/uint64_constant_payload.bin",
+          "sha256": "4243540c5ccefe23ede20eadc44edf3f89dd705d35ea0183de110eff461d04df"
+        },
+        {
+          "path": "codec-vectors/uint64_constant_payload.bin",
+          "sha256": "4243540c5ccefe23ede20eadc44edf3f89dd705d35ea0183de110eff461d04df"
+        },
+        {
+          "path": "codec-vectors/uint64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/uint64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/uint64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/uint64_ramp_payload.bin",
+          "sha256": "bbd330b12e8159e117376ef24fa106413bc9fc18032a0d43e95c5dae5e47953f"
+        },
+        {
+          "path": "codec-vectors/uint64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/uint64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/uint64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/uint64_noise_payload.bin",
+          "sha256": "e10cc29e2c336094b2f3fe87a99efd10aa74b9ae6a96ba11c062e94e5a1f84df"
+        },
+        {
+          "path": "codec-vectors/uint64_extremes_payload.bin",
+          "sha256": "24a82860d5364d2b65b3a5671f53085294ac0e1560da8a63d1caef1c6b9fe0bb"
+        },
+        {
+          "path": "codec-vectors/uint64_extremes_payload.bin",
+          "sha256": "24a82860d5364d2b65b3a5671f53085294ac0e1560da8a63d1caef1c6b9fe0bb"
+        },
+        {
+          "path": "codec-vectors/uint64_extremes_payload.bin",
+          "sha256": "24a82860d5364d2b65b3a5671f53085294ac0e1560da8a63d1caef1c6b9fe0bb"
+        },
+        {
+          "path": "codec-vectors/uint64_extremes_payload.bin",
+          "sha256": "24a82860d5364d2b65b3a5671f53085294ac0e1560da8a63d1caef1c6b9fe0bb"
+        },
+        {
+          "path": "codec-vectors/float32_constant_payload.bin",
+          "sha256": "93841c00f87ee9e874b0ba6495193d22d216a2b27e983628212ecdfec87a5ef8"
+        },
+        {
+          "path": "codec-vectors/float32_constant_payload.bin",
+          "sha256": "93841c00f87ee9e874b0ba6495193d22d216a2b27e983628212ecdfec87a5ef8"
+        },
+        {
+          "path": "codec-vectors/float32_constant_payload.bin",
+          "sha256": "93841c00f87ee9e874b0ba6495193d22d216a2b27e983628212ecdfec87a5ef8"
+        },
+        {
+          "path": "codec-vectors/float32_constant_payload.bin",
+          "sha256": "93841c00f87ee9e874b0ba6495193d22d216a2b27e983628212ecdfec87a5ef8"
+        },
+        {
+          "path": "codec-vectors/float32_ramp_payload.bin",
+          "sha256": "96651a0d1e4301e42a9d63fbf690c6d73ff0a71988d82af44d60c3c5ea1bcb45"
+        },
+        {
+          "path": "codec-vectors/float32_ramp_payload.bin",
+          "sha256": "96651a0d1e4301e42a9d63fbf690c6d73ff0a71988d82af44d60c3c5ea1bcb45"
+        },
+        {
+          "path": "codec-vectors/float32_ramp_payload.bin",
+          "sha256": "96651a0d1e4301e42a9d63fbf690c6d73ff0a71988d82af44d60c3c5ea1bcb45"
+        },
+        {
+          "path": "codec-vectors/float32_ramp_payload.bin",
+          "sha256": "96651a0d1e4301e42a9d63fbf690c6d73ff0a71988d82af44d60c3c5ea1bcb45"
+        },
+        {
+          "path": "codec-vectors/float32_noise_payload.bin",
+          "sha256": "0ae24ec5dafeef55d3f8877f00f2ad9302b10ea1da1958fd20eb2391177d3e4f"
+        },
+        {
+          "path": "codec-vectors/float32_noise_payload.bin",
+          "sha256": "0ae24ec5dafeef55d3f8877f00f2ad9302b10ea1da1958fd20eb2391177d3e4f"
+        },
+        {
+          "path": "codec-vectors/float32_noise_payload.bin",
+          "sha256": "0ae24ec5dafeef55d3f8877f00f2ad9302b10ea1da1958fd20eb2391177d3e4f"
+        },
+        {
+          "path": "codec-vectors/float32_noise_payload.bin",
+          "sha256": "0ae24ec5dafeef55d3f8877f00f2ad9302b10ea1da1958fd20eb2391177d3e4f"
+        },
+        {
+          "path": "codec-vectors/float32_all-nan_payload.bin",
+          "sha256": "1acc0ecb837a5149d3109aff169efc58877cc84412fd50ced7893e2f12f275b2"
+        },
+        {
+          "path": "codec-vectors/float32_all-nan_payload.bin",
+          "sha256": "1acc0ecb837a5149d3109aff169efc58877cc84412fd50ced7893e2f12f275b2"
+        },
+        {
+          "path": "codec-vectors/float32_all-nan_payload.bin",
+          "sha256": "1acc0ecb837a5149d3109aff169efc58877cc84412fd50ced7893e2f12f275b2"
+        },
+        {
+          "path": "codec-vectors/float32_all-nan_payload.bin",
+          "sha256": "1acc0ecb837a5149d3109aff169efc58877cc84412fd50ced7893e2f12f275b2"
+        },
+        {
+          "path": "codec-vectors/float64_constant_payload.bin",
+          "sha256": "66b051fc658277f007b771774a2cd22c212b1b4f46e2dc69727847a09f407300"
+        },
+        {
+          "path": "codec-vectors/float64_constant_payload.bin",
+          "sha256": "66b051fc658277f007b771774a2cd22c212b1b4f46e2dc69727847a09f407300"
+        },
+        {
+          "path": "codec-vectors/float64_constant_payload.bin",
+          "sha256": "66b051fc658277f007b771774a2cd22c212b1b4f46e2dc69727847a09f407300"
+        },
+        {
+          "path": "codec-vectors/float64_constant_payload.bin",
+          "sha256": "66b051fc658277f007b771774a2cd22c212b1b4f46e2dc69727847a09f407300"
+        },
+        {
+          "path": "codec-vectors/float64_ramp_payload.bin",
+          "sha256": "f372f982d27eed74276b356a04d6a3c38214b670fd903bb7a6f4d282b9505c34"
+        },
+        {
+          "path": "codec-vectors/float64_ramp_payload.bin",
+          "sha256": "f372f982d27eed74276b356a04d6a3c38214b670fd903bb7a6f4d282b9505c34"
+        },
+        {
+          "path": "codec-vectors/float64_ramp_payload.bin",
+          "sha256": "f372f982d27eed74276b356a04d6a3c38214b670fd903bb7a6f4d282b9505c34"
+        },
+        {
+          "path": "codec-vectors/float64_ramp_payload.bin",
+          "sha256": "f372f982d27eed74276b356a04d6a3c38214b670fd903bb7a6f4d282b9505c34"
+        },
+        {
+          "path": "codec-vectors/float64_noise_payload.bin",
+          "sha256": "b9a5c3e0fa3ea2a42b43096876a7942966ea865a1ae198fcb560b4fca38a58fa"
+        },
+        {
+          "path": "codec-vectors/float64_noise_payload.bin",
+          "sha256": "b9a5c3e0fa3ea2a42b43096876a7942966ea865a1ae198fcb560b4fca38a58fa"
+        },
+        {
+          "path": "codec-vectors/float64_noise_payload.bin",
+          "sha256": "b9a5c3e0fa3ea2a42b43096876a7942966ea865a1ae198fcb560b4fca38a58fa"
+        },
+        {
+          "path": "codec-vectors/float64_noise_payload.bin",
+          "sha256": "b9a5c3e0fa3ea2a42b43096876a7942966ea865a1ae198fcb560b4fca38a58fa"
+        },
+        {
+          "path": "codec-vectors/float64_all-nan_payload.bin",
+          "sha256": "4a596d9c5ab41bf2c572eaf197373027885afae9f5522450ac956298d8061802"
+        },
+        {
+          "path": "codec-vectors/float64_all-nan_payload.bin",
+          "sha256": "4a596d9c5ab41bf2c572eaf197373027885afae9f5522450ac956298d8061802"
+        },
+        {
+          "path": "codec-vectors/float64_all-nan_payload.bin",
+          "sha256": "4a596d9c5ab41bf2c572eaf197373027885afae9f5522450ac956298d8061802"
+        },
+        {
+          "path": "codec-vectors/float64_all-nan_payload.bin",
+          "sha256": "4a596d9c5ab41bf2c572eaf197373027885afae9f5522450ac956298d8061802"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-fixed-rate_payload.bin",
+          "sha256": "69cf6ba9d0ce4719e42af6a127a0745101a95f364a7ce0f9f7492d169777db46"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-fixed-rate_payload.bin",
+          "sha256": "69cf6ba9d0ce4719e42af6a127a0745101a95f364a7ce0f9f7492d169777db46"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-fixed-rate_payload.bin",
+          "sha256": "69cf6ba9d0ce4719e42af6a127a0745101a95f364a7ce0f9f7492d169777db46"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-fixed-rate_payload.bin",
+          "sha256": "69cf6ba9d0ce4719e42af6a127a0745101a95f364a7ce0f9f7492d169777db46"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-jittered_payload.bin",
+          "sha256": "41737913e90f866c7e42a999094c2df95eb8136ada216f5113b9e103a81dd338"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-jittered_payload.bin",
+          "sha256": "41737913e90f866c7e42a999094c2df95eb8136ada216f5113b9e103a81dd338"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-jittered_payload.bin",
+          "sha256": "41737913e90f866c7e42a999094c2df95eb8136ada216f5113b9e103a81dd338"
+        },
+        {
+          "path": "codec-vectors/int64_timestamps-absolute-jittered_payload.bin",
+          "sha256": "41737913e90f866c7e42a999094c2df95eb8136ada216f5113b9e103a81dd338"
+        }
+      ]
+    },
+    {
+      "id": "record-enums",
+      "set": "record-layouts",
+      "kind": "fixture",
+      "asserts": "The wire enums are closed sets with these exact codes: ten dtypes 0..9, two aggregation modes, two timing modes, two timing-flag bits, two file states, two scaling types, and the compression/profile codes; an unrecognised value in any of them is a read-time rejection, never a default.",
+      "source": "the enum definitions in spec/v1, cross-checked against the dtype widths and the recipe registry the rest of the corpus uses",
+      "contract": "An enum is a closed set: a reader that defaults an unknown value reads a file its writer never wrote.",
+      "requires": [],
+      "case_count": 9,
+      "files": [
+        {
+          "path": "record-layouts/record-enums.json",
+          "sha256": "9bf9155109db56db862262c21170de2bf6a121597b1d49b3fd2a75e17cae47d1"
+        }
+      ]
+    },
+    {
+      "id": "record-layouts-v1",
+      "set": "record-layouts",
+      "kind": "fixture",
+      "asserts": "The five records are exactly 128, 64, 160, 24 and 48 bytes, little-endian throughout except session_id which is the 16 RFC 4122 bytes in network order, and each field sits at the offset given \u2014 proved by a golden encoding and not only by a field table, so a struct with the right names and the wrong padding fails.",
+      "source": "the version-1 record definitions, with a golden encoding produced from them",
+      "contract": "A struct with the right field names and the wrong padding reads plausible nonsense, so the layout is pinned as bytes and not only as a table.",
+      "requires": [
+        "format:v1"
+      ],
+      "case_count": 5,
+      "files": [
+        {
+          "path": "record-layouts/record-layouts-v1.json",
+          "sha256": "7249a5c745be9fae422ce1e2570c4c41d60eb9a052c94c8db9514f5f24fe2b9f"
+        }
+      ]
+    },
+    {
+      "id": "set1-div-round-half-even",
+      "set": "set1-tick-timebase",
+      "kind": "fixture",
+      "asserts": "Integer division rounds half to even over the exact rational: ties go to the even quotient, and negative numerators floor before the tie test rather than truncating toward zero.",
+      "source": "authored: round-half-even over fractions.Fraction, derived from the rule rather than from any implementation of it",
+      "contract": "One rounding rule, stated: three implementations rounding three ways put the same instant in three different places.",
+      "requires": [
+        "feature:tick-timebase"
+      ],
+      "case_count": 23,
+      "files": [
+        {
+          "path": "set1-tick-timebase/set1-div-round-half-even.json",
+          "sha256": "2b6192392b11aabc3cda02e24998ddb65d5d2d21ea96bda341995311bc4cc95a"
+        }
+      ]
+    },
+    {
+      "id": "set1-ghz-boundary",
+      "set": "set1-tick-timebase",
+      "kind": "fixture",
+      "asserts": "At and above 1 GHz the forward map stays exact RHE of the exact rational, but the ticks -> ns -> ticks round trip is no longer bit-exact; the recovery error is bounded by (1 + rate/10^9)/2 ticks and each case states the observed error.",
+      "source": "authored: exact-rational round-half-even; the recovery error is measured per case, not assumed",
+      "contract": "An implementation that assumes exactness at every rate is wrong above 1 GHz, so the bound is part of the contract rather than a surprise found later.",
+      "requires": [
+        "feature:tick-timebase"
+      ],
+      "case_count": 50,
+      "files": [
+        {
+          "path": "set1-tick-timebase/set1-ghz-boundary.json",
+          "sha256": "7e6b2b0492333c5f698b86f1c8860e294a2a944316e9826ce65c5c08bc68adc2"
+        }
+      ]
+    },
+    {
+      "id": "set1-ns-to-ticks-round-trip",
+      "set": "set1-tick-timebase",
+      "kind": "fixture",
+      "asserts": "Below 1 GHz the round trip ticks -> ns -> ticks recovers the original tick bit-exactly, and ns_to_ticks is itself rhe((ns - start) * numer / (denom * 10^9)) \u2014 including at the magnitudes where the intermediate passes 2^53 and 2^63, where an implementation that narrows either direction loses the tick it started from.",
+      "source": "authored: exact-rational round-half-even oracle. The delta set is chosen rather than swept, on the same boundaries as set1-ticks-to-ns",
+      "contract": "A timestamp that does not survive a round trip cannot be used to address the sample it came from.",
+      "requires": [
+        "feature:tick-timebase"
+      ],
+      "case_count": 88,
+      "files": [
+        {
+          "path": "set1-tick-timebase/set1-ns-to-ticks-round-trip.json",
+          "sha256": "2da425e8e46c015d43b17149e67938297f7746c3df826b88ba5fc97197f71ba1"
+        }
+      ]
+    },
+    {
+      "id": "set1-ticks-to-ns",
+      "set": "set1-tick-timebase",
+      "kind": "fixture",
+      "asserts": "ticks_to_ns(t) == start_timestamp + rhe((t - anchor) * 10^9 * denom / numer) evaluated as an EXACT rational at every magnitude: exact where the intermediate fits in a double, and still exact past 2^53 and past 2^63, where a float64 and then an int64 intermediate stop being able to hold it. The cases straddle both crossings from each side and at each sign.",
+      "source": "authored: exact-rational round-half-even oracle, so the expected values do not come from any implementation of the conversion. The delta set is chosen rather than swept: it was 160 pseudo-random magnitudes per rate, which sampled one behaviour many times, and is now the boundaries that behaviour actually turns on",
+      "contract": "Evaluating this conversion in a double is correct on small inputs and wrong on real captures, so exactness is pinned at the magnitudes where it stops holding.",
+      "requires": [
+        "feature:tick-timebase"
+      ],
+      "case_count": 88,
+      "files": [
+        {
+          "path": "set1-tick-timebase/set1-ticks-to-ns.json",
+          "sha256": "e2f42e93494a18a59746620332aa6b63f20d32634aff11d0a62c49eaf1e45922"
+        }
+      ]
+    },
+    {
+      "id": "set2-anchored-bucket-geometry",
+      "set": "set2-anchored-fold",
+      "kind": "fixture",
+      "asserts": "Bucket j at level K covers raw samples [j*BF^K, (j+1)*BF^K), anchored at global sample index 0 \u2014 never at a block boundary and never at a time \u2014 so block b at level K starts at raw sample b * BF^(K+1).",
+      "source": "the anchored dyadic geometry, stated as arithmetic",
+      "contract": "Bucket boundaries are anchored to the data rather than to a block or a time, which is what lets two implementations agree on them without negotiating.",
+      "requires": [],
+      "case_count": 132,
+      "files": [
+        {
+          "path": "set2-anchored-fold/set2-anchored-bucket-geometry.json",
+          "sha256": "899d9c3c46d460ebee59bf78da9f78d95aa798036e08cf6bdf9f04abbfd303d6"
+        }
+      ]
+    },
+    {
+      "id": "set2-compute-num-levels",
+      "set": "set2-anchored-fold",
+      "kind": "fixture",
+      "asserts": "num_levels counts level 0, so it is ceil(log N / log BF) + 1; it is 1 for a zero- or one-sample channel, and branching_factor < 2 is refused rather than looping.",
+      "source": "derived here from the depth law: fold by branching_factor until one bucket remains, counting level 0",
+      "contract": "The pyramid's depth is stored in the file, and a reader that derives it differently builds a level table of the wrong length.",
+      "requires": [],
+      "case_count": 72,
+      "files": [
+        {
+          "path": "set2-anchored-fold/set2-compute-num-levels.json",
+          "sha256": "7a15860422bf2b0f82015d59e2d1658d314f82655c1908dee5a9006c8f5d136a"
+        }
+      ]
+    },
+    {
+      "id": "set3-bucket-moments",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "Every numeric value bucket at level >= 1 carries (count, mean, M2, M3, M4) as float64, where count is the number of NON-NaN elements and the stored tuple is the strict left-to-right Chan/Pebay fold over the bucket's branching_factor children in ascending index \u2014 raw samples at level 1, the level below's stored tuples above it.",
+      "source": "tools/_moments.py, the one shared fold; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "Moments computed by different implementations are only comparable if the order they are folded in is part of the format.",
+      "requires": [
+        "format:v1",
+        "feature:moments"
+      ],
+      "case_count": 55,
+      "files": [
+        {
+          "path": "set3-build-level/set3-bucket-moments.json",
+          "sha256": "641a4ad17c749148059d5fcb0dee1418e5d805e426a7dc17071ae59f2b253933"
+        },
+        {
+          "path": "set3-build-level/mom_float32_bf256_n512_input.bin",
+          "sha256": "b442421cdbfb42ba4df3b949454e17b2b657e9e3d296d929c73fd16030860e96"
+        },
+        {
+          "path": "set3-build-level/mom_float32_bf256_n700_input.bin",
+          "sha256": "16877f883b4db1093d688f6c175796fdb198d33cbad55d59c64a718985c2233a"
+        },
+        {
+          "path": "set3-build-level/mom_float64_bf256_n512_input.bin",
+          "sha256": "5d7fe032918a1c6dbfd99188234b3cfea46bd406ab1f41f344c8fd8cc718c089"
+        },
+        {
+          "path": "set3-build-level/mom_float64_bf256_n700_input.bin",
+          "sha256": "95df21dca6b1acf384360b35207eaaaf357d27b7ca33dd0138bb1936b7d708d3"
+        },
+        {
+          "path": "set3-build-level/mom_int8_bf256_n700_input.bin",
+          "sha256": "79776e9b3771306656bf869b0e01ad49596a0371c24536e1557e6f7f25b05666"
+        },
+        {
+          "path": "set3-build-level/mom_int16_bf256_n512_input.bin",
+          "sha256": "aae56b760d17185ad607f64428a3ac2c82c79106ca2e7a44a693d4426feefd60"
+        },
+        {
+          "path": "set3-build-level/mom_int16_bf256_n700_input.bin",
+          "sha256": "e974e35b1feb582dd0600f1d7ce7127a00fc43025659d9a0b13f5c0908ee6cdf"
+        },
+        {
+          "path": "set3-build-level/mom_int32_bf256_n512_input.bin",
+          "sha256": "4f5f8b8db412b4186a34071270fcaaa278b719e2f235bbabb6660fc8a85c1bc2"
+        },
+        {
+          "path": "set3-build-level/mom_int32_bf256_n700_input.bin",
+          "sha256": "0130988c7e208559d241465410e17faf2c6ed62be937706c51af271d6b433aa5"
+        },
+        {
+          "path": "set3-build-level/mom_int64_bf256_n512_input.bin",
+          "sha256": "dbaa70c09b9193ed61723bd60d527679a9535cad901e79e612730f6a987d2cfc"
+        },
+        {
+          "path": "set3-build-level/mom_int64_bf256_n700_input.bin",
+          "sha256": "5d74f58666c501314ae1fb69b6ae8e33306d07c6af5ba2a3f7d81cf9c4eede81"
+        },
+        {
+          "path": "set3-build-level/mom_uint8_bf256_n700_input.bin",
+          "sha256": "3cad347d623c1eadf910e5ced9d99091cdd5e9f4ebfee0dd453b3aef81b3744f"
+        },
+        {
+          "path": "set3-build-level/mom_uint16_bf256_n512_input.bin",
+          "sha256": "e2268925472add67df1bc8e3ce9c6f9afde09de2cac6f925665e96be76c004d4"
+        },
+        {
+          "path": "set3-build-level/mom_uint16_bf256_n700_input.bin",
+          "sha256": "442ab858e3f12512a32bc0670d7812eb325c9f785e2ac1e88b8e976b77b85f2c"
+        },
+        {
+          "path": "set3-build-level/mom_uint32_bf256_n512_input.bin",
+          "sha256": "4d3998e6ff484d239dc710bcba0557d35ef5c867b88d0b972102506de2b77bde"
+        },
+        {
+          "path": "set3-build-level/mom_uint32_bf256_n700_input.bin",
+          "sha256": "f85022ddea9ace59a5caaac76f712e7d81395f1fe3ad72d0ba8fe410d71551b5"
+        },
+        {
+          "path": "set3-build-level/mom_uint64_bf256_n512_input.bin",
+          "sha256": "d16e108b355386bf319341592650616ff0acabe78e0ab4ace4d0c76321cd245e"
+        },
+        {
+          "path": "set3-build-level/mom_uint64_bf256_n700_input.bin",
+          "sha256": "b6875ede6935ed4233b354536567a47419ff23cd11e0be93eb5d54ec30b3f4b1"
+        }
+      ]
+    },
+    {
+      "id": "set3-build-level-bitfield",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "Bitfield mode produces [OR, AND, first, last] per bucket, is permitted on the eight integer dtypes and refused on the two float dtypes, operates on the two's-complement bit pattern including the sign bit for signed dtypes, and does not accept a request for positions.",
+      "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "OR and AND over a signed integer act on the bit pattern, so a reader that widens to a signed type and sign-extends produces different flags from the same bytes.",
+      "requires": [
+        "dtype:int8",
+        "dtype:int16",
+        "dtype:int32",
+        "dtype:int64",
+        "dtype:uint8",
+        "dtype:uint16",
+        "dtype:uint32",
+        "dtype:uint64"
+      ],
+      "case_count": 83,
+      "files": [
+        {
+          "path": "set3-build-level/set3-build-level-bitfield.json",
+          "sha256": "13e8ded3664b34d319c1187769e37719cb21a3836ecb23a53675ffedfb75f3ee"
+        }
+      ]
+    },
+    {
+      "id": "set3-build-level-edges",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "build_level refuses an empty input and a branching factor below 2 rather than returning an empty level, and a single-bucket fold of a bucket shorter than the branching factor is the identity on values.",
+      "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "The fold refuses an empty input and a branching factor below two rather than returning something plausible.",
+      "requires": [],
+      "case_count": 6,
+      "files": [
+        {
+          "path": "set3-build-level/set3-build-level-edges.json",
+          "sha256": "bcc1cd91d74665d6789dcf58aee02cfd5f4f40e027f1f7674ef72258b4542f0f"
+        }
+      ]
+    },
+    {
+      "id": "set3-build-level-nan-matrix",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "NaN is skipped in min and max; an all-NaN bucket yields four NaNs and positions [0, 0]; first and last are the LITERAL first and last elements and may therefore be NaN even when min and max are finite \u2014 and every NaN that came from an input element keeps that element's bit pattern.",
+      "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "NaN handling is the whole of a bucket's behaviour on invalid data, and numeric equality cannot test it because NaN is equal to nothing.",
+      "requires": [
+        "feature:positions",
+        "dtype:float32",
+        "dtype:float64"
+      ],
+      "case_count": 36,
+      "files": [
+        {
+          "path": "set3-build-level/set3-build-level-nan-matrix.json",
+          "sha256": "96217265ed31b0e182378383222692465aa74d56ebbf560d171fbf53cd75c4e5"
+        }
+      ]
+    },
+    {
+      "id": "set3-build-level-numeric",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "build_level in numeric mode produces [min, max, first, last] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
+      "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "All four columns share a type, so a swapped pair is invisible in the data; the order is pinned because nothing else can recover it.",
+      "requires": [
+        "feature:positions",
+        "dtype:float32",
+        "dtype:float64",
+        "dtype:int8",
+        "dtype:int16",
+        "dtype:int32",
+        "dtype:int64",
+        "dtype:uint8",
+        "dtype:uint16",
+        "dtype:uint32",
+        "dtype:uint64"
+      ],
+      "case_count": 110,
+      "files": [
+        {
+          "path": "set3-build-level/set3-build-level-numeric.json",
+          "sha256": "1290f69851cf057d70aecbbf5b9d7e2dd8740e7e4f6702e9aaeca982b89f8d75"
+        },
+        {
+          "path": "set3-build-level/raw_float32_bf256_n512_input.bin",
+          "sha256": "3af7019ae9b44d3eaac7591d40382ec655afc80a69af9ca86000bb5d16e60240"
+        },
+        {
+          "path": "set3-build-level/raw_float32_bf256_n700_input.bin",
+          "sha256": "b44ebaeba27503d46cc69025ce0f9b9590eea82380862db9f2fc31cd3aba285d"
+        },
+        {
+          "path": "set3-build-level/raw_float64_bf256_n512_input.bin",
+          "sha256": "8f47787c74ee2173f552c30808804f2b835a410f0bb0313360382e4f26e9aad9"
+        },
+        {
+          "path": "set3-build-level/raw_float64_bf256_n700_input.bin",
+          "sha256": "68142c13d01d43651c3dcbb627d96183853b2672565b48d6a3243e933df8a64b"
+        },
+        {
+          "path": "set3-build-level/raw_int8_bf256_n700_input.bin",
+          "sha256": "02ea65bb4ce948deb13569c8ac7e61e05184b5232c0e625416ab24e06af1f680"
+        },
+        {
+          "path": "set3-build-level/raw_int16_bf256_n512_input.bin",
+          "sha256": "224c4eac983fc92d7bccb4ffe06c1934eed5f7eb94a8566e484d76ae23459e7a"
+        },
+        {
+          "path": "set3-build-level/raw_int16_bf256_n700_input.bin",
+          "sha256": "e2879045b86ef6473255d2a9ff1fe37363929dcc2afee5e2eb204c5845d98315"
+        },
+        {
+          "path": "set3-build-level/raw_int32_bf256_n512_input.bin",
+          "sha256": "c2daefb6e8b82d52563b74454867a8d43ca8a5c1a22fa985d5a2094fe0776126"
+        },
+        {
+          "path": "set3-build-level/raw_int32_bf256_n700_input.bin",
+          "sha256": "59517698ceabc23bca75aed3efe81b6af2c8e9c3cd413d2904a374e8592ad6de"
+        },
+        {
+          "path": "set3-build-level/raw_int64_bf256_n512_input.bin",
+          "sha256": "9d532ddf1d865b18a56447079630d5ef405f47e191df1fc4322d80b83c087d3b"
+        },
+        {
+          "path": "set3-build-level/raw_int64_bf256_n700_input.bin",
+          "sha256": "63020c5374ce9149e9d1b03bdad38bc9eca6dab46924ffebf96b8cee94d33cef"
+        },
+        {
+          "path": "set3-build-level/raw_uint8_bf256_n700_input.bin",
+          "sha256": "6ad0f8e8e9d772b6a3868dd12f28641a1871c6682cf50599fc1a687ec1302764"
+        },
+        {
+          "path": "set3-build-level/raw_uint16_bf256_n512_input.bin",
+          "sha256": "ff37d0e763daa6ab7a2e0963bde449d07338926823ce358ee4914e46ea0f5139"
+        },
+        {
+          "path": "set3-build-level/raw_uint16_bf256_n700_input.bin",
+          "sha256": "f2c4d056188cd3fdf0508bc7a0ccbc0d8dffd661a55ab69635d1bf52cf989900"
+        },
+        {
+          "path": "set3-build-level/raw_uint32_bf256_n512_input.bin",
+          "sha256": "52288e1f8c38d6e1983ef7444fb7b634546a99eef361130dace3783dfb2e4e79"
+        },
+        {
+          "path": "set3-build-level/raw_uint32_bf256_n700_input.bin",
+          "sha256": "c535038ad0b37ba5b9e05c8da3b5725935a889712fd6d3c33e1492bdfa571179"
+        },
+        {
+          "path": "set3-build-level/raw_uint64_bf256_n512_input.bin",
+          "sha256": "fac4aa348c635fda358c72c0e71b0b1a29412df5b0665c61a2330876a5d2b444"
+        },
+        {
+          "path": "set3-build-level/raw_uint64_bf256_n700_input.bin",
+          "sha256": "4663a6e434f19e3e323eb795abf28c7a7532fc7748baff04a0bb72f10f01ce50"
+        }
+      ]
+    },
+    {
+      "id": "set3-build-level-tie-break",
+      "set": "set3-build-level",
+      "kind": "fixture",
+      "asserts": "The comparison is strict < and >, so when a bucket's minimum or maximum occurs more than once the FIRST occurrence wins and its bucket-relative index is the one stored \u2014 which is what decides the stored min_ts/max_ts.",
+      "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+      "contract": "The values are identical either way \u2014 only the positions separate a strict comparison from a non-strict one, and positions are what become stored timestamps.",
+      "requires": [
+        "feature:positions"
+      ],
+      "case_count": 60,
+      "files": [
+        {
+          "path": "set3-build-level/set3-build-level-tie-break.json",
+          "sha256": "d7e1f1ad9144d1b5dd1052a01777556fa50c9312cf538a96c64c854335a52183"
+        }
+      ]
+    },
+    {
+      "id": "set4-chan-pebay-merge",
+      "set": "set4-chan-pebay",
+      "kind": "oracle",
+      "asserts": "Merging per-block (count, mean, M2, M3, M4) with the Chan/P\u00e9bay identities reproduces the moments of the concatenated data \u2014 exactly in real arithmetic, and to the stated relative tolerance in float64 \u2014 for every split including maximally unequal ones, and with NaN excluded from count and from every sum.",
+      "source": "AUTHORED against exact rational arithmetic (fractions.Fraction); no expected value here was produced by running an implementation of the merge",
+      "contract": "A statistic computed from buckets has to agree with one computed from the samples, or the pyramid is decoration.",
+      "requires": [],
+      "case_count": 70,
+      "files": [
+        {
+          "path": "set4-chan-pebay/set4-chan-pebay-merge.json",
+          "sha256": "3840575f2af03620a97281cd7bc5bc288ad0cd179e0a6129112660cf622fb980"
+        }
+      ]
+    },
+    {
+      "id": "set4-chan-pebay-nan",
+      "set": "set4-chan-pebay",
+      "kind": "oracle",
+      "asserts": "NaN is excluded from count and from every sum, so an all-NaN part is the identity of the merge and a part containing NaN contributes only its non-NaN elements \u2014 the same NaN rule the stored moments follow, carried to the merge.",
+      "source": "AUTHORED: exact rational arithmetic over the non-NaN elements only",
+      "contract": "Counting invalid samples poisons every statistic above them, permanently and silently.",
+      "requires": [],
+      "case_count": 7,
+      "files": [
+        {
+          "path": "set4-chan-pebay/set4-chan-pebay-nan.json",
+          "sha256": "db5ac3f178fbae9bb0e9ee62923ba8cb38e0b623ad0da7725b7c12088baba354"
+        }
+      ]
+    },
+    {
+      "id": "set4-chan-pebay-order",
+      "set": "set4-chan-pebay",
+      "kind": "oracle",
+      "asserts": "The Chan/P\u00e9bay identities are order-independent in exact arithmetic \u2014 a left-to-right fold and a balanced-tree fold of the same parts agree exactly \u2014 so any divergence an implementation sees is float64 rounding and not a defect in the merge, and the format must therefore STATE the fold order for merged moments to be reproducible.",
+      "source": "AUTHORED: both folds evaluated over exact Fractions and asserted equal",
+      "contract": "The identities are exact in real arithmetic, so any divergence an implementation sees is its own rounding rather than a defect in the algebra.",
+      "requires": [],
+      "case_count": 40,
+      "files": [
+        {
+          "path": "set4-chan-pebay/set4-chan-pebay-order.json",
+          "sha256": "36c2a94e34e10f445b4f1da87c42795fe939952ac7855430cc56f4f042f9e123"
+        }
+      ]
+    },
+    {
+      "id": "set4-chan-pebay-range",
+      "set": "set4-chan-pebay",
+      "kind": "fixture",
+      "asserts": "A range query's merged moments are the strict left-to-right fold WITHIN each block in ascending bucket index, then the strict left-to-right fold of the per-block results in ascending block index \u2014 which is bit-identical for a per-block parallel engine and a serial reader, and is NOT the same as a flat fold over every bucket in the range.",
+      "source": "tools/_moments.py:range_merge, the one shared fold",
+      "contract": "A parallel implementation and a serial one must return the same bits for the same range, which holds only if the block boundary is part of the rule.",
+      "requires": [
+        "feature:moments"
+      ],
+      "case_count": 15,
+      "files": [
+        {
+          "path": "set4-chan-pebay/set4-chan-pebay-range.json",
+          "sha256": "06884fbacd3adc8582eaa3da03a624a8e91f5b5f15040e0b91ee3a24c40f10df"
+        },
+        {
+          "path": "set4-chan-pebay/range_uniform_buckets.bin",
+          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+        },
+        {
+          "path": "set4-chan-pebay/range_uniform_buckets.bin",
+          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+        },
+        {
+          "path": "set4-chan-pebay/range_uniform_buckets.bin",
+          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+        },
+        {
+          "path": "set4-chan-pebay/range_uniform_buckets.bin",
+          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+        },
+        {
+          "path": "set4-chan-pebay/range_uniform_buckets.bin",
+          "sha256": "1e7a5893e1474ef6768f09591b7ff2876e7d15ff74dd62dd0880afbc028be63b"
+        },
+        {
+          "path": "set4-chan-pebay/range_large-offset_buckets.bin",
+          "sha256": "57d717c687dfd206ab924804e09b8b23e9126b71c562f94dfa5434067b16f1b1"
+        },
+        {
+          "path": "set4-chan-pebay/range_large-offset_buckets.bin",
+          "sha256": "57d717c687dfd206ab924804e09b8b23e9126b71c562f94dfa5434067b16f1b1"
+        },
+        {
+          "path": "set4-chan-pebay/range_large-offset_buckets.bin",
+          "sha256": "57d717c687dfd206ab924804e09b8b23e9126b71c562f94dfa5434067b16f1b1"
+        },
+        {
+          "path": "set4-chan-pebay/range_large-offset_buckets.bin",
+          "sha256": "57d717c687dfd206ab924804e09b8b23e9126b71c562f94dfa5434067b16f1b1"
+        },
+        {
+          "path": "set4-chan-pebay/range_large-offset_buckets.bin",
+          "sha256": "57d717c687dfd206ab924804e09b8b23e9126b71c562f94dfa5434067b16f1b1"
+        },
+        {
+          "path": "set4-chan-pebay/range_with-nan_buckets.bin",
+          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+        },
+        {
+          "path": "set4-chan-pebay/range_with-nan_buckets.bin",
+          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+        },
+        {
+          "path": "set4-chan-pebay/range_with-nan_buckets.bin",
+          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+        },
+        {
+          "path": "set4-chan-pebay/range_with-nan_buckets.bin",
+          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+        },
+        {
+          "path": "set4-chan-pebay/range_with-nan_buckets.bin",
+          "sha256": "7e4eb042f70eba47ab9f2b97264de0fe10fb93ff7d8f558c2bb65afeef0ad80b"
+        }
+      ]
+    },
+    {
+      "id": "v1-block-crc",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "The block CRC is IEEE CRC-32 exactly as zlib computes it, over exactly the bytes [file_offset, file_offset + compressed_size) \u2014 the index entry that holds it lies outside that range \u2014 and it is checked BEFORE decode, so a flipped bit is refused rather than mis-decoded.",
+      "source": "verified against zlib.crc32 and against the polynomial's own published check value",
+      "contract": "A corrupt block that decodes to a plausible value draws a wrong plot silently; checking before decode is what makes the failure loud.",
+      "requires": [
+        "format:v1",
+        "feature:crc"
+      ],
+      "case_count": 9,
+      "files": [
+        {
+          "path": "v1-format/v1-block-crc.json",
+          "sha256": "58eb69daac70df34415da0931cdec1d0f208641c855e7daad5cbb3743c71a27b"
+        },
+        {
+          "path": "v1-format/files/v1_crc_reference.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_crc_reference.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        }
+      ]
+    },
+    {
+      "id": "v1-block-framing",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "A one-stream v1 block is [recipe u8][payload]; a two-stream block is [ts_len u32 LE][recipe u8][ts payload][recipe u8][values payload] where ts_len counts the timestamp stream INCLUDING its recipe byte, so the values recipe byte sits at offset 4 + ts_len.",
+      "source": "the bytes are produced by tools/_tslod_build.py",
+      "contract": "A length that counts its own recipe byte and one that does not differ by one, and a reader that gets it wrong decodes garbage from the second stream onward.",
+      "requires": [
+        "format:v1",
+        "recipe:0x00"
+      ],
+      "case_count": 4,
+      "files": [
+        {
+          "path": "v1-format/v1-block-framing.json",
+          "sha256": "44d2d68a67de164b3e95b94ab4b61904aecdfd79127fe3dd36e1cf719cbf5be8"
+        }
+      ]
+    },
+    {
+      "id": "v1-negative-vectors",
+      "set": "v1-format",
+      "kind": "negative",
+      "asserts": "A v1 reader reads EXACTLY version 1 and rejects every other value, and rejects block_samples that is zero or not a multiple of branching_factor, any must-understand feature bit it does not know, a profile byte outside {0, 2}, and any recipe byte outside the registry \u2014 while skipping may-ignore feature bits it does not know.",
+      "source": "the version-1 header and framing rules",
+      "contract": "A reader that accepts a malformed file produces wrong answers where it should have produced an error.",
+      "requires": [
+        "format:v1",
+        "feature:read-rejection"
+      ],
+      "case_count": 22,
+      "files": [
+        {
+          "path": "v1-format/v1-negative-vectors.json",
+          "sha256": "771e3c50a3db1809955dda0c234cd5432916ff22b50ea3152b95ab2a8fa584f6"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "75794d677583cd8dd7d2580c5a810dc839b38d1639f1ac133d93e189e6aef604"
+        },
+        {
+          "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
+          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
+          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
+          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
+          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
+          "sha256": "fe04a4b4c432c29252e54d5629d0a36bc489660478acf510e6571cd75274dc8c"
+        }
+      ]
+    },
+    {
+      "id": "v1-profile0-conformance-set",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "The profile-0 conformance files are readable with no codec at all: compression_id = 0 means every recipe byte in the file is 0x00 and every payload is the array's little-endian row-major bytes, so a reader needs only struct unpacking and zlib.crc32 to pass this set.",
+      "source": "written by tools/_tslod_build.py",
+      "contract": "A profile that needs no codec at all is what lets an implementation be checked before it has one.",
+      "requires": [
+        "format:v1",
+        "profile:0",
+        "recipe:0x00",
+        "feature:crc"
+      ],
+      "case_count": 11,
+      "files": [
+        {
+          "path": "v1-format/v1-profile0-conformance-set.json",
+          "sha256": "055932c0109cd003fd5af183df0d7271f7143d314fa4b27956465b3b219549b5"
+        },
+        {
+          "path": "v1-format/files/v1_all_ten_dtypes.tslod",
+          "sha256": "42f6d94e9c225ff3e1f79efc71c3b15f8096f560e27d689da0de10ec5be93e76"
+        },
+        {
+          "path": "v1-format/files/v1_both_timing_modes.tslod",
+          "sha256": "593a9ff4e4feaabde10c515aaf216449b95a548e7a42fddec3349b99c183796e"
+        },
+        {
+          "path": "v1-format/files/v1_enums_and_units.tslod",
+          "sha256": "da442a35ea992a7851064ce7265ab2aafc79c6bccde5ec8cdec98a9d513977ed"
+        },
+        {
+          "path": "v1-format/files/v1_active_file_state.tslod",
+          "sha256": "d39a007879abeb1a27b4cb32424e2f906467683cf543bbdba1e4abf6faf38faf"
+        },
+        {
+          "path": "v1-format/files/v1_no_moment_stream.tslod",
+          "sha256": "41cf8430b0bdeca3c1b637c57ba41e4974d00535f882e50557551f88e4713965"
+        },
+        {
+          "path": "v1-format/files/v1_block_samples_256.tslod",
+          "sha256": "39bd1a06cb788fde3cc6eb0e9f124fc632e533f067829e9f9b2603eb3960e80b"
+        },
+        {
+          "path": "v1-format/files/v1_block_samples_512.tslod",
+          "sha256": "38f91864b2ede1f1cf6c6891554596cd6eba380404fa103c4efd13487cd1085b"
+        },
+        {
+          "path": "v1-format/files/v1_block_samples_1024.tslod",
+          "sha256": "9af6f74bdb6e674d93bce945e80901d2c226d6b7b540ec9bd6220ac94f3929a5"
+        },
+        {
+          "path": "v1-format/files/v1_branching_factor_2.tslod",
+          "sha256": "370eac79116ee76c5374aacebabfc3bc4ba6d121ecf316d13fe7ccc56d69b05a"
+        },
+        {
+          "path": "v1-format/files/v1_branching_factor_16.tslod",
+          "sha256": "7093251ec893695669a9f20fff4cc1ff9d44ce781d183ce467d34a45e911db86"
+        },
+        {
+          "path": "v1-format/files/v1_branching_factor_1024.tslod",
+          "sha256": "ba7db276c97d9b5c36f825c6273f0f2eefeadc898fe134761c7451f5e5e2edea"
+        }
+      ]
+    },
+    {
+      "id": "v1-time-axis",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "The time of raw sample i in a fixed-rate group is start_timestamp + rhe(i * 10^9 / rate), where rate is the EXACT rational value of the stored float64 and rhe is round-half-even \u2014 evaluated as a rational, never as a float period accumulated per sample.",
+      "source": "computed with fractions.Fraction, which is exact because every finite double is a rational",
+      "contract": "One rule for the time of a sample, so a file's timestamps mean the same thing to everyone who reads it.",
+      "requires": [
+        "format:v1",
+        "timing:fixed"
+      ],
+      "case_count": 66,
+      "files": [
+        {
+          "path": "v1-format/v1-time-axis.json",
+          "sha256": "d1b963fc74f1921ac0f568c07f3f0ae8de2eaecafb8a21154b9f591860ee03eb"
+        }
+      ]
+    }
+  ]
+}

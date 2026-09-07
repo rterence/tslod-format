@@ -1,0 +1,894 @@
+{
+  "id": "set1-ns-to-ticks-round-trip",
+  "set": "set1-tick-timebase",
+  "kind": "fixture",
+  "asserts": "Below 1 GHz the round trip ticks -> ns -> ticks recovers the original tick bit-exactly, and ns_to_ticks is itself rhe((ns - start) * numer / (denom * 10^9)) \u2014 including at the magnitudes where the intermediate passes 2^53 and 2^63, where an implementation that narrows either direction loses the tick it started from.",
+  "source": "authored: exact-rational round-half-even oracle. The delta set is chosen rather than swept, on the same boundaries as set1-ticks-to-ns",
+  "contract": "A timestamp that does not survive a round trip cannot be used to address the sample it came from.",
+  "requires": [
+    "feature:tick-timebase"
+  ],
+  "case_count": 88,
+  "cases": [
+    {
+      "name": "mcu-24mhz/delta=0",
+      "t_ns": "1700000000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123456",
+      "round_trip_of": "-123456"
+    },
+    {
+      "name": "mcu-24mhz/delta=1",
+      "t_ns": "1700000000000000042",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123455",
+      "round_trip_of": "-123455"
+    },
+    {
+      "name": "mcu-24mhz/delta=2",
+      "t_ns": "1700000000000000083",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123454",
+      "round_trip_of": "-123454"
+    },
+    {
+      "name": "mcu-24mhz/delta=3",
+      "t_ns": "1700000000000000125",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123453",
+      "round_trip_of": "-123453"
+    },
+    {
+      "name": "mcu-24mhz/delta=4",
+      "t_ns": "1700000000000000167",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123452",
+      "round_trip_of": "-123452"
+    },
+    {
+      "name": "mcu-24mhz/delta=5",
+      "t_ns": "1700000000000000208",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123451",
+      "round_trip_of": "-123451"
+    },
+    {
+      "name": "mcu-24mhz/delta=7",
+      "t_ns": "1700000000000000292",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123449",
+      "round_trip_of": "-123449"
+    },
+    {
+      "name": "mcu-24mhz/delta=8",
+      "t_ns": "1700000000000000333",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123448",
+      "round_trip_of": "-123448"
+    },
+    {
+      "name": "mcu-24mhz/delta=2073599999999",
+      "t_ns": "1700086399999999958",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2073599876543",
+      "round_trip_of": "2073599876543"
+    },
+    {
+      "name": "mcu-24mhz/delta=2073600000000",
+      "t_ns": "1700086400000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2073599876544",
+      "round_trip_of": "2073599876544"
+    },
+    {
+      "name": "mcu-24mhz/delta=2073600000001",
+      "t_ns": "1700086400000000042",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2073599876545",
+      "round_trip_of": "2073599876545"
+    },
+    {
+      "name": "mcu-24mhz/delta=14515200000000",
+      "t_ns": "1700604800000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "14515199876544",
+      "round_trip_of": "14515199876544"
+    },
+    {
+      "name": "mcu-24mhz/delta=62208000000000",
+      "t_ns": "1702592000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "62207999876544",
+      "round_trip_of": "62207999876544"
+    },
+    {
+      "name": "mcu-24mhz/delta=62208000000007",
+      "t_ns": "1702592000000000292",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "62207999876551",
+      "round_trip_of": "62207999876551"
+    },
+    {
+      "name": "mcu-24mhz/delta=9007199",
+      "t_ns": "1700000000375299958",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "8883743",
+      "round_trip_of": "8883743"
+    },
+    {
+      "name": "mcu-24mhz/delta=9007200",
+      "t_ns": "1700000000375300000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "8883744",
+      "round_trip_of": "8883744"
+    },
+    {
+      "name": "mcu-24mhz/delta=9223372036",
+      "t_ns": "1700000384307168167",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "9223248580",
+      "round_trip_of": "9223248580"
+    },
+    {
+      "name": "mcu-24mhz/delta=9223372037",
+      "t_ns": "1700000384307168208",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "9223248581",
+      "round_trip_of": "9223248581"
+    },
+    {
+      "name": "mcu-24mhz/delta=-1",
+      "t_ns": "1699999999999999958",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123457",
+      "round_trip_of": "-123457"
+    },
+    {
+      "name": "mcu-24mhz/delta=-2",
+      "t_ns": "1699999999999999917",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123458",
+      "round_trip_of": "-123458"
+    },
+    {
+      "name": "mcu-24mhz/delta=-3",
+      "t_ns": "1699999999999999875",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123459",
+      "round_trip_of": "-123459"
+    },
+    {
+      "name": "mcu-24mhz/delta=-4",
+      "t_ns": "1699999999999999833",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123460",
+      "round_trip_of": "-123460"
+    },
+    {
+      "name": "mcu-24mhz/delta=-2073600000000",
+      "t_ns": "1699913600000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-2073600123456",
+      "round_trip_of": "-2073600123456"
+    },
+    {
+      "name": "mcu-24mhz/delta=-62208000000000",
+      "t_ns": "1697408000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-62208000123456",
+      "round_trip_of": "-62208000123456"
+    },
+    {
+      "name": "mcu-24mhz/delta=-9007199",
+      "t_ns": "1699999999624700042",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9130655",
+      "round_trip_of": "-9130655"
+    },
+    {
+      "name": "mcu-24mhz/delta=-9007200",
+      "t_ns": "1699999999624700000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9130656",
+      "round_trip_of": "-9130656"
+    },
+    {
+      "name": "mcu-24mhz/delta=-9223372036",
+      "t_ns": "1699999615692831833",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9223495492",
+      "round_trip_of": "-9223495492"
+    },
+    {
+      "name": "mcu-24mhz/delta=-9223372037",
+      "t_ns": "1699999615692831792",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "24000000",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9223495493",
+      "round_trip_of": "-9223495493"
+    },
+    {
+      "name": "rtc-32768hz/delta=0",
+      "t_ns": "1700000000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123456",
+      "round_trip_of": "-123456"
+    },
+    {
+      "name": "rtc-32768hz/delta=1",
+      "t_ns": "1700000000000030518",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123455",
+      "round_trip_of": "-123455"
+    },
+    {
+      "name": "rtc-32768hz/delta=2",
+      "t_ns": "1700000000000061035",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123454",
+      "round_trip_of": "-123454"
+    },
+    {
+      "name": "rtc-32768hz/delta=3",
+      "t_ns": "1700000000000091553",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123453",
+      "round_trip_of": "-123453"
+    },
+    {
+      "name": "rtc-32768hz/delta=4",
+      "t_ns": "1700000000000122070",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123452",
+      "round_trip_of": "-123452"
+    },
+    {
+      "name": "rtc-32768hz/delta=5",
+      "t_ns": "1700000000000152588",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123451",
+      "round_trip_of": "-123451"
+    },
+    {
+      "name": "rtc-32768hz/delta=7",
+      "t_ns": "1700000000000213623",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123449",
+      "round_trip_of": "-123449"
+    },
+    {
+      "name": "rtc-32768hz/delta=8",
+      "t_ns": "1700000000000244141",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123448",
+      "round_trip_of": "-123448"
+    },
+    {
+      "name": "rtc-32768hz/delta=2831155199",
+      "t_ns": "1700086399999969482",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2831031743",
+      "round_trip_of": "2831031743"
+    },
+    {
+      "name": "rtc-32768hz/delta=2831155200",
+      "t_ns": "1700086400000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2831031744",
+      "round_trip_of": "2831031744"
+    },
+    {
+      "name": "rtc-32768hz/delta=2831155201",
+      "t_ns": "1700086400000030518",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2831031745",
+      "round_trip_of": "2831031745"
+    },
+    {
+      "name": "rtc-32768hz/delta=19818086400",
+      "t_ns": "1700604800000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "19817962944",
+      "round_trip_of": "19817962944"
+    },
+    {
+      "name": "rtc-32768hz/delta=84934656000",
+      "t_ns": "1702592000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "84934532544",
+      "round_trip_of": "84934532544"
+    },
+    {
+      "name": "rtc-32768hz/delta=84934656007",
+      "t_ns": "1702592000000213623",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "84934532551",
+      "round_trip_of": "84934532551"
+    },
+    {
+      "name": "rtc-32768hz/delta=9007199",
+      "t_ns": "1700000274877899170",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "8883743",
+      "round_trip_of": "8883743"
+    },
+    {
+      "name": "rtc-32768hz/delta=9007200",
+      "t_ns": "1700000274877929688",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "8883744",
+      "round_trip_of": "8883744"
+    },
+    {
+      "name": "rtc-32768hz/delta=9223372036",
+      "t_ns": "1700281474976684570",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "9223248580",
+      "round_trip_of": "9223248580"
+    },
+    {
+      "name": "rtc-32768hz/delta=9223372037",
+      "t_ns": "1700281474976715088",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "9223248581",
+      "round_trip_of": "9223248581"
+    },
+    {
+      "name": "rtc-32768hz/delta=32",
+      "t_ns": "1700000000000976562",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123424",
+      "round_trip_of": "-123424"
+    },
+    {
+      "name": "rtc-32768hz/delta=96",
+      "t_ns": "1700000000002929688",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123360",
+      "round_trip_of": "-123360"
+    },
+    {
+      "name": "rtc-32768hz/delta=-1",
+      "t_ns": "1699999999999969482",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123457",
+      "round_trip_of": "-123457"
+    },
+    {
+      "name": "rtc-32768hz/delta=-2",
+      "t_ns": "1699999999999938965",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123458",
+      "round_trip_of": "-123458"
+    },
+    {
+      "name": "rtc-32768hz/delta=-3",
+      "t_ns": "1699999999999908447",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123459",
+      "round_trip_of": "-123459"
+    },
+    {
+      "name": "rtc-32768hz/delta=-4",
+      "t_ns": "1699999999999877930",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123460",
+      "round_trip_of": "-123460"
+    },
+    {
+      "name": "rtc-32768hz/delta=-2831155200",
+      "t_ns": "1699913600000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-2831278656",
+      "round_trip_of": "-2831278656"
+    },
+    {
+      "name": "rtc-32768hz/delta=-84934656000",
+      "t_ns": "1697408000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-84934779456",
+      "round_trip_of": "-84934779456"
+    },
+    {
+      "name": "rtc-32768hz/delta=-9007199",
+      "t_ns": "1699999725122100830",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9130655",
+      "round_trip_of": "-9130655"
+    },
+    {
+      "name": "rtc-32768hz/delta=-9007200",
+      "t_ns": "1699999725122070312",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9130656",
+      "round_trip_of": "-9130656"
+    },
+    {
+      "name": "rtc-32768hz/delta=-9223372036",
+      "t_ns": "1699718525023315430",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9223495492",
+      "round_trip_of": "-9223495492"
+    },
+    {
+      "name": "rtc-32768hz/delta=-9223372037",
+      "t_ns": "1699718525023284912",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-9223495493",
+      "round_trip_of": "-9223495493"
+    },
+    {
+      "name": "rtc-32768hz/delta=-32",
+      "t_ns": "1699999999999023438",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123488",
+      "round_trip_of": "-123488"
+    },
+    {
+      "name": "rtc-32768hz/delta=-96",
+      "t_ns": "1699999999997070312",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "32768",
+      "tick_rate_denom": "1",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123552",
+      "round_trip_of": "-123552"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=0",
+      "t_ns": "1700000000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123456",
+      "round_trip_of": "-123456"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=1",
+      "t_ns": "1700000000000000003",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123455",
+      "round_trip_of": "-123455"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=2",
+      "t_ns": "1700000000000000006",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123454",
+      "round_trip_of": "-123454"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=3",
+      "t_ns": "1700000000000000009",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123453",
+      "round_trip_of": "-123453"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=4",
+      "t_ns": "1700000000000000012",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123452",
+      "round_trip_of": "-123452"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=5",
+      "t_ns": "1700000000000000015",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123451",
+      "round_trip_of": "-123451"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=7",
+      "t_ns": "1700000000000000021",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123449",
+      "round_trip_of": "-123449"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=8",
+      "t_ns": "1700000000000000024",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123448",
+      "round_trip_of": "-123448"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=28799999999999",
+      "t_ns": "1700086399999999997",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "28799999876543",
+      "round_trip_of": "28799999876543"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=28800000000000",
+      "t_ns": "1700086400000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "28799999876544",
+      "round_trip_of": "28799999876544"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=28800000000001",
+      "t_ns": "1700086400000000003",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "28799999876545",
+      "round_trip_of": "28799999876545"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=201600000000000",
+      "t_ns": "1700604800000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "201599999876544",
+      "round_trip_of": "201599999876544"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=864000000000000",
+      "t_ns": "1702592000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "863999999876544",
+      "round_trip_of": "863999999876544"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=864000000000007",
+      "t_ns": "1702592000000000021",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "863999999876551",
+      "round_trip_of": "863999999876551"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=3002399",
+      "t_ns": "1700000000009007197",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2878943",
+      "round_trip_of": "2878943"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=3002400",
+      "t_ns": "1700000000009007200",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "2878944",
+      "round_trip_of": "2878944"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=3074457345",
+      "t_ns": "1700000009223372035",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "3074333889",
+      "round_trip_of": "3074333889"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=3074457346",
+      "t_ns": "1700000009223372038",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "3074333890",
+      "round_trip_of": "3074333890"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-1",
+      "t_ns": "1699999999999999997",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123457",
+      "round_trip_of": "-123457"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-2",
+      "t_ns": "1699999999999999994",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123458",
+      "round_trip_of": "-123458"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-3",
+      "t_ns": "1699999999999999991",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123459",
+      "round_trip_of": "-123459"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-4",
+      "t_ns": "1699999999999999988",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-123460",
+      "round_trip_of": "-123460"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-28800000000000",
+      "t_ns": "1699913600000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-28800000123456",
+      "round_trip_of": "-28800000123456"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-864000000000000",
+      "t_ns": "1697408000000000000",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-864000000123456",
+      "round_trip_of": "-864000000123456"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-3002399",
+      "t_ns": "1699999999990992803",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-3125855",
+      "round_trip_of": "-3125855"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-3002400",
+      "t_ns": "1699999999990992800",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-3125856",
+      "round_trip_of": "-3125856"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-3074457345",
+      "t_ns": "1699999990776627965",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-3074580801",
+      "round_trip_of": "-3074580801"
+    },
+    {
+      "name": "rational-1e9-over-3/delta=-3074457346",
+      "t_ns": "1699999990776627962",
+      "start_timestamp": "1700000000000000000",
+      "tick_rate_numer": "1000000000",
+      "tick_rate_denom": "3",
+      "anchor_ticks": "-123456",
+      "expected_ticks": "-3074580802",
+      "round_trip_of": "-3074580802"
+    }
+  ]
+}

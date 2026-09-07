@@ -1,0 +1,731 @@
+"""The version-1 format vectors, at `compression_id = 0` (profile 0).
+
+Profile 0 is the interchange and conformance profile: every recipe byte must be
+`0x00` and every payload is the array's little-endian bytes, so a reader needs
+only struct unpacking and a CRC-32 to read one. That is what lets an
+implementation be measured before it has a codec.
+
+What is here:
+
+  * the profile-0 conformance files — every enum value, both timing modes,
+    both aggregation modes, all ten dtypes, both file states, two units,
+    `scaling_type = linear`, a zero-sample channel, and `block_samples` both
+    equal to and a multiple of the branching factor;
+  * the block framing vectors — one-stream and two-stream, with `ts_len`
+    counting the timestamp stream INCLUDING its recipe byte, so the values
+    recipe byte sits at `4 + ts_len`;
+  * the CRC vectors — IEEE CRC-32 as zlib computes it over exactly
+    `[file_offset, file_offset + compressed_size)`, checked before decode;
+  * the time-axis vectors — the exact-rational rule, never a float period
+    accumulated per sample;
+  * the v1 negative vectors — `block_samples`, the feature word, and the
+    profile byte.
+
+Every numeric bucket at level >= 1 may carry `(count, mean, M2, M3, M4)` as a
+third stream. It is optional, and nothing in the file records whether it was
+written, so both shapes are in the conformance set and neither can be assumed.
+"""
+
+from __future__ import annotations
+
+import struct
+import zlib
+from fractions import Fraction
+
+import numpy as np
+
+import _tslod_build as B
+from _corpus import VECTORS, Vector, array_ref, i64, u64
+
+SET = "v1-format"
+FILES = f"{SET}/files"
+
+ALL_DTYPES = ["float32", "float64", "int8", "int16", "int32", "int64",
+              "uint8", "uint16", "uint32", "uint64"]
+
+
+def ramp(dtype: str, n: int, seed: int = 0) -> np.ndarray:
+    dt = np.dtype(dtype)
+    if dt.kind == "f":
+        return np.ascontiguousarray((((np.arange(n) + seed) % 97) * 1.5 - 40).astype(dtype))
+    info = np.iinfo(dt)
+    arr = np.ascontiguousarray(((np.arange(n) + seed) % 97).astype(np.int64).astype(dtype))
+    arr[0] = info.min
+    arr[1] = info.max
+    return arr
+
+
+def _write_file(name: str, result: B.BuildResult) -> str:
+    rel = f"{FILES}/{name}"
+    path = VECTORS / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(result.data)
+    return rel
+
+
+# ---------------------------------------------------------------------------
+# The profile-0 conformance set
+# ---------------------------------------------------------------------------
+
+
+def gen_profile0_set() -> Vector:
+    v = Vector(
+        id="v1-profile0-conformance-set",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "The profile-0 conformance files are readable with no codec at all: "
+            "compression_id = 0 means every recipe byte in the file is 0x00 and every "
+            "payload is the array's little-endian row-major bytes, so a reader needs "
+            "only struct unpacking and zlib.crc32 to pass this set."
+        ),
+        source=(
+            "written by tools/_tslod_build.py"
+        ),
+        contract=(
+            "A profile that needs no codec at all is what lets an implementation be "
+            "checked before it has one."
+        ),
+        requires=["format:v1", "profile:0", "recipe:0x00", "feature:crc"],
+        notes=(
+            "Profile 0 exists so the reference reader can be written against the SPEC "
+            "with the standard library alone (the one exemption is "
+            "pco and zstd for profile-2 files, and profile 0 needs neither). Every file "
+            "below is decodable by hand."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+
+    def emit(name, spec, checks, note):
+        result = B.build(spec)
+        rel = _write_file(name, result)
+        # Every block's CRC must verify over exactly its stored extent.
+        for (ci, level, bi, blk) in result.blocks:
+            lo = blk["file_offset"]
+            hi = lo + blk["compressed_size"]
+            assert zlib.crc32(result.data[lo:hi]) & 0xFFFFFFFF == blk["crc32"], (
+                f"{name}: CRC does not verify for channel {ci} level {level} block {bi}")
+            # Check the recipe byte at its REAL offset, per stream, rather than
+            # the block's first byte. The weaker check passed for months by
+            # coincidence: a float32 payload of -40.0 begins 00 00 20 C2, so
+            # its first byte is 0x00 whether or not a recipe byte precedes it,
+            # and a whole file written with the wrong framing slipped through.
+            off = 0
+            if blk.get("ts_columns"):
+                ts_len = struct.unpack_from("<I", result.data, lo)[0]
+                assert result.data[lo + 4] == 0x00, (
+                    f"{name}: timestamp stream's recipe byte is not identity")
+                off = 4 + ts_len
+            has_moments = (level >= 1
+                           and spec.channels[ci].aggregation_mode == 0
+                           and spec.moments)
+            if has_moments:
+                val_len = struct.unpack_from("<I", result.data, lo + off)[0]
+                assert result.data[lo + off + 4] == 0x00, (
+                    f"{name}: values stream's recipe byte is not identity")
+                assert result.data[lo + off + 4 + val_len] == 0x00, (
+                    f"{name}: moment stream's recipe byte is not identity")
+            else:
+                assert result.data[lo + off] == 0x00, (
+                    f"{name}: values stream's recipe byte is not identity")
+        body = dict(file=rel, file_size_bytes=u64(len(result.data)),
+                    block_count=len(result.blocks),
+                    format_version=1, compression_id=0,
+                    branching_factor=spec.branching_factor,
+                    block_samples=spec.block_samples or spec.branching_factor,
+                    every_crc_verifies=True, note=note)
+        body.update(checks)      # a check may restate a field; the check wins
+        v.case(name, **body)
+
+    emit("v1_all_ten_dtypes.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    groups=[B.GroupSpec(1000.0, ts)],
+                    channels=[B.ChannelSpec(f"ch_{d}", ramp(d, 1024, i))
+                              for i, d in enumerate(ALL_DTYPES)]),
+         {"dtypes": ALL_DTYPES},
+         "all ten wire dtypes in one file; six of them appear in no .tslod that exists")
+
+    emit("v1_both_timing_modes.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    groups=[
+                        B.GroupSpec(1000.0, ts, timing_mode=0),
+                        B.GroupSpec(1000.0, ts, timing_mode=1,
+                                    timestamps=np.ascontiguousarray(
+                                        ts + np.arange(1024, dtype=np.int64) * 999_983)),
+                    ],
+                    channels=[
+                        B.ChannelSpec("fixed_num", ramp("float32", 1024), group_id=0),
+                        B.ChannelSpec("fixed_bits", ramp("uint16", 1024), group_id=0,
+                                      aggregation_mode=1),
+                        B.ChannelSpec("var_num", ramp("float64", 1024), group_id=1),
+                        B.ChannelSpec("var_bits", ramp("uint8", 1024), group_id=1,
+                                      aggregation_mode=1),
+                    ]),
+         {"timing_modes": [0, 1], "aggregation_modes": [0, 1],
+          "stream_shapes": {
+              "fixed/L0": "one stream: values (N,)",
+              "fixed/L>=1 numeric": "two: positions (N,2) i64 [min_ts,max_ts], then tuples (N,4)",
+              "fixed/L>=1 bitfield": "one: tuples (N,4)",
+              "variable/L0": "two: timestamps (N,) i64, then values (N,)",
+              "variable/L>=1 numeric": "two: timestamps (N,4) [first,last,min,max], then tuples (N,4)",
+              "variable/L>=1 bitfield": "two: timestamps (N,) [first], then tuples (N,4)"}},
+         "all six rows of the stream table in one file — which streams a block has "
+         "is fixed by its KIND, and this is the file that proves each shape exists")
+
+    emit("v1_enums_and_units.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    groups=[B.GroupSpec(1000.0, ts, timing_flags=0x03,
+                                        tick_rate_numer=24_000_000, tick_rate_denom=1,
+                                        anchor_ticks=-123_456)],
+                    channels=[
+                        B.ChannelSpec("accel", ramp("float32", 1024), unit="m/s^2"),
+                        B.ChannelSpec("volts", ramp("float32", 1024, 5), unit="V"),
+                        B.ChannelSpec("temp", ramp("int16", 1024), unit="degC",
+                                      scaling_type=1, scaling_gain=0.0625,
+                                      scaling_offset=-273.15,
+                                      calibration_id="cal-2026-09-06"),
+                        B.ChannelSpec("empty", np.ascontiguousarray(
+                            np.array([], dtype="float32")), unit="raw"),
+                    ]),
+         {"units": ["m/s^2", "V", "degC", "raw"], "scaling_types": [0, 1],
+          "timing_flags": 3, "zero_sample_channel": "empty"},
+         "two units, both scaling types, both timing flags, and a zero-sample channel — "
+         "the list of what the conformance files must carry")
+
+    emit("v1_active_file_state.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256, file_state=1,
+                    groups=[B.GroupSpec(1000.0, ts)],
+                    channels=[B.ChannelSpec("streaming", ramp("float32", 1024))]),
+         {"file_state": 1, "file_state_name": "active"},
+         "readable up to the last flushed block; num_levels derived by walking the "
+         "level table; the stored field authoritative once sealed. The spec's "
+         "'potentially corrupt' advisory is dropped")
+
+    emit("v1_no_moment_stream.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    moments=False,
+                    groups=[B.GroupSpec(1000.0, ts)],
+                    channels=[B.ChannelSpec("sig", ramp("float32", 4096))]),
+         {"has_moment_stream": False},
+         "the same data with NO moment stream. A reader must handle both, because "
+         "bitfield buckets never carry moments and a writer may omit them; the stream "
+         "count is a function of the block KIND plus this presence, and both shapes are "
+         "in the corpus so neither can be assumed")
+
+    for bs_mult in (1, 2, 4):
+        bs = 256 * bs_mult
+        emit(f"v1_block_samples_{bs}.tslod",
+             B.FileSpec(compression_id=0, branching_factor=256,
+                        block_samples=bs,
+                        groups=[B.GroupSpec(1000.0, ts)],
+                        channels=[B.ChannelSpec("sig", ramp("float32", 8192))]),
+             {"block_samples_multiple_of_bf": bs_mult},
+             f"block_samples = {bs} = {bs_mult}x branching_factor. The bucket "
+             f"geometry is UNCHANGED — only how many buckets share a block moves")
+
+    for bf in (2, 16, 1024):
+        emit(f"v1_branching_factor_{bf}.tslod",
+             B.FileSpec(compression_id=0, branching_factor=bf,
+                        groups=[B.GroupSpec(1000.0, ts)],
+                        channels=[B.ChannelSpec("sig", ramp("float32", 4096))]),
+             {"branching_factor": bf,
+              "num_levels": B.compute_num_levels(4096, bf)},
+             f"BF={bf}; no file that exists uses anything but 256")
+    return v
+
+
+# ---------------------------------------------------------------------------
+# Block framing
+# ---------------------------------------------------------------------------
+
+
+def gen_block_framing() -> Vector:
+    v = Vector(
+        id="v1-block-framing",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "A one-stream v1 block is [recipe u8][payload]; a two-stream block is "
+            "[ts_len u32 LE][recipe u8][ts payload][recipe u8][values payload] where "
+            "ts_len counts the timestamp stream INCLUDING its recipe byte, so the values "
+            "recipe byte sits at offset 4 + ts_len."
+        ),
+        source=(
+            "the bytes are produced by tools/_tslod_build.py"
+        ),
+        contract=(
+            "A length that counts its own recipe byte and one that does not differ "
+            "by one, and a reader that gets it wrong decodes garbage from the "
+            "second stream onward."
+        ),
+        requires=["format:v1", "recipe:0x00"],
+        notes=(
+            "The off-by-one this vector exists to catch: a reader that treats ts_len as "
+            "the payload length EXCLUDING the recipe byte places the second recipe byte "
+            "one byte early and decodes garbage. the framing rule names it — 'two readers placing "
+            "the second recipe byte one byte apart' — and this is the vector that fails "
+            "for one of them."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+
+    # one-stream: fixed-rate level 0
+    values = np.ascontiguousarray(np.arange(8, dtype=np.float32) * 1.5)
+    block = bytes([0x00]) + values.tobytes()
+    v.case("one-stream/fixed-L0-values",
+           kind="fixed-rate level 0",
+           block_hex=block.hex().upper(),
+           block_length=len(block),
+           recipe_byte_offset=0, recipe=0,
+           values_payload_offset=1,
+           values_payload_length=len(values.tobytes()),
+           expected_values=array_ref(values),
+           uncompressed_size=u64(len(values.tobytes())),
+           note="uncompressed_size in the index entry counts the VALUES stream's decoded "
+                "bytes only, and the recipe byte is not part of it")
+
+    # two-stream: variable-rate level 0
+    stamps = np.ascontiguousarray(ts + np.arange(8, dtype=np.int64) * 1_000_003)
+    ts_stream = bytes([0x00]) + stamps.tobytes()
+    val_stream = bytes([0x00]) + values.tobytes()
+    block2 = struct.pack("<I", len(ts_stream)) + ts_stream + val_stream
+    v.case("two-stream/variable-L0",
+           kind="variable-rate level 0",
+           block_hex=block2.hex().upper(),
+           block_length=len(block2),
+           ts_len=len(ts_stream),
+           ts_len_includes_its_recipe_byte=True,
+           ts_recipe_byte_offset=4,
+           values_recipe_byte_offset=4 + len(ts_stream),
+           expected_timestamps=array_ref(stamps),
+           expected_values=array_ref(values),
+           timestamps_are_absolute_i64=True,
+           note="⟢ ABSOLUTE i64, not deltas. No transform is implicit: if a delta "
+                "ever earns its place it is a RECIPE the reader can see, not a rule it "
+                "must know")
+
+    # two-stream: fixed-rate level >= 1 numeric — positions then tuples
+    positions = np.ascontiguousarray(
+        np.column_stack([ts + np.arange(4, dtype=np.int64) * 256_000_000,
+                         ts + np.arange(4, dtype=np.int64) * 256_000_000 + 1_000]))
+    tuples = np.ascontiguousarray(
+        np.arange(16, dtype=np.float32).reshape(4, 4))
+    ts_stream = bytes([0x00]) + positions.tobytes()
+    block3 = struct.pack("<I", len(ts_stream)) + ts_stream + bytes([0x00]) + tuples.tobytes()
+    # three-stream: fixed-rate level >= 1 numeric, WITH the moment stream
+    import _moments
+    mom = _moments.level1_from_raw(
+        np.ascontiguousarray(np.arange(16, dtype=np.float64)), 4)
+    ts_stream3 = bytes([0x00]) + positions.tobytes()
+    val_stream3 = bytes([0x00]) + tuples.tobytes()
+    mom_stream3 = bytes([0x00]) + np.ascontiguousarray(mom).tobytes()
+    block4 = (struct.pack("<I", len(ts_stream3)) + ts_stream3
+              + struct.pack("<I", len(val_stream3)) + val_stream3
+              + mom_stream3)
+    v.case("three-stream/fixed-L1-numeric-with-moments",
+           kind="fixed-rate level >= 1 numeric, with the moment stream",
+           block_hex=block4.hex().upper(),
+           block_length=len(block4),
+           stream_count=3,
+           stream_order="timestamps, then values, then moments",
+           ts_len=len(ts_stream3),
+           values_len=len(val_stream3),
+           last_stream_has_no_length_prefix=True,
+           ts_recipe_byte_offset=4,
+           values_recipe_byte_offset=4 + len(ts_stream3) + 4,
+           moments_recipe_byte_offset=4 + len(ts_stream3) + 4 + len(val_stream3),
+           expected_positions=array_ref(positions),
+           expected_tuples=array_ref(tuples),
+           expected_moments=array_ref(np.ascontiguousarray(mom)),
+           moment_columns=list(_moments.COLUMNS),
+           moment_stream_dtype="float64",
+           moment_stream_shape=[int(mom.shape[0]), 5],
+           note="Every stream but the LAST carries its own u32 LE byte "
+                "length including its recipe byte; the last runs to compressed_size. The "
+                "two-stream form is the same rule with one fewer stream, which is why "
+                "ts_len's meaning did not change. A reader that wants only the plot "
+                "stops after the values stream and never touches the moments")
+
+    v.case("two-stream/fixed-L1-numeric",
+           kind="fixed-rate level >= 1 numeric",
+           block_hex=block3.hex().upper(),
+           block_length=len(block3),
+           ts_len=len(ts_stream),
+           ts_columns=2, ts_column_meaning="[min_ts, max_ts]",
+           expected_positions=array_ref(positions),
+           expected_tuples=array_ref(tuples),
+           row_major_not_planar=True,
+           note="the four values of bucket 0, then the four of bucket 1 — NEVER planar "
+                ". A planar reader gets four plausible-looking arrays of the "
+                "wrong thing")
+    return v
+
+
+# ---------------------------------------------------------------------------
+# CRC
+# ---------------------------------------------------------------------------
+
+
+def gen_crc() -> Vector:
+    v = Vector(
+        id="v1-block-crc",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "The block CRC is IEEE CRC-32 exactly as zlib computes it, over exactly the "
+            "bytes [file_offset, file_offset + compressed_size) — the index entry that "
+            "holds it lies outside that range — and it is checked BEFORE decode, so a "
+            "flipped bit is refused rather than mis-decoded."
+        ),
+        source=(
+            "verified against zlib.crc32 and against the polynomial's own published "
+            "check value"
+        ),
+        contract=(
+            "A corrupt block that decodes to a plausible value draws a wrong plot "
+            "silently; checking before decode is what makes the failure loud."
+        ),
+        requires=["format:v1", "feature:crc"],
+        notes=(
+            "The check value pins the variant unambiguously: reflected polynomial "
+            "0xEDB88320, init and xor-out 0xFFFFFFFF, giving 0xCBF43926 for the ASCII "
+            "string '123456789'. There are several CRC-32s and they disagree; this one "
+            "is the one crc32fast and zlib.crc32 both compute."
+        ),
+    )
+    v.case("check-value",
+           input_ascii="123456789",
+           input_hex=b"123456789".hex().upper(),
+           expected_crc32=f"0x{zlib.crc32(b'123456789') & 0xFFFFFFFF:08X}",
+           polynomial="0xEDB88320 (reflected)",
+           init="0xFFFFFFFF", xor_out="0xFFFFFFFF",
+           note="the standard check value for this CRC-32 variant")
+    assert zlib.crc32(b"123456789") & 0xFFFFFFFF == 0xCBF43926
+
+    for label, payload in [
+        ("empty", b""),
+        ("single-zero-byte", b"\x00"),
+        ("all-zero-64", b"\x00" * 64),
+        ("all-ff-64", b"\xff" * 64),
+        ("ascending-256", bytes(range(256))),
+    ]:
+        v.case(f"payload/{label}",
+               input_hex=payload.hex().upper(),
+               input_length=len(payload),
+               expected_crc32=f"0x{zlib.crc32(payload) & 0xFFFFFFFF:08X}")
+
+    # On a real block, and with a flipped bit.
+    ts = 1_700_000_000_000_000_000
+    result = B.build(B.FileSpec(
+        compression_id=0, branching_factor=256,
+        groups=[B.GroupSpec(1000.0, ts)],
+        channels=[B.ChannelSpec("sig", ramp("float32", 1024))]))
+    rel = _write_file("v1_crc_reference.tslod", result)
+    ci, level, bi, blk = result.blocks[0]
+    lo, hi = blk["file_offset"], blk["file_offset"] + blk["compressed_size"]
+    v.case("on-a-real-block",
+           file=rel,
+           channel_index=ci, level=level, block_index=bi,
+           file_offset=u64(lo), compressed_size=u64(blk["compressed_size"]),
+           coverage=f"[{lo}, {hi}) — the whole block as stored, framing and recipe bytes included",
+           expected_crc32=f"0x{blk['crc32']:08X}",
+           index_entry_lies_outside_coverage=True)
+
+    flipped = bytearray(result.data)
+    flipped[lo] ^= 0x01
+    v.case("flipped-bit-must-be-rejected",
+           file=rel,
+           byte_offset_to_flip=u64(lo),
+           bit_mask="0x01",
+           original_byte=f"0x{result.data[lo]:02X}",
+           flipped_byte=f"0x{flipped[lo]:02X}",
+           stored_crc32=f"0x{blk['crc32']:08X}",
+           crc32_after_flip=f"0x{zlib.crc32(bytes(flipped[lo:hi])) & 0xFFFFFFFF:08X}",
+           must_be_rejected_before_decode=True,
+           note="one bit, in the first byte of the payload. The CRC differs, so the "
+                "reader refuses the block; without the check it would decode to a "
+                "plausible wrong value and draw a wrong plot")
+    assert zlib.crc32(bytes(flipped[lo:hi])) & 0xFFFFFFFF != blk["crc32"]
+
+    v.case("compressed-size-zero-rejected-before-crc",
+           compressed_size=u64(0),
+           crc32_of_empty_range=f"0x{zlib.crc32(b'') & 0xFFFFFFFF:08X}",
+           must_be_rejected=True,
+           note="an index entry whose compressed_size is zero is rejected as today "
+                ", which is what stops an all-zero entry passing: the CRC of an "
+                "empty range is 0x00000000, and an all-zero entry stores exactly that")
+    return v
+
+
+# ---------------------------------------------------------------------------
+# The time axis
+# ---------------------------------------------------------------------------
+
+
+def gen_time_axis() -> Vector:
+    v = Vector(
+        id="v1-time-axis",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "The time of raw sample i in a fixed-rate group is "
+            "start_timestamp + rhe(i * 10^9 / rate), where rate is the EXACT rational "
+            "value of the stored float64 and rhe is round-half-even — evaluated as a "
+            "rational, never as a float period accumulated per sample."
+        ),
+        source=(
+            "computed with fractions.Fraction, which is exact because every finite "
+            "double is a rational"
+        ),
+        contract=(
+            "One rule for the time of a sample, so a file's timestamps mean the "
+            "same thing to everyone who reads it."
+        ),
+        requires=["format:v1", "timing:fixed"],
+        notes=(
+            "One rule, and the reason it has to be exactly one: 10^9 / rate is not "
+            "representable for most rates, so a writer that computes a float period "
+            "and multiplies, one that truncates the period to an integer, and one that "
+            "rounds the product all produce different times for the same sample. At "
+            "24 MHz those three span 666,666 ns by sample 10^9 — two thirds of a "
+            "millisecond of disagreement about when a sample was taken. Evaluating the "
+            "rational exactly is what removes the choice."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+    rates = [
+        ("1khz-exact", 1000.0),
+        ("24mhz", 24_000_000.0),
+        ("44100hz", 44_100.0),
+        ("7hz", 7.0),
+        ("3076.923076923077hz", 3076.923076923077),   # a rate with no exact period
+        ("99.9900009999hz", 99.9900009999),           # and another
+    ]
+    for name, rate in rates:
+        exact_rate = Fraction(rate)
+        for i in [0, 1, 2, 3, 255, 256, 257, 1000, 65_536, 10**6, 10**9]:
+            t = B.sample_time_ns(ts, rate, i)
+            v.case(
+                f"{name}/i={i}",
+                sample_rate_bits="0x%016X" % struct.unpack(
+                    "<Q", struct.pack("<d", rate))[0],
+                sample_rate_repr=repr(rate),
+                sample_rate_exact_numerator=str(exact_rate.numerator),
+                sample_rate_exact_denominator=str(exact_rate.denominator),
+                start_timestamp=i64(ts),
+                sample_index=u64(i),
+                expected_ns=i64(t),
+                rule="start + round_half_even(i * 10^9 / rate), rate exact",
+            )
+    return v
+
+
+# ---------------------------------------------------------------------------
+# v1-specific rejections
+# ---------------------------------------------------------------------------
+
+
+def gen_v1_negatives() -> Vector:
+    v = Vector(
+        id="v1-negative-vectors",
+        set_=SET,
+        kind="negative",
+        asserts=(
+            "A v1 reader reads EXACTLY version 1 and rejects every other value, "
+            "and rejects block_samples that is zero or not a multiple of "
+            "branching_factor, any must-understand feature bit it does not know, a "
+            "profile byte outside {0, 2}, and any recipe byte outside the registry — "
+            "while skipping may-ignore feature bits it does not know."
+        ),
+        source=(
+            "the version-1 header and framing rules"
+        ),
+        contract=(
+            "A reader that accepts a malformed file produces wrong answers where it "
+            "should have produced an error."
+        ),
+        requires=["format:v1", "feature:read-rejection"],
+        notes=(
+            "Each case is a well-formed file with one field patched and the rejection "
+            "class it must trigger. Two of them are ACCEPTING cases — a may-ignore "
+            "feature bit, and a tick rate at exactly the largest legal value — because "
+            "a bound pinned only where it fails is half pinned: a reader that refuses "
+            "the boundary passes every rejection here and still refuses valid files."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+    good = B.build(B.FileSpec(
+        compression_id=0, branching_factor=256, block_samples=256,
+        groups=[B.GroupSpec(1000.0, ts)],
+        channels=[B.ChannelSpec("sig", ramp("float32", 1024))]))
+    rel = _write_file("v1_negative_base.tslod", good)
+    H = B.header_offset
+
+    def case(slug, offset, code, value, field, why):
+        raw = struct.pack("<" + code, value)
+        v.case(slug, file=rel, rejection_class=slug,
+               patch={"offset": u64(offset), "width_bytes": len(raw),
+                      "original_hex": good.data[offset:offset + len(raw)].hex().upper(),
+                      "patched_hex": raw.hex().upper()},
+               field=field, expected_error="CorruptFileError",
+               verified_against_an_implementation=False, reason=why)
+
+    case("v1-version-must-be-exactly-1", H("version"), "H", 4,
+         "header.version",
+         "the wire version of this format is 1. A version-1 reader reads EXACTLY 1 "
+         "and rejects every other value. The error should name the version it found, "
+         "because a user holding a file this reader cannot read needs to know what "
+         "they are holding")
+    case("v1-version-zero", H("version"), "H", 0, "header.version",
+         "zero is not a version; it is what an uninitialised or truncated header reads as")
+    case("v1-version-unassigned", H("version"), "H", 3, "header.version",
+         "no version other than 1 is assigned, so a file claiming any of them is "
+         "refused rather than read on a guess")
+
+    case("v1-block-samples-zero", H("block_samples"), "I", 0,
+         "header.block_samples",
+         "block_samples that is zero is rejected")
+    case("v1-block-samples-not-multiple-of-bf", H("block_samples"), "I", 300,
+         "header.block_samples",
+         "300 is not a multiple of branching_factor 256; the block-length parameter requires a multiple so "
+         "that a level k+1 block is built from exactly branching_factor complete level k "
+         "blocks and position chaining is unchanged")
+    case("v1-profile-unassigned-1", H("compression_id"), "B", 1,
+         "header.compression_id",
+         "the profile is 0 (none) or 2 (recipe); 1 is not assigned and a file carrying "
+         "it is rejected rather than guessed at")
+    case("v1-profile-unknown", H("compression_id"), "B", 3,
+         "header.compression_id",
+         "the v1 profile is 0 (none) or 2 (recipe); nothing else")
+    case("v1-unknown-must-understand-feature-bit", H("features"), "Q", 0x0000_0000_0000_0001,
+         "header.features",
+         "the low 32 bits are must-understand: a reader that does not know bit 0 must "
+         "refuse the file rather than read it as though the feature were absent")
+
+    v.case("v1-unknown-may-ignore-feature-bit-is-ACCEPTED",
+           file=rel, rejection_class=None,
+           patch={"offset": u64(H("features")), "width_bytes": 8,
+                  "original_hex": good.data[H("features"):H("features") + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", 1 << 32).hex().upper()},
+           field="header.features",
+           expected_error=None, must_open=True,
+           verified_against_an_implementation=False,
+           reason="the HIGH 32 bits are may-ignore. This is the case that proves the "
+                  "split is real: the same field, a different half, and the opposite "
+                  "outcome. A reader that refuses both has no forward compatibility at "
+                  "all; a reader that accepts both has no safety")
+
+    v.case("v1-stream-length-prefix-exceeds-block",
+           rejection_class="stream-length-prefix-out-of-range",
+           field="block.stream[0].length_prefix",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="a stream's u32 length prefix that runs past the block's "
+                  "compressed_size must be refused before any decode. With k streams "
+                  "there are k-1 such prefixes and each is a rejection site")
+
+    v.case("v1-stream-length-prefix-zero",
+           rejection_class="stream-length-prefix-zero",
+           field="block.stream[0].length_prefix",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="a length of 0 leaves no room for the stream's own recipe byte, so it "
+                  "cannot describe a well-formed stream; the minimum is 1")
+
+    v.case("v1-stream-length-prefixes-leave-no-last-stream",
+           rejection_class="stream-length-prefix-consumes-block",
+           field="block stream framing",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="the prefixes of the first k-1 streams must leave at least one byte "
+                  "for the last stream, which has no prefix and runs to compressed_size. "
+                  "Prefixes summing to the whole block describe a block with no values")
+
+    # The stored tick-rate domain, as file rejections. Both fields are u64 on
+    # the wire, so the constraint a reader enforces is 1 <= x <= 2**32: the
+    # floor because a zero denominator has no value and a zero numerator makes
+    # every tick the same instant, the ceiling because it is what keeps every
+    # intermediate in the two tick conversions inside 128 bits.
+    ticks_base = B.build(B.FileSpec(
+        compression_id=0, branching_factor=256, block_samples=256,
+        groups=[B.GroupSpec(1000.0, ts, timing_flags=0x01,
+                            tick_rate_numer=24_000_000, tick_rate_denom=1,
+                            anchor_ticks=-123_456)],
+        channels=[B.ChannelSpec("sig", ramp("float32", 1024))]))
+    ticks_rel = _write_file("v1_negative_tick_rate_base.tslod", ticks_base)
+
+    def rate_case(slug, fieldname, value, why):
+        offset = B.group_offset(ticks_base.layout, 0, fieldname)
+        raw = struct.pack("<Q", value)
+        v.case(slug, file=ticks_rel, rejection_class=slug,
+               patch={"offset": u64(offset), "width_bytes": len(raw),
+                      "original_hex": ticks_base.data[offset:offset + len(raw)].hex().upper(),
+                      "patched_hex": raw.hex().upper()},
+               field=f"group_entry.{fieldname}", expected_error="CorruptFileError",
+               verified_against_an_implementation=False, reason=why)
+
+    rate_case("v1-tick-rate-numer-zero", "tick_rate_numer", 0,
+              "with TIMEBASE_PRESENT set, a numerator of zero makes every tick the same "
+              "instant; the field is >= 1 or the group is malformed")
+    rate_case("v1-tick-rate-denom-zero", "tick_rate_denom", 0,
+              "a denominator of zero is a division by zero in both tick conversions; "
+              "the field is >= 1 or the group is malformed")
+    rate_case("v1-tick-rate-numer-exceeds-2p32", "tick_rate_numer", 2**32 + 1,
+              "both rate fields are at most 2^32. That bound is what lets an "
+              "implementation evaluate the tick conversions in 128-bit integers rather "
+              "than arbitrary precision: the widest intermediate is "
+              "|ticks - anchor| * 10^9 * denom, below 2^125 for |ticks - anchor| < 2^63 "
+              "and denom <= 2^32")
+    # The accepting side of the same bound. Without it "at most 2^32" is pinned
+    # only where it fails, and a reader that refuses the boundary value itself
+    # passes every rejection case above.
+    _numer_off = B.group_offset(ticks_base.layout, 0, "tick_rate_numer")
+    v.case("v1-tick-rate-at-2p32-is-ACCEPTED",
+           file=ticks_rel, rejection_class=None,
+           patch={"offset": u64(_numer_off), "width_bytes": 8,
+                  "original_hex": ticks_base.data[_numer_off:_numer_off + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", 2**32).hex().upper()},
+           field="group_entry.tick_rate_numer",
+           expected_error=None, must_open=True,
+           verified_against_an_implementation=False,
+           reason="2^32 is the largest legal value, not the first illegal one. This is "
+                  "the case that makes the bound inclusive: a reader that treats it as "
+                  "exclusive refuses a valid file and passes every rejection case above")
+
+    rate_case("v1-tick-rate-denom-exceeds-2p32", "tick_rate_denom", 2**32 + 1,
+              "the same bound on the denominator, which is the field the widest "
+              "intermediate is actually multiplied by")
+
+    for recipe in (0x04, 0x7F, 0xEF, 0xFF):
+        v.case(f"v1-unknown-recipe-{recipe:#04x}",
+               rejection_class="unknown-recipe-byte",
+               recipe_byte=f"0x{recipe:02X}",
+               expected_error="CorruptFileError",
+               error_must_name_the_byte=True,
+               verified_against_an_implementation=False,
+               reason="every value outside {0x00, 0x01, 0x02, 0x03} and the 0xF0-0xFF "
+                      "experimental range is reserved and rejected with an actionable "
+                      "error naming the byte; there is no registry escape")
+
+    v.case("v1-profile0-with-non-identity-recipe",
+           rejection_class="profile0-recipe-mismatch",
+           compression_id=0, recipe_byte="0x01",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="under profile 0 EVERY recipe byte must be 0x00. A profile-0 "
+                  "file carrying a zstd recipe is the file that would make the "
+                  "stdlib-only reference reader need a codec, which is the whole point "
+                  "of the profile")
+    return v
+
+
+def main() -> None:
+    for factory in (gen_profile0_set, gen_block_framing, gen_crc,
+                    gen_time_axis, gen_v1_negatives):
+        vector = factory()
+        vector.write()
+        print(f"  {vector.kind:9s} {vector.id:34s} {len(vector.cases):5d} cases")
+
+
+if __name__ == "__main__":
+    main()

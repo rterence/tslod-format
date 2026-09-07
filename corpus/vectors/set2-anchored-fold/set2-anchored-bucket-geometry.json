@@ -1,0 +1,1345 @@
+{
+  "id": "set2-anchored-bucket-geometry",
+  "set": "set2-anchored-fold",
+  "kind": "fixture",
+  "asserts": "Bucket j at level K covers raw samples [j*BF^K, (j+1)*BF^K), anchored at global sample index 0 \u2014 never at a block boundary and never at a time \u2014 so block b at level K starts at raw sample b * BF^(K+1).",
+  "source": "the anchored dyadic geometry, stated as arithmetic",
+  "contract": "Bucket boundaries are anchored to the data rather than to a block or a time, which is what lets two implementations agree on them without negotiating.",
+  "requires": [],
+  "notes": "A block holds `block_samples` buckets rather than exactly BF, so the block-start column below is stated for block_samples == BF (today's geometry) and separately for block_samples == 2 * BF, which is the first value the parameter makes legal.",
+  "case_count": 132,
+  "cases": [
+    {
+      "name": "bucket/BF=2,K=0,j=0",
+      "branching_factor": "2",
+      "level": "0",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "1",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=2,K=0,j=1",
+      "branching_factor": "2",
+      "level": "0",
+      "bucket_index": "1",
+      "raw_start_inclusive": "1",
+      "raw_end_exclusive": "2",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=2,K=0,j=2",
+      "branching_factor": "2",
+      "level": "0",
+      "bucket_index": "2",
+      "raw_start_inclusive": "2",
+      "raw_end_exclusive": "3",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=2,K=0,j=7",
+      "branching_factor": "2",
+      "level": "0",
+      "bucket_index": "7",
+      "raw_start_inclusive": "7",
+      "raw_end_exclusive": "8",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=2,K=0,j=1000",
+      "branching_factor": "2",
+      "level": "0",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "1000",
+      "raw_end_exclusive": "1001",
+      "raw_span": "1"
+    },
+    {
+      "name": "block/BF=2,K=0,b=0,block_samples=2",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "2",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=0,b=0,block_samples=4",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=0,b=1,block_samples=2",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "2",
+      "raw_span_of_block": "2",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=0,b=1,block_samples=4",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "4",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=0,b=5,block_samples=2",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "10",
+      "raw_span_of_block": "2",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=0,b=5,block_samples=4",
+      "branching_factor": "2",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "20",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=2,K=1,j=0",
+      "branching_factor": "2",
+      "level": "1",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "2",
+      "raw_span": "2"
+    },
+    {
+      "name": "bucket/BF=2,K=1,j=1",
+      "branching_factor": "2",
+      "level": "1",
+      "bucket_index": "1",
+      "raw_start_inclusive": "2",
+      "raw_end_exclusive": "4",
+      "raw_span": "2"
+    },
+    {
+      "name": "bucket/BF=2,K=1,j=2",
+      "branching_factor": "2",
+      "level": "1",
+      "bucket_index": "2",
+      "raw_start_inclusive": "4",
+      "raw_end_exclusive": "6",
+      "raw_span": "2"
+    },
+    {
+      "name": "bucket/BF=2,K=1,j=7",
+      "branching_factor": "2",
+      "level": "1",
+      "bucket_index": "7",
+      "raw_start_inclusive": "14",
+      "raw_end_exclusive": "16",
+      "raw_span": "2"
+    },
+    {
+      "name": "bucket/BF=2,K=1,j=1000",
+      "branching_factor": "2",
+      "level": "1",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "2000",
+      "raw_end_exclusive": "2002",
+      "raw_span": "2"
+    },
+    {
+      "name": "block/BF=2,K=1,b=0,block_samples=2",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=1,b=0,block_samples=4",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=1,b=1,block_samples=2",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "4",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=1,b=1,block_samples=4",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "8",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=1,b=5,block_samples=2",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "20",
+      "raw_span_of_block": "4",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=1,b=5,block_samples=4",
+      "branching_factor": "2",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "40",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=2,K=2,j=0",
+      "branching_factor": "2",
+      "level": "2",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "4",
+      "raw_span": "4"
+    },
+    {
+      "name": "bucket/BF=2,K=2,j=1",
+      "branching_factor": "2",
+      "level": "2",
+      "bucket_index": "1",
+      "raw_start_inclusive": "4",
+      "raw_end_exclusive": "8",
+      "raw_span": "4"
+    },
+    {
+      "name": "bucket/BF=2,K=2,j=2",
+      "branching_factor": "2",
+      "level": "2",
+      "bucket_index": "2",
+      "raw_start_inclusive": "8",
+      "raw_end_exclusive": "12",
+      "raw_span": "4"
+    },
+    {
+      "name": "bucket/BF=2,K=2,j=7",
+      "branching_factor": "2",
+      "level": "2",
+      "bucket_index": "7",
+      "raw_start_inclusive": "28",
+      "raw_end_exclusive": "32",
+      "raw_span": "4"
+    },
+    {
+      "name": "bucket/BF=2,K=2,j=1000",
+      "branching_factor": "2",
+      "level": "2",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "4000",
+      "raw_end_exclusive": "4004",
+      "raw_span": "4"
+    },
+    {
+      "name": "block/BF=2,K=2,b=0,block_samples=2",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=2,b=0,block_samples=4",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=2,b=1,block_samples=2",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "8",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=2,b=1,block_samples=4",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "16",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=2,b=5,block_samples=2",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "40",
+      "raw_span_of_block": "8",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=2,b=5,block_samples=4",
+      "branching_factor": "2",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "80",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=2,K=3,j=0",
+      "branching_factor": "2",
+      "level": "3",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "8",
+      "raw_span": "8"
+    },
+    {
+      "name": "bucket/BF=2,K=3,j=1",
+      "branching_factor": "2",
+      "level": "3",
+      "bucket_index": "1",
+      "raw_start_inclusive": "8",
+      "raw_end_exclusive": "16",
+      "raw_span": "8"
+    },
+    {
+      "name": "bucket/BF=2,K=3,j=2",
+      "branching_factor": "2",
+      "level": "3",
+      "bucket_index": "2",
+      "raw_start_inclusive": "16",
+      "raw_end_exclusive": "24",
+      "raw_span": "8"
+    },
+    {
+      "name": "bucket/BF=2,K=3,j=7",
+      "branching_factor": "2",
+      "level": "3",
+      "bucket_index": "7",
+      "raw_start_inclusive": "56",
+      "raw_end_exclusive": "64",
+      "raw_span": "8"
+    },
+    {
+      "name": "bucket/BF=2,K=3,j=1000",
+      "branching_factor": "2",
+      "level": "3",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "8000",
+      "raw_end_exclusive": "8008",
+      "raw_span": "8"
+    },
+    {
+      "name": "block/BF=2,K=3,b=0,block_samples=2",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=3,b=0,block_samples=4",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=3,b=1,block_samples=2",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "16",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=3,b=1,block_samples=4",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "32",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=3,b=5,block_samples=2",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "2",
+      "buckets_per_block": "2",
+      "raw_start_of_block": "80",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=2,K=3,b=5,block_samples=4",
+      "branching_factor": "2",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "4",
+      "buckets_per_block": "4",
+      "raw_start_of_block": "160",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=16,K=0,j=0",
+      "branching_factor": "16",
+      "level": "0",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "1",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=16,K=0,j=1",
+      "branching_factor": "16",
+      "level": "0",
+      "bucket_index": "1",
+      "raw_start_inclusive": "1",
+      "raw_end_exclusive": "2",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=16,K=0,j=2",
+      "branching_factor": "16",
+      "level": "0",
+      "bucket_index": "2",
+      "raw_start_inclusive": "2",
+      "raw_end_exclusive": "3",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=16,K=0,j=7",
+      "branching_factor": "16",
+      "level": "0",
+      "bucket_index": "7",
+      "raw_start_inclusive": "7",
+      "raw_end_exclusive": "8",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=16,K=0,j=1000",
+      "branching_factor": "16",
+      "level": "0",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "1000",
+      "raw_end_exclusive": "1001",
+      "raw_span": "1"
+    },
+    {
+      "name": "block/BF=16,K=0,b=0,block_samples=16",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=0,b=0,block_samples=32",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=0,b=1,block_samples=16",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "16",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=0,b=1,block_samples=32",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "32",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=0,b=5,block_samples=16",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "80",
+      "raw_span_of_block": "16",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=0,b=5,block_samples=32",
+      "branching_factor": "16",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "160",
+      "raw_span_of_block": "32",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=16,K=1,j=0",
+      "branching_factor": "16",
+      "level": "1",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "16",
+      "raw_span": "16"
+    },
+    {
+      "name": "bucket/BF=16,K=1,j=1",
+      "branching_factor": "16",
+      "level": "1",
+      "bucket_index": "1",
+      "raw_start_inclusive": "16",
+      "raw_end_exclusive": "32",
+      "raw_span": "16"
+    },
+    {
+      "name": "bucket/BF=16,K=1,j=2",
+      "branching_factor": "16",
+      "level": "1",
+      "bucket_index": "2",
+      "raw_start_inclusive": "32",
+      "raw_end_exclusive": "48",
+      "raw_span": "16"
+    },
+    {
+      "name": "bucket/BF=16,K=1,j=7",
+      "branching_factor": "16",
+      "level": "1",
+      "bucket_index": "7",
+      "raw_start_inclusive": "112",
+      "raw_end_exclusive": "128",
+      "raw_span": "16"
+    },
+    {
+      "name": "bucket/BF=16,K=1,j=1000",
+      "branching_factor": "16",
+      "level": "1",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "16000",
+      "raw_end_exclusive": "16016",
+      "raw_span": "16"
+    },
+    {
+      "name": "block/BF=16,K=1,b=0,block_samples=16",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=1,b=0,block_samples=32",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=1,b=1,block_samples=16",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "256",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=1,b=1,block_samples=32",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "512",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=1,b=5,block_samples=16",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "1280",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=1,b=5,block_samples=32",
+      "branching_factor": "16",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "2560",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=16,K=2,j=0",
+      "branching_factor": "16",
+      "level": "2",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "256",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=16,K=2,j=1",
+      "branching_factor": "16",
+      "level": "2",
+      "bucket_index": "1",
+      "raw_start_inclusive": "256",
+      "raw_end_exclusive": "512",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=16,K=2,j=2",
+      "branching_factor": "16",
+      "level": "2",
+      "bucket_index": "2",
+      "raw_start_inclusive": "512",
+      "raw_end_exclusive": "768",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=16,K=2,j=7",
+      "branching_factor": "16",
+      "level": "2",
+      "bucket_index": "7",
+      "raw_start_inclusive": "1792",
+      "raw_end_exclusive": "2048",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=16,K=2,j=1000",
+      "branching_factor": "16",
+      "level": "2",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "256000",
+      "raw_end_exclusive": "256256",
+      "raw_span": "256"
+    },
+    {
+      "name": "block/BF=16,K=2,b=0,block_samples=16",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "4096",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=2,b=0,block_samples=32",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "8192",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=2,b=1,block_samples=16",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "4096",
+      "raw_span_of_block": "4096",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=2,b=1,block_samples=32",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "8192",
+      "raw_span_of_block": "8192",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=2,b=5,block_samples=16",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "20480",
+      "raw_span_of_block": "4096",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=2,b=5,block_samples=32",
+      "branching_factor": "16",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "40960",
+      "raw_span_of_block": "8192",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=16,K=3,j=0",
+      "branching_factor": "16",
+      "level": "3",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "4096",
+      "raw_span": "4096"
+    },
+    {
+      "name": "bucket/BF=16,K=3,j=1",
+      "branching_factor": "16",
+      "level": "3",
+      "bucket_index": "1",
+      "raw_start_inclusive": "4096",
+      "raw_end_exclusive": "8192",
+      "raw_span": "4096"
+    },
+    {
+      "name": "bucket/BF=16,K=3,j=2",
+      "branching_factor": "16",
+      "level": "3",
+      "bucket_index": "2",
+      "raw_start_inclusive": "8192",
+      "raw_end_exclusive": "12288",
+      "raw_span": "4096"
+    },
+    {
+      "name": "bucket/BF=16,K=3,j=7",
+      "branching_factor": "16",
+      "level": "3",
+      "bucket_index": "7",
+      "raw_start_inclusive": "28672",
+      "raw_end_exclusive": "32768",
+      "raw_span": "4096"
+    },
+    {
+      "name": "bucket/BF=16,K=3,j=1000",
+      "branching_factor": "16",
+      "level": "3",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "4096000",
+      "raw_end_exclusive": "4100096",
+      "raw_span": "4096"
+    },
+    {
+      "name": "block/BF=16,K=3,b=0,block_samples=16",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=3,b=0,block_samples=32",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=3,b=1,block_samples=16",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "65536",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=3,b=1,block_samples=32",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "131072",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=3,b=5,block_samples=16",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "16",
+      "buckets_per_block": "16",
+      "raw_start_of_block": "327680",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=16,K=3,b=5,block_samples=32",
+      "branching_factor": "16",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "32",
+      "buckets_per_block": "32",
+      "raw_start_of_block": "655360",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=256,K=0,j=0",
+      "branching_factor": "256",
+      "level": "0",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "1",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=256,K=0,j=1",
+      "branching_factor": "256",
+      "level": "0",
+      "bucket_index": "1",
+      "raw_start_inclusive": "1",
+      "raw_end_exclusive": "2",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=256,K=0,j=2",
+      "branching_factor": "256",
+      "level": "0",
+      "bucket_index": "2",
+      "raw_start_inclusive": "2",
+      "raw_end_exclusive": "3",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=256,K=0,j=7",
+      "branching_factor": "256",
+      "level": "0",
+      "bucket_index": "7",
+      "raw_start_inclusive": "7",
+      "raw_end_exclusive": "8",
+      "raw_span": "1"
+    },
+    {
+      "name": "bucket/BF=256,K=0,j=1000",
+      "branching_factor": "256",
+      "level": "0",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "1000",
+      "raw_end_exclusive": "1001",
+      "raw_span": "1"
+    },
+    {
+      "name": "block/BF=256,K=0,b=0,block_samples=256",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=0,b=0,block_samples=512",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "0",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=0,b=1,block_samples=256",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "256",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=0,b=1,block_samples=512",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "1",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "512",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=0,b=5,block_samples=256",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "1280",
+      "raw_span_of_block": "256",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=0,b=5,block_samples=512",
+      "branching_factor": "256",
+      "level": "0",
+      "block_index": "5",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "2560",
+      "raw_span_of_block": "512",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=256,K=1,j=0",
+      "branching_factor": "256",
+      "level": "1",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "256",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=256,K=1,j=1",
+      "branching_factor": "256",
+      "level": "1",
+      "bucket_index": "1",
+      "raw_start_inclusive": "256",
+      "raw_end_exclusive": "512",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=256,K=1,j=2",
+      "branching_factor": "256",
+      "level": "1",
+      "bucket_index": "2",
+      "raw_start_inclusive": "512",
+      "raw_end_exclusive": "768",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=256,K=1,j=7",
+      "branching_factor": "256",
+      "level": "1",
+      "bucket_index": "7",
+      "raw_start_inclusive": "1792",
+      "raw_end_exclusive": "2048",
+      "raw_span": "256"
+    },
+    {
+      "name": "bucket/BF=256,K=1,j=1000",
+      "branching_factor": "256",
+      "level": "1",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "256000",
+      "raw_end_exclusive": "256256",
+      "raw_span": "256"
+    },
+    {
+      "name": "block/BF=256,K=1,b=0,block_samples=256",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=1,b=0,block_samples=512",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "0",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=1,b=1,block_samples=256",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "65536",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=1,b=1,block_samples=512",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "1",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "131072",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=1,b=5,block_samples=256",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "327680",
+      "raw_span_of_block": "65536",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=1,b=5,block_samples=512",
+      "branching_factor": "256",
+      "level": "1",
+      "block_index": "5",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "655360",
+      "raw_span_of_block": "131072",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=256,K=2,j=0",
+      "branching_factor": "256",
+      "level": "2",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "65536",
+      "raw_span": "65536"
+    },
+    {
+      "name": "bucket/BF=256,K=2,j=1",
+      "branching_factor": "256",
+      "level": "2",
+      "bucket_index": "1",
+      "raw_start_inclusive": "65536",
+      "raw_end_exclusive": "131072",
+      "raw_span": "65536"
+    },
+    {
+      "name": "bucket/BF=256,K=2,j=2",
+      "branching_factor": "256",
+      "level": "2",
+      "bucket_index": "2",
+      "raw_start_inclusive": "131072",
+      "raw_end_exclusive": "196608",
+      "raw_span": "65536"
+    },
+    {
+      "name": "bucket/BF=256,K=2,j=7",
+      "branching_factor": "256",
+      "level": "2",
+      "bucket_index": "7",
+      "raw_start_inclusive": "458752",
+      "raw_end_exclusive": "524288",
+      "raw_span": "65536"
+    },
+    {
+      "name": "bucket/BF=256,K=2,j=1000",
+      "branching_factor": "256",
+      "level": "2",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "65536000",
+      "raw_end_exclusive": "65601536",
+      "raw_span": "65536"
+    },
+    {
+      "name": "block/BF=256,K=2,b=0,block_samples=256",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "16777216",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=2,b=0,block_samples=512",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "0",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "33554432",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=2,b=1,block_samples=256",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "16777216",
+      "raw_span_of_block": "16777216",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=2,b=1,block_samples=512",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "1",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "33554432",
+      "raw_span_of_block": "33554432",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=2,b=5,block_samples=256",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "83886080",
+      "raw_span_of_block": "16777216",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=2,b=5,block_samples=512",
+      "branching_factor": "256",
+      "level": "2",
+      "block_index": "5",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "167772160",
+      "raw_span_of_block": "33554432",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "bucket/BF=256,K=3,j=0",
+      "branching_factor": "256",
+      "level": "3",
+      "bucket_index": "0",
+      "raw_start_inclusive": "0",
+      "raw_end_exclusive": "16777216",
+      "raw_span": "16777216"
+    },
+    {
+      "name": "bucket/BF=256,K=3,j=1",
+      "branching_factor": "256",
+      "level": "3",
+      "bucket_index": "1",
+      "raw_start_inclusive": "16777216",
+      "raw_end_exclusive": "33554432",
+      "raw_span": "16777216"
+    },
+    {
+      "name": "bucket/BF=256,K=3,j=2",
+      "branching_factor": "256",
+      "level": "3",
+      "bucket_index": "2",
+      "raw_start_inclusive": "33554432",
+      "raw_end_exclusive": "50331648",
+      "raw_span": "16777216"
+    },
+    {
+      "name": "bucket/BF=256,K=3,j=7",
+      "branching_factor": "256",
+      "level": "3",
+      "bucket_index": "7",
+      "raw_start_inclusive": "117440512",
+      "raw_end_exclusive": "134217728",
+      "raw_span": "16777216"
+    },
+    {
+      "name": "bucket/BF=256,K=3,j=1000",
+      "branching_factor": "256",
+      "level": "3",
+      "bucket_index": "1000",
+      "raw_start_inclusive": "16777216000",
+      "raw_end_exclusive": "16793993216",
+      "raw_span": "16777216"
+    },
+    {
+      "name": "block/BF=256,K=3,b=0,block_samples=256",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "4294967296",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=3,b=0,block_samples=512",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "0",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "0",
+      "raw_span_of_block": "8589934592",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=3,b=1,block_samples=256",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "4294967296",
+      "raw_span_of_block": "4294967296",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=3,b=1,block_samples=512",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "1",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "8589934592",
+      "raw_span_of_block": "8589934592",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=3,b=5,block_samples=256",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "256",
+      "buckets_per_block": "256",
+      "raw_start_of_block": "21474836480",
+      "raw_span_of_block": "4294967296",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    },
+    {
+      "name": "block/BF=256,K=3,b=5,block_samples=512",
+      "branching_factor": "256",
+      "level": "3",
+      "block_index": "5",
+      "block_samples": "512",
+      "buckets_per_block": "512",
+      "raw_start_of_block": "42949672960",
+      "raw_span_of_block": "8589934592",
+      "note": "block_samples == branching_factor is today's geometry (the default); the multiple is what block_samples parameterises"
+    }
+  ]
+}

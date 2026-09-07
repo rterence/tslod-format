@@ -1,0 +1,87 @@
+{
+  "id": "v1-block-crc",
+  "set": "v1-format",
+  "kind": "fixture",
+  "asserts": "The block CRC is IEEE CRC-32 exactly as zlib computes it, over exactly the bytes [file_offset, file_offset + compressed_size) \u2014 the index entry that holds it lies outside that range \u2014 and it is checked BEFORE decode, so a flipped bit is refused rather than mis-decoded.",
+  "source": "verified against zlib.crc32 and against the polynomial's own published check value",
+  "contract": "A corrupt block that decodes to a plausible value draws a wrong plot silently; checking before decode is what makes the failure loud.",
+  "requires": [
+    "format:v1",
+    "feature:crc"
+  ],
+  "notes": "The check value pins the variant unambiguously: reflected polynomial 0xEDB88320, init and xor-out 0xFFFFFFFF, giving 0xCBF43926 for the ASCII string '123456789'. There are several CRC-32s and they disagree; this one is the one crc32fast and zlib.crc32 both compute.",
+  "case_count": 9,
+  "cases": [
+    {
+      "name": "check-value",
+      "input_ascii": "123456789",
+      "input_hex": "313233343536373839",
+      "expected_crc32": "0xCBF43926",
+      "polynomial": "0xEDB88320 (reflected)",
+      "init": "0xFFFFFFFF",
+      "xor_out": "0xFFFFFFFF",
+      "note": "the standard check value for this CRC-32 variant"
+    },
+    {
+      "name": "payload/empty",
+      "input_hex": "",
+      "input_length": 0,
+      "expected_crc32": "0x00000000"
+    },
+    {
+      "name": "payload/single-zero-byte",
+      "input_hex": "00",
+      "input_length": 1,
+      "expected_crc32": "0xD202EF8D"
+    },
+    {
+      "name": "payload/all-zero-64",
+      "input_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "input_length": 64,
+      "expected_crc32": "0x758D6336"
+    },
+    {
+      "name": "payload/all-ff-64",
+      "input_hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+      "input_length": 64,
+      "expected_crc32": "0x0F6187BA"
+    },
+    {
+      "name": "payload/ascending-256",
+      "input_hex": "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFC0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF",
+      "input_length": 256,
+      "expected_crc32": "0x29058C73"
+    },
+    {
+      "name": "on-a-real-block",
+      "file": "v1-format/files/v1_crc_reference.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "file_offset": "352",
+      "compressed_size": "1025",
+      "coverage": "[352, 1377) \u2014 the whole block as stored, framing and recipe bytes included",
+      "expected_crc32": "0xB7483CDA",
+      "index_entry_lies_outside_coverage": true
+    },
+    {
+      "name": "flipped-bit-must-be-rejected",
+      "file": "v1-format/files/v1_crc_reference.tslod",
+      "byte_offset_to_flip": "352",
+      "bit_mask": "0x01",
+      "original_byte": "0x00",
+      "flipped_byte": "0x01",
+      "stored_crc32": "0xB7483CDA",
+      "crc32_after_flip": "0x6ABDD1E2",
+      "must_be_rejected_before_decode": true,
+      "note": "one bit, in the first byte of the payload. The CRC differs, so the reader refuses the block; without the check it would decode to a plausible wrong value and draw a wrong plot"
+    },
+    {
+      "name": "compressed-size-zero-rejected-before-crc",
+      "compressed_size": "0",
+      "crc32_of_empty_range": "0x00000000",
+      "must_be_rejected": true,
+      "note": "an index entry whose compressed_size is zero is rejected as today , which is what stops an all-zero entry passing: the CRC of an empty range is 0x00000000, and an all-zero entry stores exactly that"
+    }
+  ]
+}

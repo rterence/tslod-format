@@ -1,0 +1,155 @@
+{
+  "id": "v1-block-framing",
+  "set": "v1-format",
+  "kind": "fixture",
+  "asserts": "A one-stream v1 block is [recipe u8][payload]; a two-stream block is [ts_len u32 LE][recipe u8][ts payload][recipe u8][values payload] where ts_len counts the timestamp stream INCLUDING its recipe byte, so the values recipe byte sits at offset 4 + ts_len.",
+  "source": "the bytes are produced by tools/_tslod_build.py",
+  "contract": "A length that counts its own recipe byte and one that does not differ by one, and a reader that gets it wrong decodes garbage from the second stream onward.",
+  "requires": [
+    "format:v1",
+    "recipe:0x00"
+  ],
+  "notes": "The off-by-one this vector exists to catch: a reader that treats ts_len as the payload length EXCLUDING the recipe byte places the second recipe byte one byte early and decodes garbage. the framing rule names it \u2014 'two readers placing the second recipe byte one byte apart' \u2014 and this is the vector that fails for one of them.",
+  "case_count": 4,
+  "cases": [
+    {
+      "name": "one-stream/fixed-L0-values",
+      "kind": "fixed-rate level 0",
+      "block_hex": "00000000000000C03F00004040000090400000C0400000F0400000104100002841",
+      "block_length": 33,
+      "recipe_byte_offset": 0,
+      "recipe": 0,
+      "values_payload_offset": 1,
+      "values_payload_length": 32,
+      "expected_values": {
+        "dtype": "float32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000C03F00004040000090400000C0400000F0400000104100002841"
+      },
+      "uncompressed_size": "32",
+      "note": "uncompressed_size in the index entry counts the VALUES stream's decoded bytes only, and the recipe byte is not part of it"
+    },
+    {
+      "name": "two-stream/variable-L0",
+      "kind": "variable-rate level 0",
+      "block_hex": "410000000000002A36FE9C971743423936FE9C971786844836FE9C9717C9C65736FE9C97170C096736FE9C97174F4B7636FE9C9717928D8536FE9C9717D5CF9436FE9C971700000000000000C03F00004040000090400000C0400000F0400000104100002841",
+      "block_length": 102,
+      "ts_len": 65,
+      "ts_len_includes_its_recipe_byte": true,
+      "ts_recipe_byte_offset": 4,
+      "values_recipe_byte_offset": 69,
+      "expected_timestamps": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00002A36FE9C971743423936FE9C971786844836FE9C9717C9C65736FE9C97170C096736FE9C97174F4B7636FE9C9717928D8536FE9C9717D5CF9436FE9C9717"
+      },
+      "expected_values": {
+        "dtype": "float32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000C03F00004040000090400000C0400000F0400000104100002841"
+      },
+      "timestamps_are_absolute_i64": true,
+      "note": "\u27e2 ABSOLUTE i64, not deltas. No transform is implicit: if a delta ever earns its place it is a RECIPE the reader can see, not a rule it must know"
+    },
+    {
+      "name": "three-stream/fixed-L1-numeric-with-moments",
+      "kind": "fixed-rate level >= 1 numeric, with the moment stream",
+      "block_hex": "410000000000002A36FE9C9717E8032A36FE9C971700406C45FE9C9717E8436C45FE9C97170080AE54FE9C9717E883AE54FE9C971700C0F063FE9C9717E8C3F063FE9C97174100000000000000000000803F0000004000004040000080400000A0400000C0400000E0400000004100001041000020410000304100004041000050410000604100007041000000000000001040000000000000F83F000000000000144000000000000000000000000000802440000000000000104000000000000016400000000000001440000000000000000000000000008024400000000000001040000000000000234000000000000014400000000000000000000000000080244000000000000010400000000000002B40000000000000144000000000000000000000000000802440",
+      "block_length": 299,
+      "stream_count": 3,
+      "stream_order": "timestamps, then values, then moments",
+      "ts_len": 65,
+      "values_len": 65,
+      "last_stream_has_no_length_prefix": true,
+      "ts_recipe_byte_offset": 4,
+      "values_recipe_byte_offset": 73,
+      "moments_recipe_byte_offset": 138,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00002A36FE9C9717E8032A36FE9C971700406C45FE9C9717E8436C45FE9C97170080AE54FE9C9717E883AE54FE9C971700C0F063FE9C9717E8C3F063FE9C9717"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000803F0000004000004040000080400000A0400000C0400000E0400000004100001041000020410000304100004041000050410000604100007041"
+      },
+      "expected_moments": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001040000000000000F83F000000000000144000000000000000000000000000802440000000000000104000000000000016400000000000001440000000000000000000000000008024400000000000001040000000000000234000000000000014400000000000000000000000000080244000000000000010400000000000002B40000000000000144000000000000000000000000000802440"
+      },
+      "moment_columns": [
+        "count",
+        "mean",
+        "M2",
+        "M3",
+        "M4"
+      ],
+      "moment_stream_dtype": "float64",
+      "moment_stream_shape": [
+        4,
+        5
+      ],
+      "note": "Every stream but the LAST carries its own u32 LE byte length including its recipe byte; the last runs to compressed_size. The two-stream form is the same rule with one fewer stream, which is why ts_len's meaning did not change. A reader that wants only the plot stops after the values stream and never touches the moments"
+    },
+    {
+      "name": "two-stream/fixed-L1-numeric",
+      "kind": "fixed-rate level >= 1 numeric",
+      "block_hex": "410000000000002A36FE9C9717E8032A36FE9C971700406C45FE9C9717E8436C45FE9C97170080AE54FE9C9717E883AE54FE9C971700C0F063FE9C9717E8C3F063FE9C971700000000000000803F0000004000004040000080400000A0400000C0400000E0400000004100001041000020410000304100004041000050410000604100007041",
+      "block_length": 134,
+      "ts_len": 65,
+      "ts_columns": 2,
+      "ts_column_meaning": "[min_ts, max_ts]",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          4,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00002A36FE9C9717E8032A36FE9C971700406C45FE9C9717E8436C45FE9C97170080AE54FE9C9717E883AE54FE9C971700C0F063FE9C9717E8C3F063FE9C9717"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000803F0000004000004040000080400000A0400000C0400000E0400000004100001041000020410000304100004041000050410000604100007041"
+      },
+      "row_major_not_planar": true,
+      "note": "the four values of bucket 0, then the four of bucket 1 \u2014 NEVER planar . A planar reader gets four plausible-looking arrays of the wrong thing"
+    }
+  ]
+}

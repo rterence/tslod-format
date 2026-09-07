@@ -1,0 +1,2517 @@
+{
+  "id": "set3-build-level-bitfield",
+  "set": "set3-build-level",
+  "kind": "fixture",
+  "asserts": "Bitfield mode produces [OR, AND, first, last] per bucket, is permitted on the eight integer dtypes and refused on the two float dtypes, operates on the two's-complement bit pattern including the sign bit for signed dtypes, and does not accept a request for positions.",
+  "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
+  "contract": "OR and AND over a signed integer act on the bit pattern, so a reader that widens to a signed type and sign-extends produces different flags from the same bytes.",
+  "requires": [
+    "dtype:int8",
+    "dtype:int16",
+    "dtype:int32",
+    "dtype:int64",
+    "dtype:uint8",
+    "dtype:uint16",
+    "dtype:uint32",
+    "dtype:uint64"
+  ],
+  "notes": "The sign bit is the case that separates a correct implementation from one that widened to a signed int and sign-extended: OR over int8 values -128 and 1 is -127, and AND over -1 and -2 is -2. Both are in the patterns below.",
+  "case_count": 83,
+  "cases": [
+    {
+      "name": "int8/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "010204080305090F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0001080F01030F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0001080F01030F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00010F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "7F7F7F7F7F7F7F7F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "7F7F7F7F7F7F7F7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "7F7F7F7F7F7F7F7F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "7F7F7F7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "807F007F80007F80"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF00807FFF008080"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF00807FFF008080"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF008080"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/sign-bit/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "8001FFFE80FF027F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF0080FEFF00807F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/sign-bit/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF0080FEFF00807F"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF00807F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/minus-one-and-minus-two/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFEFFFEFFFEFFFE"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFEFFFEFFFEFFFE"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int8/minus-one-and-minus-two/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFEFFFEFFFEFFFE"
+      },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFEFFFE"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "01000200040008000300050009000F00"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000010008000F00010003000F00"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000010008000F00010003000F00"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000001000F00"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF7FFF7FFF7FFF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080FF7F0000FF7F00800000FF7F0080"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000080FF7FFFFF000000800080"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000080FF7FFFFF000000800080"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF000000800080"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/sign-bit/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00800100FFFFFEFF0080FFFF0200FF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000080FEFFFFFF00000080FF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/sign-bit/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000080FEFFFFFF00000080FF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000080FF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/minus-one-and-minus-two/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int16/minus-one-and-minus-two/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF"
+      },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFEFFFFFFFEFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "010000000200000004000000080000000300000005000000090000000F000000"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000000000000010000000F000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000080FFFFFF7F00000000FFFFFF7F0000008000000000FFFFFF7F00000080"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000080FFFFFF7FFFFFFFFF000000000000008000000080"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000080FFFFFF7FFFFFFFFF000000000000008000000080"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF000000000000008000000080"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/sign-bit/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000008001000000FFFFFFFFFEFFFFFF00000080FFFFFFFF02000000FFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000080FEFFFFFFFFFFFFFF0000000000000080FFFFFF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/sign-bit/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000080FEFFFFFFFFFFFFFF0000000000000080FFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000080FFFFFF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/minus-one-and-minus-two/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int32/minus-one-and-minus-two/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "01000000000000000200000000000000040000000000000008000000000000000300000000000000050000000000000009000000000000000F00000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000000000000000000000000000001000000000000000F00000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000000FFFFFFFFFFFFFF7F00000000000000800000000000000000FFFFFFFFFFFFFF7F0000000000000080"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/sign-bit/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000800100000000000000FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF0000000000000080FFFFFFFFFFFFFFFF0200000000000000FFFFFFFFFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/sign-bit/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "sign-bit",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/minus-one-and-minus-two/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "int64/minus-one-and-minus-two/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "minus-one-and-minus-two",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "010204080305090F"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0001080F01030F"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0001080F01030F"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00010F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00FF00FF0000FF00"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF0000FFFF000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint8/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint8",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF0000FFFF000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "01000200040008000300050009000F00"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000010008000F00010003000F00"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000010008000F00010003000F00"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000001000F00"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000FFFF0000FFFF00000000FFFF0000"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000000FFFFFFFF000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint16/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint16",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF00000000FFFFFFFF000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "010000000200000004000000080000000300000005000000090000000F000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000000000000010000000F000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000FFFFFFFF00000000FFFFFFFF0000000000000000FFFFFFFF00000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint32/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint32",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/lanes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "01000000000000000200000000000000040000000000000008000000000000000300000000000000050000000000000009000000000000000F00000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/lanes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0F00000000000000000000000000000001000000000000000F00000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "lanes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/all-zero/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/all-zero/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-zero",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/all-ones/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/all-ones/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "all-ones",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/extremes/bf4",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFF0000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "2",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "uint64/extremes/agg-bf2",
+      "branching_factor": 2,
+      "from_raw": 0,
+      "aggregation_mode": 1,
+      "positions_requested": false,
+      "input": {
+        "dtype": "uint64",
+        "shape": [
+          2,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+      },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "OR,AND,first,last",
+      "bitfield_pattern": "extremes",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)"
+    },
+    {
+      "name": "float32/bitfield-refused",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000803F0000004000004040000080400000A0400000C0400000E04000000041"
+      },
+      "rejection_class": "bitfield-on-float-dtype",
+      "message": "bitfield aggregation_mode with a float dtype",
+      "note": "bitfield mode has no meaning on a float dtype: OR and AND over an IEEE-754 bit pattern are not a summary of anything"
+    },
+    {
+      "name": "float64/bitfield-refused",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F03F000000000000004000000000000008400000000000001040000000000000144000000000000018400000000000001C400000000000002040"
+      },
+      "rejection_class": "bitfield-on-float-dtype",
+      "message": "bitfield aggregation_mode with a float dtype",
+      "note": "bitfield mode has no meaning on a float dtype: OR and AND over an IEEE-754 bit pattern are not a summary of anything"
+    },
+    {
+      "name": "positions-with-bitfield-refused",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 1,
+      "positions_requested": true,
+      "input": {
+        "dtype": "int32",
+        "shape": [
+          8
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "010000000200000004000000080000000300000005000000090000000F000000"
+      },
+      "rejection_class": "positions-in-bitfield-mode",
+      "message": "positions are not supported for bitfield aggregation",
+      "note": "a bitfield bucket has no argmin or argmax to report, so asking for positions is refused rather than answered with zeros"
+    }
+  ]
+}
