@@ -38,6 +38,12 @@ a rule in `spec/v1`. It may also carry `message`, which is informative and compa
 implementation refuses in its own words and with whatever error type its language has, and neither
 is part of the format. A vector that named a Python exception would fail every conforming
 implementation that is not Python, and would fail a Python one that chose a different subclass.
+
+**`rejection_class` names the RULE the file broke, never the value that broke it.** Two cases may
+therefore carry the same class, and often should: `unknown-recipe-byte` covers four cases, one per
+offending byte, because one rule refuses all four. What distinguishes them is the case's own name.
+A class invented per case is not a class — it cannot be compared against what a reader produces,
+and a case carrying one passes by being refused for any reason at all.
 Flattening `oracle` into `fixture` is how a rewrite inherits its predecessor's bugs with full
 coverage. It is the one thing this corpus exists to prevent.
 
@@ -66,6 +72,23 @@ plain JSON numbers. When in doubt, stringify: a reader that parses `"256"` and a
 
 Negative values keep their sign inside the string: `"-123456"`.
 
+**An integer read as a bit pattern rather than counted is a `0x`-prefixed JSON string in
+hexadecimal.** It is unsigned, and its digits are zero-padded to the field's width:
+
+```json
+{ "recipe": "0x02", "expected_crc32": "0xCBF43926" }
+```
+
+Fourteen fields are written this way. One byte, two digits: `recipe` (the largest, at 208
+occurrences), `recipe_byte`, `bit_mask`, `original_byte`, `flipped_byte`, and the per-stream values
+of a profile-2 case's `recipes` map — `timestamps`, `values` and `moments`. Thirty-two bits, eight
+digits: `expected_crc32`, `stored_crc32`, `crc32_after_flip`, `crc32_of_empty_range`, `init` and
+`xor_out`.
+
+Nothing that is *counted* is ever written in hex. A sample count, an offset or a timestamp is a
+decimal string even where hex would be shorter, so that exactly one form is legal per field and a
+reader never has to accept both.
+
 ---
 
 ## 3. Floats
@@ -85,6 +108,12 @@ with the width implied by the dtype:
   extracted on arm64 must pass on x86_64, which is exactly what this rule buys.
 - `oracle` vectors are the exception: they carry `expected` plus an explicit `tolerance` object
   naming the metric (`abs`, `rel`, or `ulp`). An oracle with no stated tolerance is malformed.
+- One field carries a bit pattern **without** the descriptor: `sample_rate_bits`, in
+  `v1-time-axis`, is a bare big-endian hex string holding a float64 — `"0x408F400000000000"` is
+  1000.0 — with `sample_rate_repr` beside it for a human and the exact numerator and denominator
+  beside that, which is what the timestamp rule actually evaluates. It is the **only** bare bit
+  pattern in the corpus: every other one, all 3,630 of them, sits inside a `bits` descriptor
+  carrying its `dtype`. There are no others to look for.
 
 ---
 
