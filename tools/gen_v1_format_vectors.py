@@ -935,6 +935,42 @@ def gen_v1_negatives() -> Vector:
          "neither is bounded by anything but the file's own length",
          rejection_class="channel-table-out-of-bounds")
 
+    # ---- the group entry
+    G = lambda name: B.group_offset(good.layout, 0, name)
+    for slug, value, why in (
+        ("v1-sample-rate-zero", 0.0,
+         "a rate of zero makes the time of sample i a division by zero, so "
+         "every timestamp in the group is undefined rather than merely wrong"),
+        ("v1-sample-rate-negative", -1000.0,
+         "a negative rate runs the group's time backwards, so sample i+1 "
+         "precedes sample i and any search over the axis is unsound"),
+        ("v1-sample-rate-nan", float("nan"),
+         "a NaN rate makes every derived timestamp compare equal to nothing, "
+         "including itself, which is worse than an error because a reader "
+         "finds no sample rather than failing to look"),
+        ("v1-sample-rate-infinite", float("inf"),
+         "an infinite rate collapses every sample onto the group's start "
+         "timestamp. It is refused with the other three because the rule is "
+         "one rule: the rate is positive and finite"),
+    ):
+        case(slug, G("sample_rate"), "d", value, "group_entry.sample_rate", why,
+             rejection_class="sample-rate-not-positive-finite")
+
+    case("v1-timing-mode-unknown", G("timing_mode"), "B", 2,
+         "group_entry.timing_mode",
+         "timing_mode is 0 fixed or 1 variable. It decides which streams a "
+         "block carries and how its first stream is read, so a reader that "
+         "defaults an unknown value parses every block in the group wrongly",
+         rejection_class="timing-mode-unknown")
+    case("v1-timing-flags-reserved-bit-set", G("timing_flags"), "B", 0x04,
+         "group_entry.timing_flags",
+         "bits 2 to 7 of the timing-flag byte are reserved AND rejected, which "
+         "is the one exception to reserved fields being ignored: these bits "
+         "change how the group is read, so a reader that skips one it does not "
+         "know reads the group wrongly rather than incompletely. Stated since "
+         "version 1 and enforced all along; this is the case that pins it",
+         rejection_class="timing-flags-reserved-bit-set")
+
     # ---- a block whose extent leaves the file
     _blk = B.block_offset(good.layout, 0, 1, 0, "file_offset")
     _csz = B.block_offset(good.layout, 0, 1, 0, "compressed_size")

@@ -307,6 +307,17 @@ def open_v1(data: bytes) -> dict:
     for gi in range(n_groups):
         base = group_off + gi * GROUP_ENTRY_SIZE
         timing_mode = data[base + 24]
+        if timing_mode not in (0, 1):
+            raise CorruptFile("timing-mode-unknown", str(timing_mode))
+        if timing_mode == 0:
+            # Only a fixed-rate group derives its timestamps from this field,
+            # which is where the specification gives it meaning, so it is
+            # where the constraint applies. `0 < rate < inf` is false for a
+            # NaN too, which is the point: a NaN rate makes every timestamp in
+            # the group a NaN-derived value that compares equal to nothing.
+            rate, = struct.unpack_from("<d", data, base)
+            if not 0 < rate < float("inf"):
+                raise CorruptFile("sample-rate-not-positive-finite", repr(rate))
         timing_flags = data[base + 25]
         if timing_flags & 0b1111_1100:
             raise CorruptFile("timing-flags-reserved-bit-set",

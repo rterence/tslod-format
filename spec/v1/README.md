@@ -295,3 +295,15 @@ table whose entries end past the end of the file (`group-table-out-of-bounds`,
 `channel-table-out-of-bounds`) — both offsets are `u64` and nothing bounds them but the file's own
 length. A `file_state` outside `{0, 1}` (`file-state-unknown`): a reader that treats any non-zero
 value as active reads an unknown state as one it happens to know.
+
+**The group entry.** A `timing_mode` outside `{0, 1}` (`timing-mode-unknown`), which decides both
+which streams a block carries and how its first stream is read. For a **fixed-rate** group, a
+`sample_rate` that is not positive and finite (`sample-rate-not-positive-finite`) — zero divides,
+negative runs time backwards, a NaN makes every derived timestamp compare equal to nothing including
+itself, and an infinity collapses the group onto its start. The constraint is on fixed-rate groups
+because that is where this field defines the time of a sample; a variable-rate group carries its
+timestamps instead.
+
+`total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
+conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a
+recording that captured nothing rather than a malformed file.

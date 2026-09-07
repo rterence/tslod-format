@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 25,
-    "cases": 1291,
+    "cases": 1297,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1051,11 +1051,35 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 40,
+      "case_count": 46,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "1691b9c2eb439a84653a2c536fbb739a8acce836117cd9a0b8589f4e7b1c9073"
+          "sha256": "31d5820e9be771c30664f38f97abb3eda2182638b57456577db145538f6f78dc"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",

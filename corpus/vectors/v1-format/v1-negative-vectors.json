@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 40,
+  "case_count": 46,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -254,6 +254,96 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "the same rule for the channel table. Both offsets are u64 and neither is bounded by anything but the file's own length"
+    },
+    {
+      "name": "v1-sample-rate-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "sample-rate-not-positive-finite",
+      "patch": {
+        "offset": "128",
+        "width_bytes": 8,
+        "original_hex": "0000000000408F40",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "group_entry.sample_rate",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a rate of zero makes the time of sample i a division by zero, so every timestamp in the group is undefined rather than merely wrong"
+    },
+    {
+      "name": "v1-sample-rate-negative",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "sample-rate-not-positive-finite",
+      "patch": {
+        "offset": "128",
+        "width_bytes": 8,
+        "original_hex": "0000000000408F40",
+        "patched_hex": "0000000000408FC0"
+      },
+      "field": "group_entry.sample_rate",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a negative rate runs the group's time backwards, so sample i+1 precedes sample i and any search over the axis is unsound"
+    },
+    {
+      "name": "v1-sample-rate-nan",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "sample-rate-not-positive-finite",
+      "patch": {
+        "offset": "128",
+        "width_bytes": 8,
+        "original_hex": "0000000000408F40",
+        "patched_hex": "000000000000F87F"
+      },
+      "field": "group_entry.sample_rate",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a NaN rate makes every derived timestamp compare equal to nothing, including itself, which is worse than an error because a reader finds no sample rather than failing to look"
+    },
+    {
+      "name": "v1-sample-rate-infinite",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "sample-rate-not-positive-finite",
+      "patch": {
+        "offset": "128",
+        "width_bytes": 8,
+        "original_hex": "0000000000408F40",
+        "patched_hex": "000000000000F07F"
+      },
+      "field": "group_entry.sample_rate",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "an infinite rate collapses every sample onto the group's start timestamp. It is refused with the other three because the rule is one rule: the rate is positive and finite"
+    },
+    {
+      "name": "v1-timing-mode-unknown",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "timing-mode-unknown",
+      "patch": {
+        "offset": "152",
+        "width_bytes": 1,
+        "original_hex": "00",
+        "patched_hex": "02"
+      },
+      "field": "group_entry.timing_mode",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "timing_mode is 0 fixed or 1 variable. It decides which streams a block carries and how its first stream is read, so a reader that defaults an unknown value parses every block in the group wrongly"
+    },
+    {
+      "name": "v1-timing-flags-reserved-bit-set",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "timing-flags-reserved-bit-set",
+      "patch": {
+        "offset": "153",
+        "width_bytes": 1,
+        "original_hex": "00",
+        "patched_hex": "04"
+      },
+      "field": "group_entry.timing_flags",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "bits 2 to 7 of the timing-flag byte are reserved AND rejected, which is the one exception to reserved fields being ignored: these bits change how the group is read, so a reader that skips one it does not know reads the group wrongly rather than incompletely. Stated since version 1 and enforced all along; this is the case that pins it"
     },
     {
       "name": "v1-block-extent-past-eof",
