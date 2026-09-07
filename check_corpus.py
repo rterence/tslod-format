@@ -247,8 +247,14 @@ def check_flag_against_framing(body: bytes, offset: int, uncompressed_size: int,
 
 def open_v1(data: bytes) -> dict:
     """Parse and validate a version-1 file, or raise CorruptFile."""
-    if len(data) < 128 or data[:6] != b"TSLOD\x00":
-        raise CorruptFile("bad-magic")
+    # A truncated file and a file that is not one of ours are different
+    # defects and get different classes: a reader that reports "bad magic"
+    # for an empty file sends its user looking for the wrong problem.
+    if len(data) < 128:
+        raise CorruptFile("file-shorter-than-header",
+                          f"{len(data)} bytes; the v1 header is 128")
+    if data[:6] != b"TSLOD\x00":
+        raise CorruptFile("bad-magic", data[:6].hex().upper())
     version, = struct.unpack_from("<H", data, 6)
     if version != 1:
         raise CorruptFile("version-must-be-exactly-1", str(version))
@@ -258,6 +264,9 @@ def open_v1(data: bytes) -> dict:
     profile = data[12]
     if profile not in (0, 2):
         raise CorruptFile("profile-unknown", str(profile))
+    file_state = data[13]
+    if file_state not in (0, 1):
+        raise CorruptFile("file-state-unknown", str(file_state))
     block_samples, = struct.unpack_from("<I", data, 20)
     if block_samples == 0:
         raise CorruptFile("block-samples-zero")
@@ -277,6 +286,22 @@ def open_v1(data: bytes) -> dict:
     n_channels, = struct.unpack_from("<I", data, 16)
     group_off, = struct.unpack_from("<Q", data, 24)
     channel_off, = struct.unpack_from("<Q", data, 32)
+    # A file with no group has no time base and a file with no channel holds
+    # no data; neither is a file this format can describe.
+    if n_groups == 0:
+        raise CorruptFile("num-groups-zero")
+    if n_channels == 0:
+        raise CorruptFile("num-channels-zero")
+    # A table is refused for reaching past the end of the file, not for the
+    # exception raised when a reader walks off it.
+    if group_off + n_groups * GROUP_ENTRY_SIZE > len(data):
+        raise CorruptFile(
+            "group-table-out-of-bounds",
+            f"{n_groups} entries at {group_off} end past {len(data)}")
+    if channel_off + n_channels * CHANNEL_ENTRY_SIZE > len(data):
+        raise CorruptFile(
+            "channel-table-out-of-bounds",
+            f"{n_channels} entries at {channel_off} end past {len(data)}")
 
     groups = []
     for gi in range(n_groups):
@@ -1325,6 +1350,21 @@ def c_profile2(v, c):
 
 def c_negative(v, c):
     """Apply the patch and require the reader to refuse — or to accept."""
+    if "truncate_to" in c:
+        # A whole-file rule cannot be a patched field: the defect IS the file's
+        # length, so the case states where to cut instead of what to overwrite.
+        data = (VECTORS / c["file"]).read_bytes()[:int(c["truncate_to"])]
+        try:
+            open_v1(data)
+        except CorruptFile as exc:
+            want = c["rejection_class"]
+            want = want[3:] if want.startswith("v1-") else want
+            assert exc.rejection_class == want, (
+                f"{c['name']}: refused as {exc.rejection_class}, "
+                f"the case says {want}")
+            return
+        raise AssertionError(f"{c['name']}: the truncated file was accepted")
+
     if "file" in c:
         data = bytearray((VECTORS / c["file"]).read_bytes())
         p = c["patch"]

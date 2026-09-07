@@ -860,6 +860,96 @@ def gen_v1_negatives() -> Vector:
     case("v1-profile-unknown", H("compression_id"), "B", 3,
          "header.compression_id",
          "the v1 profile is 0 (none) or 2 (recipe); nothing else")
+
+    def raw_case(slug, offset, raw, field, why, cls=None):
+        """A patch of arbitrary bytes, where a struct code will not do."""
+        v.case(slug, file=rel, rejection_class=cls or slug,
+               patch={"offset": u64(offset), "width_bytes": len(raw),
+                      "original_hex": good.data[offset:offset + len(raw)].hex().upper(),
+                      "patched_hex": raw.hex().upper()},
+               field=field, expected_error="CorruptFileError",
+               verified_against_an_implementation=False, reason=why)
+
+    def trunc_case(slug, keep, field, why, cls):
+        """A whole-file rule: the defect is the file's LENGTH, not a field."""
+        v.case(slug, file=rel, rejection_class=cls, truncate_to=u64(keep),
+               field=field, expected_error="CorruptFileError",
+               original_size_bytes=u64(len(good.data)),
+               verified_against_an_implementation=False, reason=why)
+
+    # ---- the file as a whole. A truncated file is not a patched field: the
+    # length IS the defect, so these cases cut rather than overwrite.
+    trunc_case("v1-empty-file", 0, "file",
+               "zero bytes is the commonest damaged file there is — a create "
+               "that never wrote, a copy that never ran. It is refused for "
+               "being too short to hold a header, not for a magic that was "
+               "never there to mismatch",
+               "file-shorter-than-header")
+    trunc_case("v1-file-shorter-than-header", 64, "file",
+               "half a header. A reader that unpacks fields before checking "
+               "the length reads whatever follows the buffer",
+               "file-shorter-than-header")
+    trunc_case("v1-file-one-byte-short-of-header", 127, "file",
+               "the boundary, and the one an off-by-one gets wrong: 127 bytes "
+               "is not a header and 128 is. A reader comparing with > rather "
+               "than >= accepts this and reads one byte past the end",
+               "file-shorter-than-header")
+
+    raw_case("v1-magic-mismatch", H("magic"), b"TSLOD\x01", "header.magic",
+             "the sixth byte of the magic is part of it. A reader that matches "
+             "only the five ASCII bytes accepts a file whose format marker "
+             "says something else, and then reads it as version 1",
+             cls="bad-magic")
+
+    # ---- header fields whose rule the reader already knew and no case pinned
+    case("v1-branching-factor-below-2", H("branching_factor"), "I", 1,
+         "header.branching_factor",
+         "a branching factor of 1 gives a level that is its own parent, so the "
+         "pyramid never terminates. The specification says two or more and the "
+         "reader has always refused it; nothing pinned it until now",
+         rejection_class="branching-factor-below-2")
+    case("v1-file-state-unknown", H("file_state"), "B", 2, "header.file_state",
+         "file_state is 0 sealed or 1 active and there is no third value. A "
+         "reader that treats anything non-zero as active reads an unknown "
+         "state as one it happens to know",
+         rejection_class="file-state-unknown")
+    case("v1-num-groups-zero", H("num_groups"), "H", 0, "header.num_groups",
+         "every channel belongs to a group and a group carries the time base, "
+         "so a file with no groups has no way to say when any sample was "
+         "taken",
+         rejection_class="num-groups-zero")
+    case("v1-num-channels-zero", H("num_channels"), "I", 0, "header.num_channels",
+         "a file with no channels holds no data. It is refused rather than "
+         "read as an empty success, because the likelier cause is a header "
+         "written before the channels were",
+         rejection_class="num-channels-zero")
+    case("v1-group-table-offset-out-of-bounds", H("group_table_offset"), "Q",
+         1 << 40, "header.group_table_offset",
+         "the group table is refused for ending past the end of the file, "
+         "which is a stated rule, rather than for whatever a reader's language "
+         "does when it indexes past a buffer",
+         rejection_class="group-table-out-of-bounds")
+    case("v1-channel-table-offset-out-of-bounds", H("channel_table_offset"), "Q",
+         1 << 40, "header.channel_table_offset",
+         "the same rule for the channel table. Both offsets are u64 and "
+         "neither is bounded by anything but the file's own length",
+         rejection_class="channel-table-out-of-bounds")
+
+    # ---- a block whose extent leaves the file
+    _blk = B.block_offset(good.layout, 0, 1, 0, "file_offset")
+    _csz = B.block_offset(good.layout, 0, 1, 0, "compressed_size")
+    case("v1-block-extent-past-eof", _csz, "Q", 1 << 40,
+         "block_index_entry.compressed_size",
+         "file_offset + compressed_size reaches past the end of the file. This "
+         "is checked before the CRC, because computing a CRC over a range that "
+         "does not exist is the read the rule is there to prevent",
+         rejection_class="block-extent-past-eof")
+    case("v1-block-file-offset-past-eof", _blk, "Q", 1 << 40,
+         "block_index_entry.file_offset",
+         "the same rule reached by moving the start rather than the length. "
+         "One rule, one class: a reader needs to know the block is not in the "
+         "file, not which of the two numbers was wrong",
+         rejection_class="block-extent-past-eof")
     # This case used to patch bit 0. Bit 0 is now ASSIGNED — it is what says
     # whether the moment stream is present — so patching it no longer describes
     # an unknown feature; it describes a flag that disagrees with the framing,

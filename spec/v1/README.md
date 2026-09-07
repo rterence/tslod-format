@@ -276,4 +276,22 @@ exactness (`set1-*`).
 A version-1 reader reads **exactly** version 1 and refuses every other value. Every validity
 constraint a writer enforces is enforced again at read time, because a reader's input is the file
 and not the writer. The negative vectors are the enumeration: a well-formed file, one patched field,
-and the rejection class it must trigger (`v1-negative-vectors`).
+and the rejection class it must trigger (`v1-negative-vectors`). A whole-file rule cannot be a
+patched field, so those cases state a length to truncate to instead.
+
+The rules stated with the fields they belong to are rejections wherever they are stated. Beyond
+them:
+
+**The file as a whole.** Fewer than 128 bytes, so the header is incomplete
+(`file-shorter-than-header`) — refused for its length and not for a magic it is too short to hold.
+The first six bytes not `TSLOD\0` (`bad-magic`); the sixth is part of the marker. A block index
+entry whose `file_offset + compressed_size` reaches past the end of the file
+(`block-extent-past-eof`), checked **before** the CRC, because a checksum over a range that does not
+exist is the read the rule prevents.
+
+**The header.** `num_groups` or `num_channels` of zero (`num-groups-zero`, `num-channels-zero`): a
+file with no group has no time base, and a file with no channel holds no data. A group or channel
+table whose entries end past the end of the file (`group-table-out-of-bounds`,
+`channel-table-out-of-bounds`) — both offsets are `u64` and nothing bounds them but the file's own
+length. A `file_state` outside `{0, 1}` (`file-state-unknown`): a reader that treats any non-zero
+value as active reads an unknown state as one it happens to know.

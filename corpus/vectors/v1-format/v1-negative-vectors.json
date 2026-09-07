@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 28,
+  "case_count": 40,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -116,6 +116,174 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "the v1 profile is 0 (none) or 2 (recipe); nothing else"
+    },
+    {
+      "name": "v1-empty-file",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "file-shorter-than-header",
+      "truncate_to": "0",
+      "field": "file",
+      "expected_error": "CorruptFileError",
+      "original_size_bytes": "5194",
+      "verified_against_an_implementation": false,
+      "reason": "zero bytes is the commonest damaged file there is \u2014 a create that never wrote, a copy that never ran. It is refused for being too short to hold a header, not for a magic that was never there to mismatch"
+    },
+    {
+      "name": "v1-file-shorter-than-header",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "file-shorter-than-header",
+      "truncate_to": "64",
+      "field": "file",
+      "expected_error": "CorruptFileError",
+      "original_size_bytes": "5194",
+      "verified_against_an_implementation": false,
+      "reason": "half a header. A reader that unpacks fields before checking the length reads whatever follows the buffer"
+    },
+    {
+      "name": "v1-file-one-byte-short-of-header",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "file-shorter-than-header",
+      "truncate_to": "127",
+      "field": "file",
+      "expected_error": "CorruptFileError",
+      "original_size_bytes": "5194",
+      "verified_against_an_implementation": false,
+      "reason": "the boundary, and the one an off-by-one gets wrong: 127 bytes is not a header and 128 is. A reader comparing with > rather than >= accepts this and reads one byte past the end"
+    },
+    {
+      "name": "v1-magic-mismatch",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "bad-magic",
+      "patch": {
+        "offset": "0",
+        "width_bytes": 6,
+        "original_hex": "54534C4F4400",
+        "patched_hex": "54534C4F4401"
+      },
+      "field": "header.magic",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the sixth byte of the magic is part of it. A reader that matches only the five ASCII bytes accepts a file whose format marker says something else, and then reads it as version 1"
+    },
+    {
+      "name": "v1-branching-factor-below-2",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "branching-factor-below-2",
+      "patch": {
+        "offset": "8",
+        "width_bytes": 4,
+        "original_hex": "00010000",
+        "patched_hex": "01000000"
+      },
+      "field": "header.branching_factor",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a branching factor of 1 gives a level that is its own parent, so the pyramid never terminates. The specification says two or more and the reader has always refused it; nothing pinned it until now"
+    },
+    {
+      "name": "v1-file-state-unknown",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "file-state-unknown",
+      "patch": {
+        "offset": "13",
+        "width_bytes": 1,
+        "original_hex": "00",
+        "patched_hex": "02"
+      },
+      "field": "header.file_state",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "file_state is 0 sealed or 1 active and there is no third value. A reader that treats anything non-zero as active reads an unknown state as one it happens to know"
+    },
+    {
+      "name": "v1-num-groups-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "num-groups-zero",
+      "patch": {
+        "offset": "14",
+        "width_bytes": 2,
+        "original_hex": "0100",
+        "patched_hex": "0000"
+      },
+      "field": "header.num_groups",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "every channel belongs to a group and a group carries the time base, so a file with no groups has no way to say when any sample was taken"
+    },
+    {
+      "name": "v1-num-channels-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "num-channels-zero",
+      "patch": {
+        "offset": "16",
+        "width_bytes": 4,
+        "original_hex": "01000000",
+        "patched_hex": "00000000"
+      },
+      "field": "header.num_channels",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a file with no channels holds no data. It is refused rather than read as an empty success, because the likelier cause is a header written before the channels were"
+    },
+    {
+      "name": "v1-group-table-offset-out-of-bounds",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "group-table-out-of-bounds",
+      "patch": {
+        "offset": "24",
+        "width_bytes": 8,
+        "original_hex": "8000000000000000",
+        "patched_hex": "0000000000010000"
+      },
+      "field": "header.group_table_offset",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the group table is refused for ending past the end of the file, which is a stated rule, rather than for whatever a reader's language does when it indexes past a buffer"
+    },
+    {
+      "name": "v1-channel-table-offset-out-of-bounds",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "channel-table-out-of-bounds",
+      "patch": {
+        "offset": "32",
+        "width_bytes": 8,
+        "original_hex": "C000000000000000",
+        "patched_hex": "0000000000010000"
+      },
+      "field": "header.channel_table_offset",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same rule for the channel table. Both offsets are u64 and neither is bounded by anything but the file's own length"
+    },
+    {
+      "name": "v1-block-extent-past-eof",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "block-extent-past-eof",
+      "patch": {
+        "offset": "5034",
+        "width_bytes": 8,
+        "original_hex": "2B01000000000000",
+        "patched_hex": "0000000000010000"
+      },
+      "field": "block_index_entry.compressed_size",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "file_offset + compressed_size reaches past the end of the file. This is checked before the CRC, because computing a CRC over a range that does not exist is the read the rule is there to prevent"
+    },
+    {
+      "name": "v1-block-file-offset-past-eof",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "block-extent-past-eof",
+      "patch": {
+        "offset": "5026",
+        "width_bytes": 8,
+        "original_hex": "6411000000000000",
+        "patched_hex": "0000000000010000"
+      },
+      "field": "block_index_entry.file_offset",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same rule reached by moving the start rather than the length. One rule, one class: a reader needs to know the block is not in the file, not which of the two numbers was wrong"
     },
     {
       "name": "v1-unknown-must-understand-feature-bit",
