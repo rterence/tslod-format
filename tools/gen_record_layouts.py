@@ -14,6 +14,7 @@ struct whose fields are all correctly named and whose padding is wrong.
 from __future__ import annotations
 
 import struct
+import uuid
 
 from _corpus import Vector
 
@@ -198,6 +199,17 @@ def _layout_cases(v: Vector, records: dict, golden: dict, version: int) -> None:
         if packed is not None:
             case["golden_encoding_hex"] = hexs(packed)
             case["golden_encoding_len"] = len(packed)
+            # session_id is the one field that is NOT little-endian: it is the
+            # 16 RFC 4122 bytes in network order. Stating the same value as a
+            # text UUID makes that checkable — the text parses to network-order
+            # bytes by definition, so a reader can compare two derivations
+            # instead of taking the byte order on trust.
+            for off, width, _t, fname, _n in rec["fields"]:
+                if fname == "session_id":
+                    assert width == 16, "session_id is 16 bytes"
+                    case["session_id_text"] = str(
+                        uuid.UUID(bytes=packed[off:off + width]))
+                    break
         v.case(f"v{version}/{name}", **case)
 
 

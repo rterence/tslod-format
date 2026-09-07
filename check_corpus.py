@@ -32,6 +32,7 @@ import json
 import re
 import struct
 import sys
+import uuid
 import traceback
 import zlib
 from fractions import Fraction
@@ -447,6 +448,17 @@ def c_layout(v, c):
             f"{fld['name']}: the golden bytes at {offset} are not this field")
         cursor += fld["width"]
     assert cursor == c["size_bytes"]
+
+    # The one field that is not little-endian. The case states the same value
+    # as an RFC 4122 text UUID, whose parse is network order by definition, so
+    # comparing it with the golden's 16 bytes compares two derivations rather
+    # than accepting the byte order as written.
+    if "session_id_text" in c:
+        fld = next(f for f in c["fields"] if f["name"] == "session_id")
+        want = raw[fld["offset"]:fld["offset"] + fld["width"]]
+        assert uuid.UUID(c["session_id_text"]).bytes == want, (
+            f"session_id as text is {c['session_id_text']}, whose network-order "
+            f"bytes are not the {fld['width']} at offset {fld['offset']}")
 
 
 #: Every v1 wire enum, in full. Stated here so that "a closed set with these

@@ -77,9 +77,13 @@ def merge_arrays(a, b):
     Vectorised across buckets, **not** across the fold: every bucket advances
     through its own children in the same left-to-right order, one step at a
     time, so the result is bit-identical to folding each bucket separately in a
-    Python loop. That identity is asserted in `corpus/runner` and re-checked by
-    the generators; it is what makes a fast writer and a simple
-    reader agree.
+    Python loop.
+
+    That identity is what `check_corpus.py` tests: its moment check re-folds
+    every bucket with a scalar Python loop written from the specification and
+    requires the same bits, over every case of `set3-bucket-moments`. It is
+    what makes a fast writer and a simple reader agree, and until that check
+    existed it was only claimed here.
     """
     ca, ma, m2a, m3a, m4a = (a[:, i] for i in range(5))
     cb, mb, m2b, m3b, m4b = (b[:, i] for i in range(5))
