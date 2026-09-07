@@ -693,12 +693,64 @@ def c_merge(v, c):
 
 
 def c_merge_nan(v, c):
+    """NaN is excluded from count AND from every sum.
+
+    The count was the only thing compared here, which left the second half of
+    the claim — that the moments are over the non-NaN elements — resting on
+    nothing.
+    """
     if "values" not in c:
-        return                                  # the identity part
-    vals = np.array([f_of(x) for x in c["values"]], dtype=np.float64)
-    got = _moments.fold_children(_moments.singles(vals), len(vals))[0]
-    assert int(got[0]) == int(c["expected_count"]), (
+        # An all-NaN part is the identity of the merge: merging it changes
+        # neither the count nor any moment of what it is merged into.
+        assert int(c["right_count"]) == 0, "an all-NaN part has count 0"
+        left = (float(int(c["left_count"])), f_of(c["expected_mean"]),
+                f_of(c["expected_M2"]), 0.0, 0.0)
+        empty = (0.0, _QNAN, _QNAN, _QNAN, _QNAN)
+        merged = _ref_merge(left, empty)
+        assert merged == left, "merging an all-NaN part changed the accumulator"
+        assert c["merged_equals_left"] is True
+        return
+
+    vals = [f_of(x) for x in c["values"]]
+    assert len(vals) == int(c["element_count_including_nan"])
+    finite = [x for x in vals if x == x]
+
+    # count first: it is exact, and it counts the non-NaN elements only.
+    got = _ref_fold_children(_ref_singles(vals), len(vals))[0]
+    assert int(got[0]) == int(c["expected_count"]) == len(finite), (
         f"count {int(got[0])} != {c['expected_count']} — count is the NON-NaN count")
+    assert c["count_counts_non_nan_only"] is True
+
+    # then the moments, which is the half that was not being checked. The
+    # expected values are the exact rational moments OF THE NON-NaN ELEMENTS,
+    # and the float64 fold must land within the stated tolerance of them.
+    n, mean, m2, m3, m4 = _exact_moments(finite)
+    assert n == len(finite)
+    limit = c["tolerance"]["max"]
+    assert c["tolerance"]["metric"] == "relative"
+
+    if n == 0:
+        # Every element was NaN, so there is nothing to take a moment of and
+        # the case states none. The four moments are the canonical quiet NaN.
+        for i in range(1, 5):
+            assert struct.pack("<d", float(got[i])) == struct.pack("<Q", QNAN_BITS), (
+                "an all-NaN bucket's moments are the canonical quiet NaN")
+        for key in ("mean", "M2", "M3", "M4"):
+            assert c.get(f"expected_{key}") is None
+        return
+
+    for i, key, exact in ((1, "mean", mean), (2, "M2", m2),
+                          (3, "M3", m3), (4, "M4", m4)):
+        field = c.get(f"expected_{key}")
+        if field is None:
+            continue
+        want = f_of(field)
+        assert float(exact) == want, (
+            f"{key}: the stated expectation is not the exact moment of the "
+            f"non-NaN elements ({float(exact)!r} vs {want!r})")
+        g = float(got[i])
+        err = abs(g - want) / abs(want) if want != 0.0 else abs(g)
+        assert err <= limit, f"{key}: error {err:.3e} > {limit:.3e}"
 
 
 def _exact_moments(values):
