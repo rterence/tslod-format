@@ -744,9 +744,16 @@ def gen_v1_negatives() -> Vector:
     rel = _write_file("v1_negative_base.tslod", good)
     H = B.header_offset
 
-    def case(slug, offset, code, value, field, why):
+    def case(slug, offset, code, value, field, why, rejection_class=None):
+        """One patched field and the class it must be refused as.
+
+        `rejection_class` defaults to the slug because most cases are the only
+        member of their class. Where several patches are refused by the SAME
+        rule the class must be passed explicitly: the slug names the case, and
+        a class no reader can produce is not a check.
+        """
         raw = struct.pack("<" + code, value)
-        v.case(slug, file=rel, rejection_class=slug,
+        v.case(slug, file=rel, rejection_class=rejection_class or slug,
                patch={"offset": u64(offset), "width_bytes": len(raw),
                       "original_hex": good.data[offset:offset + len(raw)].hex().upper(),
                       "patched_hex": raw.hex().upper()},
@@ -760,10 +767,12 @@ def gen_v1_negatives() -> Vector:
          "because a user holding a file this reader cannot read needs to know what "
          "they are holding")
     case("v1-version-zero", H("version"), "H", 0, "header.version",
-         "zero is not a version; it is what an uninitialised or truncated header reads as")
+         "zero is not a version; it is what an uninitialised or truncated header reads as",
+         rejection_class="v1-version-must-be-exactly-1")
     case("v1-version-unassigned", H("version"), "H", 3, "header.version",
          "no version other than 1 is assigned, so a file claiming any of them is "
-         "refused rather than read on a guess")
+         "refused rather than read on a guess",
+         rejection_class="v1-version-must-be-exactly-1")
 
     case("v1-block-samples-zero", H("block_samples"), "I", 0,
          "header.block_samples",
@@ -776,7 +785,8 @@ def gen_v1_negatives() -> Vector:
     case("v1-profile-unassigned-1", H("compression_id"), "B", 1,
          "header.compression_id",
          "the profile is 0 (none) or 2 (recipe); 1 is not assigned and a file carrying "
-         "it is rejected rather than guessed at")
+         "it is rejected rather than guessed at",
+         rejection_class="v1-profile-unknown")
     case("v1-profile-unknown", H("compression_id"), "B", 3,
          "header.compression_id",
          "the v1 profile is 0 (none) or 2 (recipe); nothing else")

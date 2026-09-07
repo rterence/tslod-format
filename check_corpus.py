@@ -759,7 +759,16 @@ def c_negative(v, c):
             return
         try:
             open_v1(bytes(data))
-        except CorruptFile:
+        except CorruptFile as exc:
+            # Refusing is not enough. A patch that happens to break something
+            # else would otherwise pass as a check of the rule it names, so the
+            # class this reader produced must be the class the case states.
+            # The vector's classes carry a `v1-` prefix the reader's do not.
+            want = c["rejection_class"]
+            want = want[3:] if want.startswith("v1-") else want
+            assert exc.rejection_class == want, (
+                f"{c['name']}: refused as {exc.rejection_class}, "
+                f"but the case says {want}")
             return
         raise AssertionError(f"{c['name']}: the patched file was accepted")
 

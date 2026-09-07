@@ -1055,7 +1055,7 @@
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "c5ac740ea7afb907d06bcc3779a278ee1427c378b17569dfd8abe73756e483e2"
+          "sha256": "348f223a53fc91f95e51eb690a504e76ebbdd3d92b0889c50434e49d53339c8e"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",

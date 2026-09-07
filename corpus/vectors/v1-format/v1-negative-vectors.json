@@ -30,7 +30,7 @@
     {
       "name": "v1-version-zero",
       "file": "v1-format/files/v1_negative_base.tslod",
-      "rejection_class": "v1-version-zero",
+      "rejection_class": "v1-version-must-be-exactly-1",
       "patch": {
         "offset": "6",
         "width_bytes": 2,
@@ -45,7 +45,7 @@
     {
       "name": "v1-version-unassigned",
       "file": "v1-format/files/v1_negative_base.tslod",
-      "rejection_class": "v1-version-unassigned",
+      "rejection_class": "v1-version-must-be-exactly-1",
       "patch": {
         "offset": "6",
         "width_bytes": 2,
@@ -90,7 +90,7 @@
     {
       "name": "v1-profile-unassigned-1",
       "file": "v1-format/files/v1_negative_base.tslod",
-      "rejection_class": "v1-profile-unassigned-1",
+      "rejection_class": "v1-profile-unknown",
       "patch": {
         "offset": "12",
         "width_bytes": 1,
