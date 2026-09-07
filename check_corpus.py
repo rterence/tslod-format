@@ -617,12 +617,46 @@ def c_moments(v, c):
 
 
 def c_range(v, c):
+    """The two-level range fold, and the claim that it is not a flat fold.
+
+    Both halves are re-derived here with the scalar merge rather than called
+    out of `_moments`, and the flat fold is computed as well — the vector
+    carries what it WOULD give and whether it happens to agree, and neither
+    was being compared with anything.
+    """
     buckets = arr_of(c["buckets"])
+    rows = [tuple(float(x) for x in buckets[i]) for i in range(buckets.shape[0])]
     size = int(c["buckets_per_block"])
-    blocks = [buckets[i:i + size] for i in range(0, buckets.shape[0], size)]
-    got = _moments.range_merge(blocks).reshape(1, 5)
-    assert bits_equal(np.ascontiguousarray(got), arr_of(c["expected_merged"])), (
+    assert len(rows) == int(c["bucket_count"])
+
+    per_block = []
+    for i in range(0, len(rows), size):
+        blk = rows[i:i + size]
+        acc = blk[0]
+        for r in blk[1:]:
+            acc = _ref_merge(acc, r)
+        per_block.append(acc)
+    assert len(per_block) == int(c["block_count"]), (
+        f"{len(per_block)} blocks of {size}, the case says {c['block_count']}")
+
+    two = per_block[0]
+    for r in per_block[1:]:
+        two = _ref_merge(two, r)
+    assert bits_equal(_as_moment_array([two]), arr_of(c["expected_merged"])), (
         "the two-level range merge differs")
+
+    # The whole point of the two-level rule: a flat fold over every bucket in
+    # the range is a DIFFERENT computation, and the case records both what it
+    # would give and whether the two happen to coincide here.
+    flat = rows[0]
+    for r in rows[1:]:
+        flat = _ref_merge(flat, r)
+    assert bits_equal(_as_moment_array([flat]), arr_of(c["flat_fold_would_give"])), (
+        "the flat fold is not what the case says it would give")
+    identical = bits_equal(_as_moment_array([two]), _as_moment_array([flat]))
+    assert identical == c["flat_fold_is_identical"], (
+        f"the two folds {'agree' if identical else 'differ'}, "
+        f"the case says flat_fold_is_identical={c['flat_fold_is_identical']}")
 
 
 def _merged(c):
