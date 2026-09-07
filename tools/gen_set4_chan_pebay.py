@@ -197,7 +197,7 @@ def gen_merge_oracle() -> Vector:
 
     EPS = 2.220446049250313e-16      # 2**-52
 
-    def tolerances(n, mean, m2):
+    def tolerances(n, mean, m2, m3, m4):
         """Per-case tolerances, derived rather than guessed.
 
         A flat relative tolerance is wrong here for two independent reasons, and
@@ -206,7 +206,17 @@ def gen_merge_oracle() -> Vector:
         * **M3 and M4 can be zero by cancellation.** On a symmetric dataset the
           exact M3 is ~1e-14 against an M2 of ~1e3 — a relative error against
           that is measuring the cancellation, not the merge. So M3 and M4 are
-          bounded against their NATURAL SCALE, `n * sigma**3` and `n * sigma**4`.
+          bounded against their NATURAL SCALE, `n * sigma**3` and `n * sigma**4`
+          — **or against their own magnitude, whichever is larger.** An
+          outlier-dominated moment runs the other way: on `one-outlier` the
+          exact M4 exceeds `n * sigma**4` by a factor of ~n, because n·σ⁴ is
+          M2²/n while M4 is carried by the single outlier. Bounding such a
+          value against the smaller of the two would demand ~n times more
+          accuracy than float64 has, and the reference fold — one ULP from the
+          exact oracle — fails it. So the scale is `max(n * sigma**k,
+          |expected|)`, and the case states that NUMBER rather than naming an
+          expression, so what a reader applies and what the checker applies
+          cannot drift apart.
         * **M2's merge accuracy degrades with the data's offset.** The merge
           forms `delta = mean_b - mean_a` and squares it; when the mean is far
           from zero relative to the spread, that difference has already lost
@@ -227,9 +237,11 @@ def gen_merge_oracle() -> Vector:
             "mean": {"metric": "relative", "max": rel},
             "M2": {"metric": "relative", "max": rel},
             "M3": {"metric": "absolute_over_scale", "max": rel,
-                   "scale": "n * sigma**3"},
+                   "scale": max(n * sigma ** 3, abs(float(m3))),
+                   "scale_rule": "max(n * sigma**3, abs(expected_M3))"},
             "M4": {"metric": "absolute_over_scale", "max": rel,
-                   "scale": "n * sigma**4"},
+                   "scale": max(n * sigma ** 4, abs(float(m4))),
+                   "scale_rule": "max(n * sigma**4, abs(expected_M4))"},
             "offset_to_spread_ratio": ratio,
             "sigma": sigma,
             "note": ("the relative bound is EPS * |mean| / sigma, floored at 1e-13: "
@@ -275,7 +287,7 @@ def gen_merge_oracle() -> Vector:
                 expected_M3=None if whole[3] is None else fbits(as_float(whole[3])),
                 expected_M4=None if whole[4] is None else fbits(as_float(whole[4])),
                 expected_from="exact rational arithmetic over the concatenated elements",
-                tolerance=tolerances(whole[0], whole[1], whole[2]),
+                tolerance=tolerances(*whole),
                 count_must_be_exact=True,
             )
     return v

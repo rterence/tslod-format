@@ -114,6 +114,13 @@ error grows **linearly with `|mean|/σ`** — reaching `1.4 × 10⁻⁵` relativ
 `10¹²`. An offset channel is the normal case, not the pathological one (`set4-chan-pebay-merge`
 carries the derived per-case tolerances).
 
+Those tolerances are relative to **the larger of `n × σᵏ` and the expected value's own magnitude**,
+never to `n × σᵏ` alone. Both ends of that need it: a moment that is zero by cancellation has no
+magnitude to be relative to, and an outlier-dominated moment runs the other way — `n × σᵏ` is
+`M2²/n` while `M4` is carried by the single outlier, so the moment exceeds its natural scale by
+about a factor of `n`, and bounding it against the smaller of the two would demand accuracy float64
+does not have.
+
 ## Blocks and streams
 
 A block is one or more streams. **Every stream except the last is prefixed by its own byte length as

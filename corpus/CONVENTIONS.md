@@ -116,7 +116,15 @@ with the width implied by the dtype:
   is the one canonical quiet NaN: `0x7FC00000` (float32), `0x7FF8000000000000` (float64). A fixture
   extracted on arm64 must pass on x86_64, which is exactly what this rule buys.
 - `oracle` vectors are the exception: they carry `expected` plus an explicit `tolerance` object
-  naming the metric (`abs`, `rel`, or `ulp`). An oracle with no stated tolerance is malformed.
+  naming the metric. An oracle with no stated tolerance is malformed. Two metrics exist:
+  - **`relative`** — the error divided by `|expected|`, or the error itself where the expected value
+    is exactly zero.
+  - **`absolute_over_scale`** — the error divided by `scale`, which the case states **as a number**.
+    That number is `max(n × σᵏ, |expected|)`. A moment that is zero by cancellation is bounded
+    against its natural scale `n × σᵏ`; a moment dominated by an outlier is bounded against its own
+    magnitude, which there is the larger of the two by a factor of about `n`. `scale_rule` names the
+    expression for a reader who wants it, but `scale` is the number to divide by, so what a reader
+    applies and what this repository applies cannot drift apart.
 - One field carries a bit pattern **without** the descriptor: `sample_rate_bits`, in
   `v1-time-axis`, is a bare big-endian hex string holding a float64 — `"0x408F400000000000"` is
   1000.0 — with `sample_rate_repr` beside it for a human and the exact numerator and denominator

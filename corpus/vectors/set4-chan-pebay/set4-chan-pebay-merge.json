@@ -101,12 +101,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -254,12 +256,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -407,12 +411,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -512,12 +518,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -641,12 +649,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -746,12 +756,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -2339,12 +2351,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 224.66850499388732,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 236.5378036152145,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.04965526025269679,
         "sigma": 0.6031343725837174,
@@ -2444,12 +2458,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -2597,12 +2613,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -2750,12 +2768,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -2855,12 +2875,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -2984,12 +3006,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -3089,12 +3113,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -4682,12 +4708,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**3"
+          "scale": 190.44219359776744,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 3.8900258370345734e-08,
-          "scale": "n * sigma**4"
+          "scale": 197.16450263894882,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 175191189.10130507,
         "sigma": 0.5708049616769149,
@@ -4787,12 +4815,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -4940,12 +4970,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -5093,12 +5125,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -5198,12 +5232,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -5327,12 +5363,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -5432,12 +5470,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -7025,12 +7065,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**3"
+          "scale": 187.39041007052515,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 0.0003911029488699473,
-          "scale": "n * sigma**4"
+          "scale": 196.52122190392177,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1761371094794.1968,
         "sigma": 0.5677395314113718,
@@ -7130,12 +7172,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -7283,12 +7327,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -7436,12 +7482,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -7541,12 +7589,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -7670,12 +7720,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -7775,12 +7827,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -9368,12 +9422,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 0.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0,
         "sigma": 0.0,
@@ -9473,12 +9529,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -9626,12 +9684,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -9779,12 +9839,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -9884,12 +9946,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -10013,12 +10077,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -10118,12 +10184,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -11711,12 +11779,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 128.0,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 64.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.0,
         "sigma": 0.5,
@@ -11816,12 +11886,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -11969,12 +12041,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -12122,12 +12196,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -12227,12 +12303,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -12356,12 +12434,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -12461,12 +12541,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -14054,12 +14136,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 9.970722198486328e+17,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 9.960994692519307e+23,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.03126526997403612,
         "sigma": 31234.737483827103,
@@ -14159,12 +14243,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -14312,12 +14398,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -14465,12 +14553,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -14570,12 +14660,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -14699,12 +14791,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -14804,12 +14898,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -16397,12 +16493,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 4.878807918358698e+25,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 4.5851462298011155e+33,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.27773881603023015,
         "sigma": 23440787.85861195,
@@ -16502,12 +16600,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -16655,12 +16755,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -16808,12 +16910,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -16913,12 +17017,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -17042,12 +17148,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -17147,12 +17255,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -18740,12 +18850,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3740.8958966617615,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 6585.435076760128,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.0003246470411228897,
         "sigma": 1.5401341662335786,
@@ -18845,12 +18957,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -18998,12 +19112,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -19151,12 +19267,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -19240,12 +19358,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -19353,12 +19473,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -19458,12 +19580,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -21051,12 +21175,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 22777.5729802263,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 120157.13147177002,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 0.013620187825936754,
         "sigma": 2.8384595054543604,
@@ -21156,12 +21282,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -21309,12 +21437,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -21462,12 +21592,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -21567,12 +21699,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -21680,12 +21814,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -21769,12 +21905,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,
@@ -23362,12 +23500,14 @@
         "M3": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**3"
+          "scale": 3852666729.45537,
+          "scale_rule": "max(n * sigma**3, abs(expected_M3))"
         },
         "M4": {
           "metric": "absolute_over_scale",
           "max": 1e-13,
-          "scale": "n * sigma**4"
+          "scale": 2059784809418.0,
+          "scale_rule": "max(n * sigma**4, abs(expected_M4))"
         },
         "offset_to_spread_ratio": 1.7203079548323488,
         "sigma": 297.0398402010523,

@@ -915,8 +915,15 @@ def c_merge(v, c):
         want, g = f_of(field), float(got[i])
         limit = tol[key]["max"]
         if tol[key]["metric"] == "absolute_over_scale":
+            # The case states the scale as a NUMBER and this divides by that
+            # number, so an implementation reading the field gets the answer
+            # this gets. The rule is re-derived only to prove the two agree.
             scale = max(n * (sigma ** (3 if key == "M3" else 4)), abs(want))
-            err = abs(g - want) / scale if scale > 0 else abs(g - want)
+            assert tol[key]["scale"] == scale, (
+                f"{key}: the case states a scale of {tol[key]['scale']}, "
+                f"max(n * sigma**k, |expected|) is {scale}")
+            stated = tol[key]["scale"]
+            err = abs(g - want) / stated if stated > 0 else abs(g - want)
         else:
             err = abs(g - want) / abs(want) if want != 0.0 else abs(g)
         assert err <= limit, f"{key}: error {err:.3e} > {limit:.3e}"
