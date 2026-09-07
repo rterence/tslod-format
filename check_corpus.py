@@ -771,6 +771,12 @@ def _merged(c):
     return acc.reshape(5)
 
 
+def _merge_dataset_values(c):
+    """The case's dataset, rebuilt from the generator's own definition."""
+    import gen_set4_chan_pebay as g
+    return dict(g.datasets())[c["dataset"]]
+
+
 def c_merge(v, c):
     got = _merged(c)
     assert int(got[0]) == int(c["expected_count"]), "count must be EXACT"
@@ -778,6 +784,26 @@ def c_merge(v, c):
     if tol is None:
         return                                  # the empty dataset: count is all of it
     n, sigma = int(c["expected_count"]), tol["sigma"]
+
+    # The tolerance is derived, not accepted. The vector states its own rule —
+    # EPS * |mean| / sigma, floored at 1e-13 — and a bound merely read back
+    # would be satisfied by any number large enough.
+    exact_n, exact_mean, exact_m2, _m3, _m4 = _exact_moments(
+        _merge_dataset_values(c))
+    assert exact_n == n, "the dataset does not have the count the case states"
+    ref_sigma = (float(exact_m2) / exact_n) ** 0.5 if exact_m2 > 0 else 0.0
+    assert ref_sigma == sigma, f"sigma {sigma} is not sqrt(M2/n) = {ref_sigma}"
+    ratio = abs(float(exact_mean)) / ref_sigma if ref_sigma > 0 else 0.0
+    assert ratio == tol["offset_to_spread_ratio"], (
+        f"offset_to_spread_ratio {tol['offset_to_spread_ratio']} is not "
+        f"|mean|/sigma = {ratio}")
+    EPS = 2.220446049250313e-16
+    bound = max(EPS * ratio, 1e-13)
+    for key in ("mean", "M2", "M3", "M4"):
+        assert tol[key]["max"] == bound, (
+            f"{key}: the stated bound {tol[key]['max']} is not "
+            f"max(EPS * |mean|/sigma, 1e-13) = {bound}")
+
     for i, key in ((1, "mean"), (2, "M2"), (3, "M3"), (4, "M4")):
         field = c.get(f"expected_{key}")
         if field is None:
