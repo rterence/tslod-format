@@ -172,6 +172,18 @@ def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
                    profile)
 
 
+def _implied_size(sample_count: int, columns: int, dtype: str) -> int:
+    """The decoded size a stream's SHAPE implies.
+
+    `sample_count` is the block's row count at its own level — raw samples at
+    level 0, buckets above it — and the column count comes from the block
+    table: positions 2, variable-rate timestamp tuples 4, values 1 at level 0
+    and 4 above it, moments 5. Nothing about this needs the stream decoded, so
+    an index entry can be checked against it before any payload is touched.
+    """
+    return sample_count * columns * np.dtype(dtype).itemsize
+
+
 def _leading_count(level: int, timing_mode: int, aggregation_mode: int) -> int:
     """How many streams precede the values stream in this block kind.
 
@@ -305,6 +317,16 @@ def open_v1(data: bytes) -> dict:
                     raise CorruptFile("compressed-size-zero")
                 if us == 0 or sc == 0:
                     raise CorruptFile("zero-size-index-entry")
+                # uncompressed_size must agree with the shape as well as with
+                # the decoded bytes. A reader that notices here refuses the
+                # file at step 1; one that only compares after decoding
+                # refuses it at step 5. Same rule, same class.
+                if us != _implied_size(sc, 4 if lv >= 1 else 1, ch_dtype):
+                    raise CorruptFile(
+                        "decoded-size-mismatch",
+                        f"uncompressed_size {us} is not the "
+                        f"{_implied_size(sc, 4 if lv >= 1 else 1, ch_dtype)} "
+                        f"bytes this block's shape implies")
                 if fo + cs > len(data):
                     raise CorruptFile("block-extent-past-eof")
                 if zlib.crc32(data[fo:fo + cs]) & 0xFFFFFFFF != crc:
@@ -335,17 +357,26 @@ def open_v1(data: bytes) -> dict:
                                           n - 1 - leading, profile)
                 _validate_last(body, rest, profile)
 
-                # (5) the values stream decodes to exactly uncompressed_size.
-                decoded = _decode(split_streams(body, n)[leading], ch_dtype)
-                if len(decoded) != us:
-                    raise CorruptFile(
-                        "decoded-size-mismatch",
-                        f"the values stream decodes to {len(decoded)} bytes, "
-                        f"the index entry says {us}")
-
-                # (6) the moment stream, where the bit says there is one. Its
-                #     recipe was checked in (4) and it carries no stated
-                #     length, so nothing here rejects on it.
+                # (5) every stream decodes to exactly the size its shape
+                #     implies; for the values stream that size is also what
+                #     uncompressed_size states. (6) the moment stream is the
+                #     last of them, where bit 0 says there is one.
+                kinds = []
+                if leading:
+                    kinds.append(("int64", 2 if (timing_mode == 0)
+                                  else (4 if aggregation_mode == 0 and lv >= 1
+                                        else 1)))
+                kinds.append((ch_dtype, 4 if lv >= 1 else 1))
+                if lv >= 1 and aggregation_mode == 0 and has_moments:
+                    kinds.append(("float64", 5))
+                for stream, (dt, cols) in zip(split_streams(body, n), kinds):
+                    want = _implied_size(sc, cols, dt)
+                    got = len(_decode(stream, dt))
+                    if got != want:
+                        raise CorruptFile(
+                            "decoded-size-mismatch",
+                            f"a stream decodes to {got} bytes, its shape "
+                            f"implies {want}")
                 blocks += 1
     return {"branching_factor": bf, "block_samples": block_samples,
             "profile": profile, "block_count": blocks}

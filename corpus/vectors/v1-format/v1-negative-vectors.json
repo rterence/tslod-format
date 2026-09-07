@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 27,
+  "case_count": 28,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -207,6 +207,21 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "the same disagreement from the other side, and the one a writer is likelier to produce: the entry was written before the stream was encoded and never corrected. Feature bit 0 still agrees with the framing here, so this fails at the decoded length and not before it"
+    },
+    {
+      "name": "v1-sample-count-disagrees-with-block-shape",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "patch": {
+        "offset": "5050",
+        "width_bytes": 8,
+        "original_hex": "0400000000000000",
+        "patched_hex": "0500000000000000"
+      },
+      "field": "block_index_entry.sample_count",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same rule from the shape's side rather than the byte count's. sample_count is the block's row count at its own level, so it fixes the decoded size of EVERY stream in the block; one more row than the block holds and no stream is the length its shape implies. A reader can refuse this before it decodes anything, by comparing uncompressed_size with the shape, or after decoding, by comparing the bytes. It is one rule, so it is one class either way"
     },
     {
       "name": "v1-decoded-size-mismatch-at-profile-2",

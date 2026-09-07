@@ -155,12 +155,18 @@ decoder. This is stated rather than left to be discovered, and it is why there i
 case for it — a case would pin one implementation's accidental failure mode as though it were the
 format's.
 
-⛔ **The values stream decodes to exactly `uncompressed_size` bytes, at every profile.** It is a
-writer's obligation and a reader's check: a reader that decodes the values stream to any other
-length rejects the file (`decoded-size-mismatch`). At profile 0 the length is knowable in advance
-and this is arithmetic; at profile 2 it is knowable only after decoding, which is precisely where a
-block whose index entry and payload disagree would otherwise be read as though they agreed. It is
-the only check a profile-2 reader has on a block's size.
+⛔ **Every stream decodes to exactly the size its shape implies.** A block's `sample_count` is its
+row count at its own level — raw samples at level 0, buckets above it — and the table above gives
+each stream its columns. The size is therefore `sample_count × columns × the dtype's width`:
+positions `N×2` i64, variable-rate timestamp tuples `N×4` i64, values `N×1` at level 0 and `N×4`
+above it, moments `N×5` f64. A stream that decodes to any other length makes the file malformed
+(`decoded-size-mismatch`).
+
+For the values stream that size is also what the index entry's `uncompressed_size` states, so
+`uncompressed_size` must agree with the shape as well as with the decoded bytes — three numbers that
+have to be one number. At profile 0 the shape is knowable before anything is decoded and the whole
+check is arithmetic; at profile 2 the decoded length is knowable only after decoding, and comparing
+it is the only check a reader has on a block's size.
 
 Every payload is the array's bytes, little-endian, **row-major** — the four values of bucket 0, then
 the four of bucket 1, never planar (`v1-block-framing`).
@@ -176,9 +182,19 @@ format:
 3. At profile 0 only, feature bit 0 against the length arithmetic
    (`moment-stream-flag-mismatch`).
 4. The remaining length prefixes, and the last stream's recipe byte.
-5. Decode the values stream and compare its length with `uncompressed_size`
-   (`decoded-size-mismatch`).
+5. Decode each stream and compare its length with the size its shape implies, the values stream's
+   being `uncompressed_size` (`decoded-size-mismatch`).
 6. The moment stream, where bit 0 says there is one.
+
+A reader that cross-checks `uncompressed_size` against the implied shape at step 1 refuses a
+disagreeing index entry there; a reader that only compares after decoding refuses it at step 5. Both
+give `decoded-size-mismatch`, because it is one rule and not two, and where `uncompressed_size` and
+the decoded bytes disagree either reader catches it.
+
+The shape comparison is nevertheless **required and not merely an early exit**. A `sample_count`
+that disagrees with the block leaves `uncompressed_size` and the decoded bytes equal to each other —
+both are wrong in the same way — so nothing but the shape notices, and every stream in that block is
+then read at the wrong length.
 
 Step 3 sits between the two prefix checks, and it has to. The cross-check needs only the leading
 stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on

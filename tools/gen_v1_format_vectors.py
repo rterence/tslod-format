@@ -967,6 +967,25 @@ def gen_v1_negatives() -> Vector:
                expected_error="CorruptFileError",
                verified_against_an_implementation=False, reason=why)
 
+    sc_off = B.block_offset(good.layout, 0, 1, 0, "sample_count")
+    good_sc, = struct.unpack_from("<Q", good.data, sc_off)
+    v.case("v1-sample-count-disagrees-with-block-shape",
+           file=rel, rejection_class="decoded-size-mismatch",
+           patch={"offset": u64(sc_off), "width_bytes": 8,
+                  "original_hex": good.data[sc_off:sc_off + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", good_sc + 1).hex().upper()},
+           field="block_index_entry.sample_count",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="the same rule from the shape's side rather than the byte "
+                  "count's. sample_count is the block's row count at its own "
+                  "level, so it fixes the decoded size of EVERY stream in the "
+                  "block; one more row than the block holds and no stream is "
+                  "the length its shape implies. A reader can refuse this "
+                  "before it decodes anything, by comparing uncompressed_size "
+                  "with the shape, or after decoding, by comparing the bytes. "
+                  "It is one rule, so it is one class either way")
+
     p2_rel, p2 = _PROFILE2_BUILDS["v1_p2_with_moments.tslod"]
     p2_off = B.block_offset(p2.layout, 0, 1, 0, "uncompressed_size")
     p2_us, = struct.unpack_from("<Q", p2.data, p2_off)
