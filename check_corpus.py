@@ -449,27 +449,54 @@ def c_layout(v, c):
     assert cursor == c["size_bytes"]
 
 
+#: Every v1 wire enum, in full. Stated here so that "a closed set with these
+#: exact codes" is checked as a set and not one member at a time: three of the
+#: six the vector names had no cardinality check at all, so an enum that grew a
+#: third member would have passed.
+V1_ENUMS = {
+    "dtype": {"float32": 0, "float64": 1, "int8": 2, "int16": 3, "int32": 4,
+              "int64": 5, "uint8": 6, "uint16": 7, "uint32": 8, "uint64": 9},
+    "aggregation_mode": {"numeric": 0, "bitfield": 1},
+    "timing_mode": {"fixed": 0, "variable": 1},
+    "file_state": {"sealed": 0, "active": 1},
+    "scaling_type": {"identity": 0, "linear": 1},
+    "timing_flags": {"TIMEBASE_PRESENT": 1, "EPOCH_SYNCED": 2},
+    "compression_id": {"none": 0, "recipe": 2},
+    "recipe": {"identity": 0, "zstd": 1, "pco": 2, "transpose_zstd": 3},
+}
+
+
 def c_enums(v, c):
     """The enums are closed sets, and the codes agree with the rest of the corpus."""
     if c.get("table"):                                  # dtype-widths
         for name, width in c["table"].items():
             assert np.dtype(name).itemsize == width, name
+        assert set(c["table"]) == set(V1_ENUMS["dtype"]), (
+            "the width table must cover exactly the ten dtypes")
         return
+
+    # No enum may quietly disappear from the vector either.
+    listed = {case["enum"] for case in v["cases"] if "enum" in case}
+    assert listed == set(V1_ENUMS), (
+        f"the vector states {sorted(listed)}, v1 has {sorted(V1_ENUMS)}")
+
     values = c["values"]
     assert len(set(values.values())) == len(values), "codes must be distinct"
     assert c.get("unknown_value_is_rejected") is True
+    assert values == V1_ENUMS[c["enum"]], (
+        f"{c['enum']} is {values}, v1 fixes it at {V1_ENUMS[c['enum']]}")
+
+    # and the codes must agree with what this reader actually enforces
     if c["enum"] == "dtype":
-        assert sorted(values.values()) == list(range(10))
         for name in values:
             np.dtype(name)                              # it must be a real dtype
+        assert {v_: k for k, v_ in values.items()} == DTYPE_BY_ENUM, (
+            "the dtype codes must be the ones this reader decodes files with")
     if c["enum"] == "recipe":
         assert set(values.values()) == RECIPE_REGISTRY, (
             "the registry the reader enforces must be the registry stated here")
-    if c["enum"] == "compression_id":
-        assert set(values.values()) == {0, 2}, "the v1 profile is 0 or 2"
     if c["enum"] == "timing_flags":
-        assert values == {"TIMEBASE_PRESENT": TIMEBASE_PRESENT,
-                          "EPOCH_SYNCED": 0x02}
+        assert values["TIMEBASE_PRESENT"] == TIMEBASE_PRESENT
         assert c["reserved_bits_must_be_zero"] is True
 
 
