@@ -971,6 +971,80 @@ def gen_v1_negatives() -> Vector:
          "version 1 and enforced all along; this is the case that pins it",
          rejection_class="timing-flags-reserved-bit-set")
 
+    # ---- the channel entry
+    C = lambda name: B.channel_offset(good.layout, 0, name)
+    case("v1-dtype-unknown", C("dtype"), "B", 10, "channel_entry.dtype",
+         "the dtype enum is 0 to 9 and closed. It fixes the width of every "
+         "value in the channel, so an unknown code leaves a reader with no way "
+         "to know how long anything is",
+         rejection_class="dtype-unknown")
+    case("v1-aggregation-mode-unknown", C("aggregation_mode"), "B", 2,
+         "channel_entry.aggregation_mode",
+         "aggregation_mode is 0 numeric or 1 bitfield, and it decides what a "
+         "bucket's four columns MEAN — min/max/first/last against OR/AND/"
+         "first/last. A reader that defaults an unknown value reports one as "
+         "the other with no sign that it did",
+         rejection_class="aggregation-mode-unknown")
+    case("v1-bitfield-aggregation-on-float-dtype", C("aggregation_mode"), "B", 1,
+         "channel_entry.aggregation_mode",
+         "bitfield mode is defined only for the eight integer dtypes: OR and "
+         "AND over a float's bit pattern are not statistics of anything. The "
+         "base channel is float32, so setting bitfield mode on it is the "
+         "combination the rule forbids. The class is the one set 3 already "
+         "uses for the same rule at the kernel",
+         rejection_class="bitfield-on-float-dtype")
+    case("v1-group-id-out-of-range", C("group_id"), "H", 7,
+         "channel_entry.group_id",
+         "a channel names the group whose time base it uses. An index past the "
+         "table is refused as an out-of-range group, not as whatever a "
+         "reader's language does when it indexes a list past its end",
+         rejection_class="group-id-out-of-range")
+    case("v1-num-levels-zero", C("num_levels"), "I", 0,
+         "channel_entry.num_levels",
+         "num_levels counts level 0, so the smallest legal value is 1 — a "
+         "channel with raw samples and no pyramid above them. Zero says the "
+         "channel has not even a level 0, which no channel can be, and a "
+         "reader looping over levels would silently read nothing",
+         rejection_class="num-levels-zero")
+    case("v1-level-table-offset-out-of-bounds", C("level_table_offset"), "Q",
+         1 << 40, "channel_entry.level_table_offset",
+         "the same bound as the group and channel tables, one level down: the "
+         "level table's entries must end inside the file",
+         rejection_class="level-table-out-of-bounds")
+    for slug, fname, why in (
+        ("v1-channel-name-not-utf8", "name",
+         "the channel name is UTF-8, NUL-padded. 0xFF 0xFE begins no valid "
+         "sequence, and a reader that decodes it leniently shows a user a name "
+         "the writer never wrote"),
+        ("v1-channel-unit-not-utf8", "unit",
+         "the unit string is the same rule in a 16-byte field, and a mangled "
+         "unit is worse than a mangled name: it is the thing a plot's axis is "
+         "labelled with"),
+        ("v1-channel-calibration-id-not-utf8", "calibration_id",
+         "and the calibration identifier, which is what ties the channel to "
+         "the record of how it was calibrated. One rule for all three text "
+         "fields, so one class"),
+    ):
+        raw_case(slug, C(fname), b"\xff\xfe", f"channel_entry.{fname}", why,
+                 cls="text-field-not-utf8")
+    case("v1-scaling-type-unknown", C("scaling_type"), "B", 3,
+         "channel_entry.scaling_type",
+         "scaling_type is 0 identity or 1 linear. It decides whether the "
+         "stored values are the real ones or have to be transformed first, so "
+         "an unknown value leaves a reader unable to say what a sample means",
+         rejection_class="scaling-type-unknown")
+    for slug, delta, value, pname, why in (
+        ("v1-scaling-gain-nan", 0, float("nan"), "gain",
+         "a NaN gain turns every scaled sample into a NaN, so a channel that "
+         "recorded perfectly reads as entirely invalid"),
+        ("v1-scaling-offset-infinite", 8, float("inf"), "offset",
+         "an infinite offset does the same by saturation. Gain and offset are "
+         "one rule — a scaling parameter is finite — so they share a class"),
+    ):
+        case(slug, C("scaling_params") + delta, "d", value,
+             f"channel_entry.scaling_{pname}", why,
+             rejection_class="scaling-parameter-not-finite")
+
     # ---- a block whose extent leaves the file
     _blk = B.block_offset(good.layout, 0, 1, 0, "file_offset")
     _csz = B.block_offset(good.layout, 0, 1, 0, "compressed_size")

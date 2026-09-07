@@ -334,12 +334,44 @@ def open_v1(data: bytes) -> dict:
     blocks = 0
     for ci in range(n_channels):
         base = channel_off + ci * CHANNEL_ENTRY_SIZE
-        ch_dtype = DTYPE_BY_ENUM[data[base + 64]]
+        dtype_code = data[base + 64]
+        if dtype_code not in DTYPE_BY_ENUM:
+            raise CorruptFile("dtype-unknown", str(dtype_code))
+        ch_dtype = DTYPE_BY_ENUM[dtype_code]
         aggregation_mode = data[base + 65]
+        if aggregation_mode not in (0, 1):
+            raise CorruptFile("aggregation-mode-unknown", str(aggregation_mode))
+        if aggregation_mode == 1 and np.dtype(ch_dtype).kind == "f":
+            raise CorruptFile("bitfield-on-float-dtype", ch_dtype)
         group_id, = struct.unpack_from("<H", data, base + 66)
+        if group_id >= n_groups:
+            raise CorruptFile("group-id-out-of-range",
+                              f"{group_id}, of {n_groups} groups")
         num_levels, = struct.unpack_from("<I", data, base + 68)
+        if num_levels == 0:
+            raise CorruptFile("num-levels-zero")
         level_off, = struct.unpack_from("<Q", data, base + 72)
-        timing_mode = groups[group_id]["timing_mode"] if groups else 0
+        if level_off + num_levels * LEVEL_ENTRY_SIZE > len(data):
+            raise CorruptFile(
+                "level-table-out-of-bounds",
+                f"{num_levels} entries at {level_off} end past {len(data)}")
+        # The three text fields are UTF-8, NUL-padded to their width.
+        for fname, off, width in (("name", 0, 64), ("unit", 80, 16),
+                                  ("calibration_id", 114, 32)):
+            try:
+                data[base + off:base + off + width].split(b"\x00")[0].decode("utf-8")
+            except UnicodeDecodeError:
+                raise CorruptFile("text-field-not-utf8",
+                                  f"channel_entry.{fname}")
+        scaling_type = data[base + 96]
+        if scaling_type not in (0, 1):
+            raise CorruptFile("scaling-type-unknown", str(scaling_type))
+        gain, offset = struct.unpack_from("<dd", data, base + 98)
+        for pname, value in (("scaling_gain", gain), ("scaling_offset", offset)):
+            if not -float("inf") < value < float("inf"):
+                raise CorruptFile("scaling-parameter-not-finite",
+                                  f"{pname}={value!r}")
+        timing_mode = groups[group_id]["timing_mode"]
         for lv in range(num_levels):
             block_count, allocated, index_off = struct.unpack_from(
                 "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)

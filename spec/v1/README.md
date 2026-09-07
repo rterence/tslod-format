@@ -304,6 +304,18 @@ itself, and an infinity collapses the group onto its start. The constraint is on
 because that is where this field defines the time of a sample; a variable-rate group carries its
 timestamps instead.
 
+**The channel entry.** A `dtype` outside 0–9 (`dtype-unknown`), which leaves a reader without the
+width of anything. An `aggregation_mode` outside `{0, 1}` (`aggregation-mode-unknown`), which decides
+what a bucket's four columns mean. Bitfield mode on a float dtype (`bitfield-on-float-dtype`), which
+is the file-level form of a rule set 3 already pins at the kernel. A `group_id` past the group table
+(`group-id-out-of-range`). `num_levels` of zero (`num-levels-zero`): it counts level 0, so 1 is the
+smallest a channel can have. A level table whose entries end past the end of the file
+(`level-table-out-of-bounds`). `name`, `unit` or `calibration_id` that is not valid UTF-8
+(`text-field-not-utf8`) — one rule for the three, so one class. A `scaling_type` outside `{0, 1}`
+(`scaling-type-unknown`), and a `scaling_gain` or `scaling_offset` that is not finite
+(`scaling-parameter-not-finite`), either of which turns every sample in the channel into a NaN or a
+saturation.
+
 `total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
 conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a
 recording that captured nothing rather than a malformed file.
