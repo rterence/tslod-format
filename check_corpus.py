@@ -527,13 +527,93 @@ def c_build_level(v, c):
     assert bits_equal(t, arr_of(c["expected_tuples"])), "tuples differ"
 
 
+QNAN_BITS = 0x7FF8000000000000
+_QNAN = struct.unpack("<d", struct.pack("<Q", QNAN_BITS))[0]
+
+
+def _ref_merge(a, b):
+    """One Chan/Pebay merge, scalar, in the association spec/v1 states.
+
+    Not `_moments.merge_arrays`. That one advances every bucket in lockstep
+    across numpy arrays and claims in its own docstring to be bit-identical to
+    folding each bucket separately in a Python loop — a claim nothing checked.
+    This is that Python loop, so the claim is now the thing being tested, and
+    the corpus is compared with the specification's arithmetic rather than with
+    the code that wrote it.
+
+    Only +, -, * and / appear, in the association the specification fixes:
+    `d2 = delta * delta`, the cube `d2 * delta`, the fourth power `d2 * d2`,
+    and the counts `n * n` and `(n * n) * n`.
+    """
+    ca, ma, m2a, m3a, m4a = a
+    cb, mb, m2b, m3b, m4b = b
+    n = ca + cb
+    if ca == 0 and cb == 0:
+        return (0.0, _QNAN, _QNAN, _QNAN, _QNAN)
+    if cb == 0:
+        return (n, ma, m2a, m3a, m4a)
+    if ca == 0:
+        return (n, mb, m2b, m3b, m4b)
+    delta = mb - ma
+    d2 = delta * delta
+    d3 = d2 * delta
+    d4 = d2 * d2
+    n2 = n * n
+    n3 = n2 * n
+    m2 = m2a + m2b + d2 * ca * cb / n
+    m3 = (m3a + m3b
+          + d3 * ca * cb * (ca - cb) / n2
+          + 3.0 * delta * (ca * m2b - cb * m2a) / n)
+    m4 = (m4a + m4b
+          + d4 * ca * cb * (ca * ca - ca * cb + cb * cb) / n3
+          + 6.0 * d2 * (ca * ca * m2b + cb * cb * m2a) / n2
+          + 4.0 * delta * (ca * m3b - cb * m3a) / n)
+    mean = (ca * ma + cb * mb) / n
+    return (n, mean, m2, m3, m4)
+
+
+def _ref_singles(values):
+    """Raw samples -> one moment tuple each. A NaN sample has count 0."""
+    out = []
+    for x in values:
+        x = float(x)
+        if x != x:
+            out.append((0.0, _QNAN, _QNAN, _QNAN, _QNAN))
+        else:
+            out.append((1.0, x, 0.0, 0.0, 0.0))
+    return out
+
+
+def _ref_fold_children(rows, k):
+    """Strict left-to-right fold of `k` children per parent, ascending index."""
+    n_out = -(-len(rows) // k)
+    padded = list(rows) + [(0.0, _QNAN, _QNAN, _QNAN, _QNAN)] * (n_out * k - len(rows))
+    out = []
+    for b in range(n_out):
+        acc = padded[b * k]
+        for i in range(1, k):
+            acc = _ref_merge(acc, padded[b * k + i])
+        out.append(acc)
+    return out
+
+
+def _as_moment_array(rows):
+    a = np.empty((len(rows), 5), dtype=np.float64)
+    for i, row in enumerate(rows):
+        a[i] = row
+    return a
+
+
 def c_moments(v, c):
     raw = arr_of(c["input"])
-    got = _moments.level1_from_raw(raw, int(c["branching_factor"]))
-    assert bits_equal(got, arr_of(c["expected_moments"])), "level-1 moments differ"
+    bf = int(c["branching_factor"])
+    level1 = _ref_fold_children(_ref_singles(raw), bf)
+    assert bits_equal(_as_moment_array(level1), arr_of(c["expected_moments"])), (
+        "level-1 moments differ")
     if "expected_moments_level2" in c:
-        l2 = _moments.next_level(got, int(c["branching_factor"]))
-        assert bits_equal(l2, arr_of(c["expected_moments_level2"])), "level-2 differ"
+        level2 = _ref_fold_children(level1, bf)
+        assert bits_equal(_as_moment_array(level2),
+                          arr_of(c["expected_moments_level2"])), "level-2 differ"
 
 
 def c_range(v, c):
