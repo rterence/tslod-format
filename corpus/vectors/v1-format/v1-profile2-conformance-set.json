@@ -1,0 +1,88 @@
+{
+  "id": "v1-profile2-conformance-set",
+  "set": "v1-format",
+  "kind": "fixture",
+  "asserts": "A profile-2 file mixes recipes freely \u2014 each stream carries its own recipe byte and none is implicit \u2014 and decodes to exactly the payloads the identity-encoded file of the same data holds, byte for byte. The number of streams in each block is header feature bit 0 and nothing a reader computes.",
+  "source": "written by tools/_tslod_build.py",
+  "contract": "At profile 2 the stream count is known only from feature bit 0, and a reader that discovers it any other way is wrong.",
+  "requires": [
+    "format:v1",
+    "profile:2",
+    "recipe:0x01",
+    "recipe:0x02",
+    "recipe:0x03",
+    "feature:crc"
+  ],
+  "notes": "Profile 0 cannot exercise any of this: its every recipe byte is 0x00, so nothing in that set decodes, and the length arithmetic that settles the stream count there does not exist here. Each file below is written with a DIFFERENT recipe on each of its streams, so a reader that applies one recipe to a whole block fails on the first file. `decoded_sha256` is over every block's decoded streams concatenated in file order; it is verified here against the identity-encoded file of the same data before the vector is written.",
+  "case_count": 3,
+  "cases": [
+    {
+      "name": "v1_p2_with_moments.tslod",
+      "file": "v1-format/files/v1_p2_with_moments.tslod",
+      "file_size_bytes": "8329",
+      "block_count": 36,
+      "format_version": 1,
+      "compression_id": 2,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
+      "recipes": {
+        "timestamps": "0x02",
+        "values": "0x03",
+        "moments": "0x01"
+      },
+      "stream_count_per_numeric_level_block": 3,
+      "decoded_stream_count": 44,
+      "decoded_bytes": "35216",
+      "decoded_sha256": "76ef9f2f89c7f53db8015722dc751cf5a29eb69ec4a16738c267c672aa2a79a6",
+      "every_crc_verifies": true,
+      "note": "three recipes in one file, one per stream kind: positions under pco, values under transpose+zstd, moments under zstd. Feature bit 0 is set, so every numeric level-1 block has three streams and a reader knows it before it decodes anything"
+    },
+    {
+      "name": "v1_p2_no_moments.tslod",
+      "file": "v1-format/files/v1_p2_no_moments.tslod",
+      "file_size_bytes": "5178",
+      "block_count": 36,
+      "format_version": 1,
+      "compression_id": 2,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "features": "0",
+      "moment_stream_present": false,
+      "recipes": {
+        "timestamps": "0x01",
+        "values": "0x02"
+      },
+      "stream_count_per_numeric_level_block": 2,
+      "decoded_stream_count": 40,
+      "decoded_bytes": "33856",
+      "decoded_sha256": "7e522d8bd7c2388a46c26e289039518108d0503688b4c86541e8915e3f7df20d",
+      "every_crc_verifies": true,
+      "note": "the same shape with NO moment stream and bit 0 clear. This is the pair that matters at profile 2: the two files differ in stream count, and only the header bit says so \u2014 there is no length arithmetic here to fall back on"
+    },
+    {
+      "name": "v1_p2_active_with_moments.tslod",
+      "file": "v1-format/files/v1_p2_active_with_moments.tslod",
+      "file_size_bytes": "1956",
+      "block_count": 10,
+      "format_version": 1,
+      "compression_id": 2,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
+      "recipes": {
+        "timestamps": "0x03",
+        "values": "0x02",
+        "moments": "0x03"
+      },
+      "stream_count_per_numeric_level_block": 3,
+      "decoded_stream_count": 14,
+      "decoded_bytes": "17176",
+      "decoded_sha256": "d321ccc94ad0fe4ff9dffe1139f9c966b0b747225a3a0877c5a2763ef63892f5",
+      "every_crc_verifies": true,
+      "note": "an ACTIVE profile-2 file: file_state = 1 and moments present. A writer that is still appending compresses what it has already flushed, so the active case and the codec case meet here rather than in separate files"
+    }
+  ]
+}

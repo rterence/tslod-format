@@ -4,8 +4,8 @@
   "conventions": "corpus/CONVENTIONS.md",
   "generated_from": "tools/generate_all.py",
   "counts": {
-    "vectors": 24,
-    "cases": 1272,
+    "vectors": 25,
+    "cases": 1275,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -13,10 +13,10 @@
       "set2-anchored-fold": 2,
       "set3-build-level": 6,
       "set4-chan-pebay": 4,
-      "v1-format": 5
+      "v1-format": 6
     },
     "by_kind": {
-      "fixture": 20,
+      "fixture": 21,
       "negative": 1,
       "oracle": 3
     }
@@ -1185,6 +1185,41 @@
         {
           "path": "v1-format/files/v1_branching_factor_1024.tslod",
           "sha256": "9471743c7b9f5d9d0d59528883e2d5b8648ceabee9a10295b2d45ca42304dab2"
+        }
+      ]
+    },
+    {
+      "id": "v1-profile2-conformance-set",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "A profile-2 file mixes recipes freely \u2014 each stream carries its own recipe byte and none is implicit \u2014 and decodes to exactly the payloads the identity-encoded file of the same data holds, byte for byte. The number of streams in each block is header feature bit 0 and nothing a reader computes.",
+      "source": "written by tools/_tslod_build.py",
+      "contract": "At profile 2 the stream count is known only from feature bit 0, and a reader that discovers it any other way is wrong.",
+      "requires": [
+        "format:v1",
+        "profile:2",
+        "recipe:0x01",
+        "recipe:0x02",
+        "recipe:0x03",
+        "feature:crc"
+      ],
+      "case_count": 3,
+      "files": [
+        {
+          "path": "v1-format/v1-profile2-conformance-set.json",
+          "sha256": "8ff3dac883c8a36465e2cb14eb8dc71feaea30b39913859e2568517426374b3b"
+        },
+        {
+          "path": "v1-format/files/v1_p2_with_moments.tslod",
+          "sha256": "80d2ff45f1633e3c3ddc4f62bb92c230d9e130ee71552e4a8a6e609abb81f3f3"
+        },
+        {
+          "path": "v1-format/files/v1_p2_no_moments.tslod",
+          "sha256": "7a4387ab902154b1c4f4fdf6a8688cb8be9efd3e9f13d87813e12e9ab2df01c4"
+        },
+        {
+          "path": "v1-format/files/v1_p2_active_with_moments.tslod",
+          "sha256": "0f9efd2ea6fa3b70168ef3a6ae27c6dc9adef1102ae236f089ebb8c56abc1a30"
         }
       ]
     },

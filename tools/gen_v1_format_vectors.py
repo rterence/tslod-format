@@ -28,6 +28,8 @@ written, so both shapes are in the conformance set and neither can be assumed.
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import struct
 import zlib
 from fractions import Fraction
@@ -242,6 +244,181 @@ def gen_profile0_set() -> Vector:
 # ---------------------------------------------------------------------------
 # Block framing
 # ---------------------------------------------------------------------------
+
+
+def _split_streams(body: bytes, n: int) -> list:
+    """The framing, read back: every stream but the last carries a u32 prefix."""
+    out, off = [], 0
+    for _ in range(n - 1):
+        prefix, = struct.unpack_from("<I", body, off)
+        out.append(body[off + 4:off + 4 + prefix])
+        off += 4 + prefix
+    out.append(body[off:])
+    return out
+
+
+def _decode_stream(stream: bytes, dtype: str) -> bytes:
+    """`[recipe][payload]` -> the decoded payload bytes, per the recipe registry."""
+    recipe, payload = stream[0], stream[1:]
+    if recipe == 0x00:
+        return payload
+    if recipe == 0x01:
+        import zstandard
+        return zstandard.ZstdDecompressor().decompress(payload)
+    if recipe == 0x03:
+        import zstandard
+        raw = zstandard.ZstdDecompressor().decompress(payload)
+        return B.byte_untranspose(raw, np.dtype(dtype).itemsize)
+    if recipe == 0x02:
+        from pcodec import standalone
+        return np.ascontiguousarray(
+            standalone.simple_decompress(payload)).tobytes()
+    raise ValueError(f"recipe {recipe:#04x}")
+
+
+def _stream_kinds(spec, ci: int, level: int, blk: dict) -> list:
+    """(name, dtype) per stream of this block, in wire order."""
+    kinds = []
+    if blk.get("ts_columns"):
+        kinds.append(("timestamps", "int64"))
+    kinds.append(("values", np.dtype(spec.channels[ci].data.dtype).name))
+    if (level >= 1 and spec.channels[ci].aggregation_mode == 0 and spec.moments):
+        kinds.append(("moments", "float64"))
+    return kinds
+
+
+def _walk_payloads(spec, result) -> list:
+    """Every block's decoded stream payloads, in file order."""
+    out = []
+    for (ci, level, bi, blk) in result.blocks:
+        lo = blk["file_offset"]
+        body = result.data[lo:lo + blk["compressed_size"]]
+        kinds = _stream_kinds(spec, ci, level, blk)
+        for stream, (name, dtype) in zip(_split_streams(body, len(kinds)), kinds):
+            out.append((name, dtype, _decode_stream(stream, dtype)))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The profile-2 conformance set
+# ---------------------------------------------------------------------------
+
+
+def gen_profile2_set() -> Vector:
+    v = Vector(
+        id="v1-profile2-conformance-set",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "A profile-2 file mixes recipes freely — each stream carries its own "
+            "recipe byte and none is implicit — and decodes to exactly the payloads "
+            "the identity-encoded file of the same data holds, byte for byte. The "
+            "number of streams in each block is header feature bit 0 and nothing a "
+            "reader computes."
+        ),
+        source="written by tools/_tslod_build.py",
+        contract=(
+            "At profile 2 the stream count is known only from feature bit 0, and a "
+            "reader that discovers it any other way is wrong."
+        ),
+        requires=["format:v1", "profile:2", "recipe:0x01", "recipe:0x02",
+                  "recipe:0x03", "feature:crc"],
+        notes=(
+            "Profile 0 cannot exercise any of this: its every recipe byte is 0x00, so "
+            "nothing in that set decodes, and the length arithmetic that settles the "
+            "stream count there does not exist here. Each file below is written with a "
+            "DIFFERENT recipe on each of its streams, so a reader that applies one "
+            "recipe to a whole block fails on the first file. `decoded_sha256` is over "
+            "every block's decoded streams concatenated in file order; it is verified "
+            "here against the identity-encoded file of the same data before the vector "
+            "is written."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+
+    def emit2(name, spec, recipes, note):
+        spec.compression_id = 2
+        spec.recipes = recipes
+        result = B.build(spec)
+        rel = _write_file(name, result)
+
+        for (ci, level, bi, blk) in result.blocks:
+            lo = blk["file_offset"]
+            hi = lo + blk["compressed_size"]
+            assert zlib.crc32(result.data[lo:hi]) & 0xFFFFFFFF == blk["crc32"], (
+                f"{name}: CRC does not verify for channel {ci} level {level} block {bi}")
+
+        # The claim, checked before it is written: decoding this file gives
+        # exactly what the identity-encoded file of the same data holds.
+        twin_spec = copy.deepcopy(spec)
+        twin_spec.compression_id = 0
+        twin_spec.recipes = None
+        twin_spec.recipe = B.RECIPE_IDENTITY
+        twin = B.build(twin_spec)
+        got = _walk_payloads(spec, result)
+        want = _walk_payloads(twin_spec, twin)
+        assert len(got) == len(want), f"{name}: stream count differs from the twin"
+        for (gn, gd, gp), (wn, wd, wp) in zip(got, want):
+            assert (gn, gd) == (wn, wd), f"{name}: stream kinds differ"
+            assert gp == wp, f"{name}: {gn} stream does not decode to the twin's bytes"
+
+        digest = hashlib.sha256()
+        for _, _, payload in got:
+            digest.update(payload)
+        features = struct.unpack_from("<Q", result.data, 92)[0]
+        assert bool(features & B.FEATURE_MOMENT_STREAM) == bool(spec.moments)
+
+        v.case(name, file=rel, file_size_bytes=u64(len(result.data)),
+               block_count=len(result.blocks),
+               format_version=1, compression_id=2,
+               branching_factor=spec.branching_factor,
+               block_samples=spec.block_samples or spec.branching_factor,
+               features=u64(features),
+               moment_stream_present=bool(features & B.FEATURE_MOMENT_STREAM),
+               recipes={k: f"0x{r:02X}" for k, r in recipes.items()},
+               stream_count_per_numeric_level_block=(
+                   3 if spec.moments else 2),
+               decoded_stream_count=len(got),
+               decoded_bytes=u64(sum(len(p) for _, _, p in got)),
+               decoded_sha256=digest.hexdigest(),
+               every_crc_verifies=True, note=note)
+
+    emit2("v1_p2_with_moments.tslod",
+          B.FileSpec(branching_factor=256,
+                     groups=[B.GroupSpec(1000.0, ts)],
+                     channels=[B.ChannelSpec("sig", ramp("float32", 4096)),
+                               B.ChannelSpec("count", ramp("int32", 4096))]),
+          {"timestamps": B.RECIPE_PCO,
+           "values": B.RECIPE_TRANSPOSE_ZSTD,
+           "moments": B.RECIPE_ZSTD},
+          "three recipes in one file, one per stream kind: positions under pco, values "
+          "under transpose+zstd, moments under zstd. Feature bit 0 is set, so every "
+          "numeric level-1 block has three streams and a reader knows it before it "
+          "decodes anything")
+
+    emit2("v1_p2_no_moments.tslod",
+          B.FileSpec(branching_factor=256, moments=False,
+                     groups=[B.GroupSpec(1000.0, ts)],
+                     channels=[B.ChannelSpec("sig", ramp("float32", 4096)),
+                               B.ChannelSpec("count", ramp("int32", 4096))]),
+          {"timestamps": B.RECIPE_ZSTD,
+           "values": B.RECIPE_PCO},
+          "the same shape with NO moment stream and bit 0 clear. This is the pair that "
+          "matters at profile 2: the two files differ in stream count, and only the "
+          "header bit says so — there is no length arithmetic here to fall back on")
+
+    emit2("v1_p2_active_with_moments.tslod",
+          B.FileSpec(branching_factor=256, file_state=1,
+                     groups=[B.GroupSpec(1000.0, ts)],
+                     channels=[B.ChannelSpec("streaming", ramp("int64", 2048))]),
+          {"timestamps": B.RECIPE_TRANSPOSE_ZSTD,
+           "values": B.RECIPE_PCO,
+           "moments": B.RECIPE_TRANSPOSE_ZSTD},
+          "an ACTIVE profile-2 file: file_state = 1 and moments present. A writer that "
+          "is still appending compresses what it has already flushed, so the active "
+          "case and the codec case meet here rather than in separate files")
+
+    return v
 
 
 def gen_block_framing() -> Vector:
@@ -786,7 +963,7 @@ def gen_v1_negatives() -> Vector:
 
 
 def main() -> None:
-    for factory in (gen_profile0_set, gen_block_framing, gen_crc,
+    for factory in (gen_profile0_set, gen_profile2_set, gen_block_framing, gen_crc,
                     gen_time_axis, gen_v1_negatives):
         vector = factory()
         vector.write()

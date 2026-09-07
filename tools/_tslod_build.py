@@ -135,7 +135,12 @@ class FileSpec:
     sequence_number: int = 0
     prev_file_hash: bytes = b"\x00" * 32
     features: int = 0                     # v1 only
-    recipe: int = RECIPE_IDENTITY         # v1 only
+    recipe: int = RECIPE_IDENTITY         # v1 only; the default for every stream
+    #: v1 only. Per-stream override of `recipe`, keyed "timestamps", "values"
+    #: and "moments". Profile 2 exists so a file can mix recipes — each stream
+    #: carries its own byte and nothing is implicit — so the writer has to be
+    #: able to write a different one per stream or the profile is untested.
+    recipes: dict | None = None
     #: v1 only. The (count, mean, M2, M3, M4) third stream on numeric levels
     #: >= 1, False builds a file without it, which is what
     #: the "reader that does not want moments skips it" vector needs.
@@ -357,8 +362,18 @@ def build(spec: FileSpec) -> BuildResult:
                         moments[level][b0:b1]).tobytes()
                     wrote_moments = True
 
-                body = _frame_v1(ts_payload, values_payload, spec.recipe,
-                                 chunk.dtype.itemsize, moments_payload)
+                def _r(kind: str) -> int:
+                    return (spec.recipes or {}).get(kind, spec.recipe)
+
+                block_streams = []
+                if ts_payload is not None:
+                    block_streams.append((ts_payload, _r("timestamps"), "int64"))
+                block_streams.append(
+                    (values_payload, _r("values"), chunk.dtype.name))
+                if moments_payload is not None:
+                    block_streams.append(
+                        (moments_payload, _r("moments"), "float64"))
+                body = _frame_v1(block_streams)
 
                 offset = data_start + len(blob)
                 blob += body
@@ -551,10 +566,31 @@ def block_offset(layout: dict, channel_index: int, level: int, block: int,
     return ch["index_offsets"][level] + block * entry + off
 
 
-def _frame_v1(ts_payload: bytes | None, values_payload: bytes,
-              recipe: int, itemsize: int,
-              moments_payload: bytes | None = None) -> bytes:
-    """v1 framing (the framing rules, generalised to k streams by the 2026-09-06 ruling).
+def encode_stream_typed(payload: bytes, recipe: int, dtype: str) -> bytes:
+    """`[recipe][payload]` for any registered recipe, given the stream's dtype.
+
+    The dtype is what the two width-aware recipes need: byte-transpose has to
+    know the element width, and pco takes typed values rather than bytes.
+    """
+    if recipe in (RECIPE_IDENTITY, RECIPE_ZSTD):
+        return encode_stream_v1(payload, recipe)
+    width = np.dtype(dtype).itemsize
+    if recipe == RECIPE_TRANSPOSE_ZSTD:
+        import zstandard
+        c = zstandard.ZstdCompressor(write_content_size=True, write_checksum=False)
+        return bytes([recipe]) + c.compress(byte_transpose(payload, width))
+    if recipe == RECIPE_PCO:
+        from pcodec import ChunkConfig, standalone
+        arr = np.frombuffer(payload, dtype=np.dtype(dtype))
+        if arr.size == 0 or width == 1:
+            raise ValueError("pco takes neither an empty array nor an 8-bit dtype")
+        return bytes([recipe]) + standalone.simple_compress(
+            np.ascontiguousarray(arr), ChunkConfig())
+    raise ValueError(f"recipe {recipe:#04x} is not encodable")
+
+
+def _frame_v1(streams_in: list) -> bytes:
+    """v1 framing: `(payload, recipe, dtype)` per stream, in wire order.
 
     **Every stream except the last is prefixed by its own byte length as u32 LE,
     counting its recipe byte** — the same rule `ts_len` already followed. The
@@ -565,23 +601,12 @@ def _frame_v1(ts_payload: bytes | None, values_payload: bytes,
     `[len_ts u32][recipe][ts][len_vals u32][recipe][vals][recipe][moments]`,
     and the two-stream form is the same rule with one fewer stream — which is
     why a two-stream block's `ts_len` means what it means.
+
+    Each stream carries its own recipe byte, so a file may mix them; that is
+    the whole of profile 2, and nothing about the framing changes with it.
     """
-    def enc(payload: bytes, width: int) -> bytes:
-        if recipe == RECIPE_TRANSPOSE_ZSTD:
-            import zstandard
-            c = zstandard.ZstdCompressor(write_content_size=True, write_checksum=False)
-            return bytes([recipe]) + c.compress(byte_transpose(payload, width))
-        if recipe == RECIPE_PCO:
-            raise ValueError("pco framing is built by the codec-vector generator")
-        return encode_stream_v1(payload, recipe)
-
-    streams: list[bytes] = []
-    if ts_payload is not None:
-        streams.append(enc(ts_payload, 8))
-    streams.append(enc(values_payload, itemsize))
-    if moments_payload is not None:
-        streams.append(enc(moments_payload, 8))
-
+    streams = [encode_stream_typed(payload, recipe, dtype)
+               for payload, recipe, dtype in streams_in]
     out = b""
     for stream in streams[:-1]:
         out += struct.pack("<I", len(stream)) + stream

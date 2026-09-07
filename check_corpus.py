@@ -641,6 +641,110 @@ def c_profile0(v, c):
     assert bool(features & FEATURE_MOMENT_STREAM) == c["moment_stream_present"]
 
 
+#: Wire dtype enum, restated here rather than imported — this file is the
+#: independent re-derivation of what the specification says.
+DTYPE_BY_ENUM = {0: "float32", 1: "float64", 2: "int8", 3: "int16", 4: "int32",
+                 5: "int64", 6: "uint8", 7: "uint16", 8: "uint32", 9: "uint64"}
+
+
+def _decode(stream: bytes, dtype: str) -> bytes:
+    """`[recipe][payload]` -> decoded payload bytes, per the recipe registry."""
+    recipe, payload = stream[0], stream[1:]
+    if recipe == 0x00:
+        return payload
+    if recipe in (0x01, 0x03):
+        try:
+            import zstandard
+        except ImportError:
+            raise Skip("zstandard")
+        raw = zstandard.ZstdDecompressor().decompress(payload)
+        if recipe == 0x01:
+            return raw
+        width = np.dtype(dtype).itemsize
+        return np.frombuffer(raw, dtype=np.uint8).reshape(width, -1).T.tobytes()
+    if recipe == 0x02:
+        try:
+            from pcodec import standalone
+        except ImportError:
+            raise Skip("pcodec")
+        return np.ascontiguousarray(standalone.simple_decompress(payload)).tobytes()
+    raise CorruptFile("unknown-recipe-byte", f"0x{recipe:02X}")
+
+
+def c_profile2(v, c):
+    """A profile-2 file: framing, the stream count from the bit, and the bytes.
+
+    The point of the profile is that recipes are per stream and nothing is
+    implicit, so this decodes every stream with the recipe that stream carries
+    and hashes what comes out. It never infers a stream count: it reads feature
+    bit 0, which at this profile is the only thing that knows.
+    """
+    data = (VECTORS / c["file"]).read_bytes()
+    info = open_v1(data)
+    assert info["profile"] == 2, "profile 2 means compression_id 2"
+    assert info["branching_factor"] == c["branching_factor"]
+    assert info["block_samples"] == c["block_samples"]
+    assert info["block_count"] == c["block_count"]
+    features, = struct.unpack_from("<Q", data, 92)
+    assert str(features) == c["features"]
+    has_moments = bool(features & FEATURE_MOMENT_STREAM)
+    assert has_moments == c["moment_stream_present"]
+
+    digest = hashlib.sha256()
+    n_streams_total = 0
+    total = 0
+    n_groups, = struct.unpack_from("<H", data, 14)
+    n_channels, = struct.unpack_from("<I", data, 16)
+    group_off, = struct.unpack_from("<Q", data, 24)
+    channel_off, = struct.unpack_from("<Q", data, 32)
+    groups = [data[group_off + gi * GROUP_ENTRY_SIZE + 24] for gi in range(n_groups)]
+    for ci in range(n_channels):
+        base = channel_off + ci * CHANNEL_ENTRY_SIZE
+        ch_dtype = DTYPE_BY_ENUM[data[base + 64]]
+        agg = data[base + 65]
+        gid, = struct.unpack_from("<H", data, base + 66)
+        n_levels, = struct.unpack_from("<I", data, base + 68)
+        level_off, = struct.unpack_from("<Q", data, base + 72)
+        tm = groups[gid] if groups else 0
+        for lv in range(n_levels):
+            block_count, _alloc, index_off = struct.unpack_from(
+                "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
+            for b in range(block_count):
+                e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
+                fo, cs, us, _sc, _ts, _crc, _r = struct.unpack_from(
+                    "<QQQQqII", data, e)
+                body = data[fo:fo + cs]
+                n = stream_count(body, lv, tm, agg, us, has_moments, 2)
+                kinds = []
+                if n > (2 if (agg == 0 and lv >= 1 and has_moments) else 1):
+                    kinds.append("int64")          # the leading position/ts stream
+                kinds.append(ch_dtype)
+                if agg == 0 and lv >= 1 and has_moments:
+                    kinds.append("float64")
+                assert len(kinds) == n, (
+                    f"{c['name']}: worked out {len(kinds)} stream kinds for a "
+                    f"block the bit says has {n}")
+                off = 0
+                for i, dt in enumerate(kinds):
+                    if i < n - 1:
+                        prefix, = struct.unpack_from("<I", body, off)
+                        stream = body[off + 4:off + 4 + prefix]
+                        off += 4 + prefix
+                    else:
+                        stream = body[off:]
+                    payload = _decode(stream, dt)
+                    digest.update(payload)
+                    total += len(payload)
+                    n_streams_total += 1
+
+    assert n_streams_total == c["decoded_stream_count"], (
+        f"decoded {n_streams_total} streams, the vector says "
+        f"{c['decoded_stream_count']}")
+    assert str(total) == c["decoded_bytes"]
+    assert digest.hexdigest() == c["decoded_sha256"], (
+        "the decoded bytes are not what the vector says they are")
+
+
 def c_negative(v, c):
     """Apply the patch and require the reader to refuse — or to accept."""
     if "file" in c:
@@ -758,6 +862,7 @@ CHECKS = {
     "v1-time-axis": c_time_axis,
     "v1-negative-vectors": c_negative,
     "v1-profile0-conformance-set": c_profile0,
+    "v1-profile2-conformance-set": c_profile2,
     "codec-decode-per-recipe": c_codec,
 }
 
