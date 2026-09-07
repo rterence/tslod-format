@@ -318,18 +318,36 @@ def c_ns_to_ticks(v, c):
     assert got == int(c["round_trip_of"]), "the round trip must recover the tick"
 
 
+def _ghz_bound(c):
+    """The recovery bound, re-derived rather than read out of the case.
+
+    Below 1 GHz the round trip is bit-exact, so the bound is one tick; at and
+    above it the bound is `(1 + rate/10^9)/2`, evaluated over the EXACT
+    rational rate so the boundary itself lands on the right side. Asserting
+    only that the observed error is within the number the case states would
+    pass however large that number were.
+    """
+    rate = Fraction(int(c["tick_rate_numer"]), int(c["tick_rate_denom"]))
+    bound = Fraction(1) if rate < NS else (1 + rate / NS) / 2
+    assert float(bound) == float(c["documented_error_bound_ticks"]), (
+        f"the stated bound {c['documented_error_bound_ticks']} is not "
+        f"{float(bound)}, which is what the rule gives for this rate")
+    return float(bound)
+
+
 def c_ghz(v, c):
     if "ticks" not in c:                      # the worst-observed summary case
-        bound = float(c["documented_error_bound_ticks"])
+        bound = _ghz_bound(c)
         assert int(c["worst_observed_error_ticks"]) <= bound
         return
+    _ghz_bound(c)
     c_ticks_to_ns(v, c)
     delta = (int(c["expected_ns"]) - int(c["start_timestamp"])) * int(c["tick_rate_numer"])
     back = int(c["anchor_ticks"]) + rhe(delta, int(c["tick_rate_denom"]) * NS)
     assert back == int(c["expected_round_trip_ticks"])
     err = abs(back - int(c["ticks"]))
     assert err == int(c["round_trip_error_ticks"])
-    assert err <= float(c["documented_error_bound_ticks"])
+    assert err <= _ghz_bound(c)
     assert c["round_trip_is_bit_exact"] == (err == 0)
 
 
