@@ -1,0 +1,96 @@
+name: conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  conformance:
+    name: conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the pinned generator dependencies
+        run: pip install -r tools/requirements.txt
+
+      - name: Regenerate the corpus from the generators
+        run: python tools/generate_all.py
+
+      - name: The regenerated tree must be byte-identical to the commit
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Regenerating changed the tree: the committed data and the"
+            echo "generators that define it disagree. Run tools/generate_all.py"
+            echo "and commit what it produces."
+            git status --porcelain
+            git diff --stat
+            exit 1
+          fi
+
+      - name: Check the corpus against the rules the specification states
+        run: |
+          set -o pipefail
+          python check_corpus.py | tee "$RUNNER_TEMP/check.log"
+          grep -q 'failed 0' "$RUNNER_TEMP/check.log" || {
+            echo "check_corpus.py reported failures."
+            exit 1
+          }
+          grep -q 'skipped 0' "$RUNNER_TEMP/check.log" || {
+            echo "A case was skipped. A skip means an optional codec is missing,"
+            echo "and every codec is installed here, so a skip is a failure."
+            exit 1
+          }
+
+      - name: No tracked file may carry a machine path or an outside identifier
+        run: |
+          # Two tiers, because a hit means a different thing in text than in
+          # binary. Tier 1 is machine paths: a path baked into a golden .tslod
+          # file or a .bin payload would be a real leak, so binaries are
+          # searched as text (-a). Tier 2 is names that mean something only
+          # outside this repository; those cannot occur meaningfully inside a
+          # float payload, where the byte 0x44 is merely the letter D, so
+          # binaries are skipped (-I). Neither tier reads .github/, so these
+          # patterns cannot match themselves. Character classes stand in for
+          # word boundaries throughout: \b is not portable across greps.
+          fail=0
+
+          sweep() {  # sweep <binary-mode-flag> <extended-regexp>
+            hits=$(git ls-files -z -- . ':!.github' | xargs -0 grep "$1" -l -E -- "$2" || true)
+            if [ -n "$hits" ]; then
+              echo "FAIL  $2"
+              echo "$hits" | sed 's/^/          /'
+              fail=1
+            else
+              echo "ok    $2"
+            fi
+          }
+
+          echo "tier 1 — machine paths, every tracked file, binaries as text"
+          sweep -a '/Users/'
+          sweep -a '/home/[a-z]'
+          sweep -a '[A-Z]:\\Users'
+
+          echo "tier 2 — outside identifiers, text files only"
+          sweep -I '(^|[^A-Za-z0-9_])AD-[0-9]'
+          sweep -I '(^|[^A-Za-z0-9_])D(1[0-8]|[1-9])([^0-9A-Za-z_]|$)'
+          sweep -I 'O9-R'
+          sweep -I 'ES-R'
+          sweep -I '<reference>'
+          sweep -I 'TSLOD_REFERENCE_ROOT'
+
+          # A pattern that must match, so that a sweep which silently searched
+          # nothing is a failure rather than a pass.
+          control=$(git ls-files -z -- . ':!.github' | xargs -0 grep -I -l -E -- 'branching_factor' || true)
+          if [ -z "$control" ]; then
+            echo "sweep did not run"
+            exit 1
+          fi
+          echo "control matched $(echo "$control" | wc -l) files"
+
+          exit "$fail"
