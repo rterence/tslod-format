@@ -44,7 +44,6 @@ CORPUS_ROOT = REPO_ROOT / "corpus"
 VECTORS = CORPUS_ROOT / "vectors"
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
-import _fold      # noqa: E402
 import _moments   # noqa: E402
 
 NS = 10**9
@@ -401,6 +400,105 @@ def c_enums(v, c):
         assert c["reserved_bits_must_be_zero"] is True
 
 
+def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: bool):
+    """`build_level` re-derived from spec/v1, in scalar Python.
+
+    Deliberately NOT `_fold.build_level`. The generators build the corpus with
+    that module, so checking the corpus against it again compares a value with
+    itself: it proves the data was regenerated, not that the data obeys the
+    rule. This is a second implementation, written from the specification's
+    words, and it shares no code with the first:
+
+    * numeric mode is `[min, max, first, last]` in that column order;
+    * NaN is skipped in min and max; an all-NaN bucket is four NaNs with
+      positions `[0, 0]`, and the NaN that lands in min and max is the FIRST
+      element's, not a manufactured one;
+    * `first` and `last` are the literal first and last elements and may be NaN
+      while min and max are finite;
+    * comparison is strict, so a repeated extreme resolves to its first
+      occurrence and that bucket-relative index is what positions carry;
+    * bitfield mode is `[OR, AND, first, last]` over the two's-complement bit
+      pattern, sign bit included, which is done here on Python integers under
+      an explicit width mask so the sign bit is handled by the rule and not by
+      a library's promotion;
+    * the ragged tail is folded over exactly the elements it has.
+    """
+    bf = int(bf)
+    if bf < 2:
+        raise ValueError("branching_factor must be >= 2")
+    if arr.size == 0:
+        raise ValueError("empty array")
+    is_float = arr.dtype.kind == "f"
+    if mode == 1:
+        if is_float:
+            raise TypeError("bitfield aggregation_mode with a float dtype")
+        if want_positions:
+            raise ValueError("positions are not supported for bitfield aggregation")
+
+    n = arr.shape[0]
+    n_out = -(-n // bf)
+    out = np.empty((n_out, 4), dtype=arr.dtype)
+    pos = np.empty((n_out, 2), dtype=np.int64)
+    width = arr.dtype.itemsize * 8
+    mask = (1 << width) - 1
+    signed = arr.dtype.kind == "i"
+
+    def to_bits(x):
+        return int(x) & mask
+
+    def from_bits(b):
+        if signed and b >= (1 << (width - 1)):
+            b -= 1 << width
+        return b
+
+    for b in range(n_out):
+        block = arr[b * bf:(b + 1) * bf]
+        k = block.shape[0]
+        if from_raw:
+            lo = [block[i] for i in range(k)]
+            hi = lo
+            first, last = block[0], block[k - 1]
+        else:
+            lo = [block[i, 0] for i in range(k)]
+            hi = [block[i, 1] for i in range(k)]
+            first, last = block[0, 2], block[k - 1, 3]
+
+        if mode == 1:
+            # Folding a level, OR accumulates the children's OR column and AND
+            # their AND column — two different columns. Folding raw samples,
+            # both are the samples themselves.
+            acc_or, acc_and = 0, mask
+            for x in lo:
+                acc_or |= to_bits(x)
+            for x in hi:
+                acc_and &= to_bits(x)
+            out[b] = (from_bits(acc_or), from_bits(acc_and), first, last)
+            pos[b] = (0, 0)
+            continue
+
+        i_min = i_max = None
+        for i in range(k):
+            x = lo[i]
+            if is_float and x != x:
+                continue
+            if i_min is None or x < lo[i_min]:      # strict: first occurrence wins
+                i_min = i
+        for i in range(k):
+            x = hi[i]
+            if is_float and x != x:
+                continue
+            if i_max is None or x > hi[i_max]:
+                i_max = i
+        if i_min is None:                            # the whole bucket is NaN
+            out[b] = (lo[0], hi[0], first, last)
+            pos[b] = (0, 0)
+        else:
+            out[b] = (lo[i_min], hi[i_max if i_max is not None else 0], first, last)
+            pos[b] = (i_min, i_max if i_max is not None else 0)
+
+    return (out, pos) if want_positions else out
+
+
 def c_build_level(v, c):
     arr = arr_of(c["input"])
     bf, from_raw, mode = c["branching_factor"], c["from_raw"], c["aggregation_mode"]
@@ -415,16 +513,17 @@ def c_build_level(v, c):
         }[cls]
         assert expected(), f"the case does not match the class it claims: {cls}"
         try:
-            _fold.build_level(arr, bf, from_raw, mode, c.get("positions_requested", False))
+            _ref_build_level(arr, bf, from_raw, mode,
+                             c.get("positions_requested", False))
         except Exception:
             return
         raise AssertionError(f"expected a refusal: {cls}")
     if c.get("positions_requested"):
-        t, p = _fold.build_level(arr, bf, from_raw, mode, True)
+        t, p = _ref_build_level(arr, bf, from_raw, mode, True)
         assert bits_equal(np.ascontiguousarray(p, dtype=np.int64),
                           arr_of(c["expected_positions"])), "positions differ"
     else:
-        t = _fold.build_level(arr, bf, from_raw, mode)
+        t = _ref_build_level(arr, bf, from_raw, mode, False)
     assert bits_equal(t, arr_of(c["expected_tuples"])), "tuples differ"
 
 
