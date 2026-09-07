@@ -23,6 +23,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "all ten wire dtypes in one file; six of them appear in no .tslod that exists",
       "dtypes": [
@@ -47,6 +49,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "all six rows of the stream table in one file \u2014 which streams a block has is fixed by its KIND, and this is the file that proves each shape exists",
       "timing_modes": [
@@ -75,6 +79,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "two units, both scaling types, both timing flags, and a zero-sample channel \u2014 the list of what the conformance files must carry",
       "units": [
@@ -99,6 +105,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "readable up to the last flushed block; num_levels derived by walking the level table; the stored field authoritative once sealed. The spec's 'potentially corrupt' advisory is dropped",
       "file_state": 1,
@@ -113,6 +121,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "0",
+      "moment_stream_present": false,
       "every_crc_verifies": true,
       "note": "the same data with NO moment stream. A reader must handle both, because bitfield buckets never carry moments and a writer may omit them; the stream count is a function of the block KIND plus this presence, and both shapes are in the corpus so neither can be assumed",
       "has_moment_stream": false
@@ -126,6 +136,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "block_samples = 256 = 1x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
       "block_samples_multiple_of_bf": 1
@@ -139,6 +151,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 512,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "block_samples = 512 = 2x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
       "block_samples_multiple_of_bf": 2
@@ -152,6 +166,8 @@
       "compression_id": 0,
       "branching_factor": 256,
       "block_samples": 1024,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "block_samples = 1024 = 4x branching_factor. The bucket geometry is UNCHANGED \u2014 only how many buckets share a block moves",
       "block_samples_multiple_of_bf": 4
@@ -165,6 +181,8 @@
       "compression_id": 0,
       "branching_factor": 2,
       "block_samples": 2,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "BF=2; no file that exists uses anything but 256",
       "num_levels": 13
@@ -178,6 +196,8 @@
       "compression_id": 0,
       "branching_factor": 16,
       "block_samples": 16,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "BF=16; no file that exists uses anything but 256",
       "num_levels": 4
@@ -191,6 +211,8 @@
       "compression_id": 0,
       "branching_factor": 1024,
       "block_samples": 1024,
+      "features": "1",
+      "moment_stream_present": true,
       "every_crc_verifies": true,
       "note": "BF=1024; no file that exists uses anything but 256",
       "num_levels": 3

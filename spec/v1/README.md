@@ -31,6 +31,16 @@ format); `block_samples` at 20, the number of buckets a block holds, which must 
 multiple of `branching_factor`; `features` at 92, whose low 32 bits are must-understand and whose
 high 32 bits may be ignored.
 
+Version 1 defines one feature bit and reserves the rest:
+
+| bits | | meaning |
+|---|---|---|
+| 0 | must-understand | **The file carries the moment stream.** Every numeric value block at level ≥ 1 has three streams; when the bit is clear, none does. |
+| 1–31 | must-understand | Reserved. A reader rejects a file with any of them set. |
+| 32–63 | may-ignore | Reserved. A reader ignores them and reads the file. |
+
+A writer sets bit 0 whenever it writes the moment stream, and never otherwise.
+
 Group entry offsets 0, 8, 16 and 24 are **frozen**: a streaming writer patches `start_timestamp` and
 `total_samples` in place after the entry is written, so a new field may only append at offset 25 or
 later.
@@ -119,13 +129,24 @@ block kind: timestamps, then values, then moments.
 | variable | ≥ 1 | numeric | timestamps `(N,4)` `[first, last, min, max]`, values `(N,4)`, moments `(N,5)`† |
 | variable | ≥ 1 | bitfield | timestamps `(N,)` `[first]`, values `(N,4)` |
 
-† **The moment stream is optional, and its presence is not recorded anywhere.** A writer may omit
-it, and `v1_no_moment_stream.tslod` in the conformance set is a file that does. No header field, no
-feature bit and no channel field says which was written, so a reader determines it from the framing:
-`uncompressed_size` counts the **values** stream's decoded bytes and nothing else, so after the
-leading stream, either the remaining bytes are exactly the values stream — and there are no moments
-— or the next length prefix is, and the moments follow it. A reader that assumes the moment stream
-is always present reads a two-stream block as a truncated three-stream one.
+† **Whether the moment stream is present is `features` bit 0, and nothing else.** It is a property
+of the file, not of a block: either every numeric value block at level ≥ 1 carries the stream or
+none does. `v1_no_moment_stream.tslod` is a file written without it and with the bit clear.
+
+At profile 0 the framing is arithmetic, so a reader can check the bit rather than merely trust it.
+`uncompressed_size` counts the **values** stream's decoded bytes and nothing else, so under the
+identity recipe that stream occupies `1 + uncompressed_size` bytes: after the leading stream, either
+the remaining bytes are exactly that — two streams — or the next length prefix is, and the moments
+follow it. A block whose framing disagrees with the bit is rejected as
+`moment-stream-flag-mismatch`, in either direction: a three-stream block in a file whose bit is
+clear, or a two-stream block in a file where it is set.
+
+⛔ **At profile 2 the bit is the only source, and a reader must not attempt to discover it.** The
+values stream's encoded length is not known until it has been decoded, so the arithmetic above does
+not exist; and the block's first byte does not answer it either. The three-stream block in
+`v1_block_samples_256.tslod` begins `01 02 00 00`, where that `0x01` is the low byte of a length
+prefix and not the zstd recipe byte it resembles. This is why the presence is a header bit and not
+something a reader works out.
 
 Every payload is the array's bytes, little-endian, **row-major** — the four values of bucket 0, then
 the four of bucket 1, never planar (`v1-block-framing`).

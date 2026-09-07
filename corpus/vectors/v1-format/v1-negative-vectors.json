@@ -2,7 +2,7 @@
   "id": "v1-negative-vectors",
   "set": "v1-format",
   "kind": "negative",
-  "asserts": "A v1 reader reads EXACTLY version 1 and rejects every other value, and rejects block_samples that is zero or not a multiple of branching_factor, any must-understand feature bit it does not know, a profile byte outside {0, 2}, and any recipe byte outside the registry \u2014 while skipping may-ignore feature bits it does not know.",
+  "asserts": "A v1 reader reads EXACTLY version 1 and rejects every other value, and rejects block_samples that is zero or not a multiple of branching_factor, any must-understand feature bit it does not know, a profile byte outside {0, 2}, any recipe byte outside the registry, and a moment-stream feature bit that disagrees with how the blocks are framed \u2014 while skipping may-ignore feature bits it does not know.",
   "source": "the version-1 header and framing rules",
   "contract": "A reader that accepts a malformed file produces wrong answers where it should have produced an error.",
   "requires": [
@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 22,
+  "case_count": 24,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -124,13 +124,13 @@
       "patch": {
         "offset": "92",
         "width_bytes": 8,
-        "original_hex": "0000000000000000",
-        "patched_hex": "0100000000000000"
+        "original_hex": "0100000000000000",
+        "patched_hex": "0100008000000000"
       },
       "field": "header.features",
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
-      "reason": "the low 32 bits are must-understand: a reader that does not know bit 0 must refuse the file rather than read it as though the feature were absent"
+      "reason": "bit 31 is in the must-understand half and version 1 assigns it nothing, so a reader refuses the file rather than reading it as though the feature were absent. Taken with its two neighbours this is the whole rule in three cases: bit 0 is must-understand and KNOWN, so the file is accepted and the bit is acted on \u2014 it is what says whether the moment stream is there; bit 31 is must-understand and unknown, so the file is refused; bit 32 is may-ignore and unknown, so the file is accepted and the bit skipped. The patched value here keeps bit 0 set because the base file carries moments, so the only thing wrong with it is the bit a reader does not know"
     },
     {
       "name": "v1-unknown-may-ignore-feature-bit-is-ACCEPTED",
@@ -139,14 +139,44 @@
       "patch": {
         "offset": "92",
         "width_bytes": 8,
-        "original_hex": "0000000000000000",
-        "patched_hex": "0000000001000000"
+        "original_hex": "0100000000000000",
+        "patched_hex": "0100000001000000"
       },
       "field": "header.features",
       "expected_error": null,
       "must_open": true,
       "verified_against_an_implementation": false,
       "reason": "the HIGH 32 bits are may-ignore. This is the case that proves the split is real: the same field, a different half, and the opposite outcome. A reader that refuses both has no forward compatibility at all; a reader that accepts both has no safety"
+    },
+    {
+      "name": "v1-moment-stream-flag-clear-but-block-has-three-streams",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "moment-stream-flag-mismatch",
+      "patch": {
+        "offset": "92",
+        "width_bytes": 8,
+        "original_hex": "0100000000000000",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "header.features",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the file's numeric level-1 blocks are framed with three streams, and clearing bit 0 says there are two. A reader must not decide the bit is stale and read the block anyway, nor decide the block is stale and trust the bit: it cannot tell which of the two is the damage, and either guess silently hands back a moment stream read as values, or values read as a truncated block"
+    },
+    {
+      "name": "v1-moment-stream-flag-set-but-block-has-two-streams",
+      "file": "v1-format/files/v1_no_moment_stream.tslod",
+      "rejection_class": "moment-stream-flag-mismatch",
+      "patch": {
+        "offset": "92",
+        "width_bytes": 8,
+        "original_hex": "0000000000000000",
+        "patched_hex": "0100000000000000"
+      },
+      "field": "header.features",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same rule from the other side: the bit promises a moment stream the blocks do not carry. This is the direction that corrupts a reader quietly rather than loudly \u2014 it reads the values stream's length prefix as the values stream, and then reads whatever follows as moments. The file that proves the rule is the one file in the set written without moments, which is also why it is kept"
     },
     {
       "name": "v1-stream-length-prefix-exceeds-block",

@@ -53,6 +53,11 @@ BLOCK_INDEX_ENTRY_SIZE_V1 = 48
 DTYPE_ENUM = {"float32": 0, "float64": 1, "int8": 2, "int16": 3, "int32": 4,
               "int64": 5, "uint8": 6, "uint16": 7, "uint32": 8, "uint64": 9}
 
+#: Must-understand feature bit 0: the file carries the moment stream, so every
+#: numeric value block at level >= 1 has three streams. Clear means none does.
+#: The builder derives it from what it actually wrote; nothing else may set it.
+FEATURE_MOMENT_STREAM = 1 << 0
+
 RECIPE_IDENTITY = 0x00
 RECIPE_ZSTD = 0x01
 RECIPE_PCO = 0x02
@@ -255,6 +260,14 @@ class BuildResult:
 
 
 def build(spec: FileSpec) -> BuildResult:
+    if spec.features & FEATURE_MOMENT_STREAM:
+        raise ValueError(
+            "feature bit 0 is derived from whether a moment stream is written, "
+            "so a caller must not set it in FileSpec.features")
+    #: Set by the block loop below the moment it writes a moment stream. The
+    #: header's feature bit 0 is this and nothing else, so the bit cannot
+    #: disagree with the framing.
+    wrote_moments = False
     bf = spec.branching_factor
     block_samples = spec.block_samples or bf
     if block_samples <= 0 or block_samples % bf:
@@ -342,6 +355,7 @@ def build(spec: FileSpec) -> BuildResult:
                         and ch.aggregation_mode == 0 and spec.moments):
                     moments_payload = np.ascontiguousarray(
                         moments[level][b0:b1]).tobytes()
+                    wrote_moments = True
 
                 body = _frame_v1(ts_payload, values_payload, spec.recipe,
                                  chunk.dtype.itemsize, moments_payload)
@@ -419,7 +433,8 @@ def build(spec: FileSpec) -> BuildResult:
         n_groups, n_channels, block_samples,
         group_table_offset, channel_table_offset,
         spec.session_id, spec.sequence_number, spec.prev_file_hash,
-        spec.features, b"\x00" * 28)
+        spec.features | (FEATURE_MOMENT_STREAM if wrote_moments else 0),
+        b"\x00" * 28)
 
     data = bytes(header) + bytes(group_table) + bytes(channel_table) \
         + bytes(blob) + bytes(index_region) + bytes(level_region)

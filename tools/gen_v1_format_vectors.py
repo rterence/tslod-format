@@ -128,11 +128,16 @@ def gen_profile0_set() -> Vector:
             else:
                 assert result.data[lo + off] == 0x00, (
                     f"{name}: values stream's recipe byte is not identity")
+        features = struct.unpack_from("<Q", result.data, 92)[0]
+        assert bool(features & B.FEATURE_MOMENT_STREAM) == bool(spec.moments), (
+            f"{name}: feature bit 0 does not match what the builder wrote")
         body = dict(file=rel, file_size_bytes=u64(len(result.data)),
                     block_count=len(result.blocks),
                     format_version=1, compression_id=0,
                     branching_factor=spec.branching_factor,
                     block_samples=spec.block_samples or spec.branching_factor,
+                    features=u64(features),
+                    moment_stream_present=bool(features & B.FEATURE_MOMENT_STREAM),
                     every_crc_verifies=True, note=note)
         body.update(checks)      # a check may restate a field; the check wins
         v.case(name, **body)
@@ -534,7 +539,8 @@ def gen_v1_negatives() -> Vector:
             "A v1 reader reads EXACTLY version 1 and rejects every other value, "
             "and rejects block_samples that is zero or not a multiple of "
             "branching_factor, any must-understand feature bit it does not know, a "
-            "profile byte outside {0, 2}, and any recipe byte outside the registry — "
+            "profile byte outside {0, 2}, any recipe byte outside the registry, and a "
+            "moment-stream feature bit that disagrees with how the blocks are framed — "
             "while skipping may-ignore feature bits it does not know."
         ),
         source=(
@@ -597,16 +603,34 @@ def gen_v1_negatives() -> Vector:
     case("v1-profile-unknown", H("compression_id"), "B", 3,
          "header.compression_id",
          "the v1 profile is 0 (none) or 2 (recipe); nothing else")
-    case("v1-unknown-must-understand-feature-bit", H("features"), "Q", 0x0000_0000_0000_0001,
-         "header.features",
-         "the low 32 bits are must-understand: a reader that does not know bit 0 must "
-         "refuse the file rather than read it as though the feature were absent")
+    # This case used to patch bit 0. Bit 0 is now ASSIGNED — it is what says
+    # whether the moment stream is present — so patching it no longer describes
+    # an unknown feature; it describes a flag that disagrees with the framing,
+    # which is a different rejection and has its own two cases below. The case
+    # moves to bit 31, the top of the must-understand half, which version 1
+    # still assigns nothing. The patched value KEEPS bit 0 set, because the
+    # base file carries moments: this case must fail for the unknown bit alone.
+    case("v1-unknown-must-understand-feature-bit", H("features"), "Q",
+         0x0000_0000_8000_0001, "header.features",
+         "bit 31 is in the must-understand half and version 1 assigns it nothing, so a "
+         "reader refuses the file rather than reading it as though the feature were "
+         "absent. Taken with its two neighbours this is the whole rule in three cases: "
+         "bit 0 is must-understand and KNOWN, so the file is accepted and the bit is "
+         "acted on — it is what says whether the moment stream is there; bit 31 is "
+         "must-understand and unknown, so the file is refused; bit 32 is may-ignore and "
+         "unknown, so the file is accepted and the bit skipped. The patched value here "
+         "keeps bit 0 set because the base file carries moments, so the only thing "
+         "wrong with it is the bit a reader does not know")
 
     v.case("v1-unknown-may-ignore-feature-bit-is-ACCEPTED",
            file=rel, rejection_class=None,
            patch={"offset": u64(H("features")), "width_bytes": 8,
                   "original_hex": good.data[H("features"):H("features") + 8].hex().upper(),
-                  "patched_hex": struct.pack("<Q", 1 << 32).hex().upper()},
+                  # bit 32 set AND bit 0 kept: the base file carries moments,
+                  # so clearing bit 0 would make this file rejectable for a
+                  # reason that has nothing to do with the half being tested.
+                  "patched_hex": struct.pack(
+                      "<Q", (1 << 32) | B.FEATURE_MOMENT_STREAM).hex().upper()},
            field="header.features",
            expected_error=None, must_open=True,
            verified_against_an_implementation=False,
@@ -614,6 +638,48 @@ def gen_v1_negatives() -> Vector:
                   "split is real: the same field, a different half, and the opposite "
                   "outcome. A reader that refuses both has no forward compatibility at "
                   "all; a reader that accepts both has no safety")
+
+    # ---- feature bit 0 must agree with the framing, in both directions.
+    # Only statable at profile 0, where the framing is arithmetic: at profile 2
+    # the bit is the only source and there is nothing to disagree with it.
+    MOMENT_FLAG = B.FEATURE_MOMENT_STREAM
+    assert struct.unpack_from("<Q", good.data, H("features"))[0] & MOMENT_FLAG, (
+        "the negative base file is supposed to carry moments")
+
+    v.case("v1-moment-stream-flag-clear-but-block-has-three-streams",
+           file=rel, rejection_class="moment-stream-flag-mismatch",
+           patch={"offset": u64(H("features")), "width_bytes": 8,
+                  "original_hex": good.data[H("features"):H("features") + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", 0).hex().upper()},
+           field="header.features",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="the file's numeric level-1 blocks are framed with three streams, and "
+                  "clearing bit 0 says there are two. A reader must not decide the bit "
+                  "is stale and read the block anyway, nor decide the block is stale and "
+                  "trust the bit: it cannot tell which of the two is the damage, and "
+                  "either guess silently hands back a moment stream read as values, or "
+                  "values read as a truncated block")
+
+    nomom_rel = f"{FILES}/v1_no_moment_stream.tslod"
+    nomom = (VECTORS / nomom_rel).read_bytes()
+    assert not struct.unpack_from("<Q", nomom, H("features"))[0] & MOMENT_FLAG, (
+        "v1_no_moment_stream.tslod is supposed to have bit 0 clear")
+
+    v.case("v1-moment-stream-flag-set-but-block-has-two-streams",
+           file=nomom_rel, rejection_class="moment-stream-flag-mismatch",
+           patch={"offset": u64(H("features")), "width_bytes": 8,
+                  "original_hex": nomom[H("features"):H("features") + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", MOMENT_FLAG).hex().upper()},
+           field="header.features",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="the same rule from the other side: the bit promises a moment stream "
+                  "the blocks do not carry. This is the direction that corrupts a "
+                  "reader quietly rather than loudly — it reads the values stream's "
+                  "length prefix as the values stream, and then reads whatever follows "
+                  "as moments. The file that proves the rule is the one file in the set "
+                  "written without moments, which is also why it is kept")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",

@@ -48,6 +48,12 @@ import _moments   # noqa: E402
 
 NS = 10**9
 
+#: Must-understand feature bit 0 of `header.features`: the file carries the
+#: moment stream. Restated here rather than imported, because this file is the
+#: independent re-derivation and a shared constant would make the two agree by
+#: construction.
+FEATURE_MOMENT_STREAM = 1 << 0
+
 
 class Skip(Exception):
     """An optional third-party codec is missing. The only reason to skip."""
@@ -150,20 +156,23 @@ def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
 
 
 def stream_count(body: bytes, level: int, timing_mode: int,
-                 aggregation_mode: int, uncompressed_size: int) -> int:
-    """How many streams this block actually has.
+                 aggregation_mode: int, uncompressed_size: int,
+                 has_moments: bool, profile: int) -> int:
+    """How many streams this block has.
 
-    The stream table in spec/v1 gives the block kind's shape, but it is not the
-    whole answer: the moment stream is OPTIONAL on a numeric level >= 1 block —
-    `v1_no_moment_stream.tslod` is in the conformance set precisely so neither
-    shape can be assumed — and nothing in the header or the channel entry
-    records which was written.
+    The stream table in spec/v1 gives the block kind's shape; whether the
+    moment stream is among them is `header.features` bit 0, file-wide. It is
+    not discovered, and at profile 2 it cannot be: the values stream's encoded
+    length is unknown before it is decoded, so there is no arithmetic to do and
+    no first byte to read — `v1_block_samples_256.tslod` has a three-stream
+    block beginning `01 02 00 00`, where `0x01` is a length prefix and not the
+    zstd recipe it looks like.
 
-    So a reader works it out from `uncompressed_size`, which counts the values
-    stream's decoded bytes and nothing else. Under the identity recipe the
-    values stream is stored in `1 + uncompressed_size` bytes, so after the
-    leading stream either the remainder is exactly that (no moments) or the
-    next length prefix is exactly that (moments follow).
+    At profile 0 the arithmetic still holds, so the bit can be checked rather
+    than trusted: `uncompressed_size` counts the values stream's decoded bytes
+    and nothing else, and under the identity recipe the values stream is stored
+    in `1 + uncompressed_size` bytes. A block whose framing disagrees with the
+    bit is a corrupt file, not a block to reinterpret.
     """
     # A fixed-rate block carries a leading stream only where it has positions:
     # numeric, level >= 1. A variable-rate block always leads with timestamps.
@@ -175,16 +184,22 @@ def stream_count(body: bytes, level: int, timing_mode: int,
         return leading + 1
     if level == 0:
         return leading + 1
-    values_stored = 1 + uncompressed_size      # identity recipe
-    offset = 0
-    for _ in range(leading):
-        if offset + 4 > len(body):
-            raise CorruptFile("stream-length-prefix-out-of-range")
-        prefix, = struct.unpack_from("<I", body, offset)
-        offset += 4 + prefix
-    if len(body) - offset == values_stored:
-        return leading + 1                     # no moment stream
-    return leading + 2
+
+    if profile == 0:
+        values_stored = 1 + uncompressed_size  # identity recipe
+        offset = 0
+        for _ in range(leading):
+            if offset + 4 > len(body):
+                raise CorruptFile("stream-length-prefix-out-of-range")
+            prefix, = struct.unpack_from("<I", body, offset)
+            offset += 4 + prefix
+        framed = len(body) - offset != values_stored
+        if framed != has_moments:
+            raise CorruptFile(
+                "moment-stream-flag-mismatch",
+                f"feature bit 0 is {int(has_moments)} but this block is framed "
+                f"with {leading + 1 + int(framed)} streams")
+    return leading + 1 + int(has_moments)
 
 
 def open_v1(data: bytes) -> dict:
@@ -207,11 +222,13 @@ def open_v1(data: bytes) -> dict:
         raise CorruptFile("block-samples-not-multiple-of-bf",
                           f"{block_samples} % {bf}")
     features, = struct.unpack_from("<Q", data, 92)
-    if features & 0xFFFF_FFFF:
-        # The low half is must-understand and this version defines no bit in
-        # it, so any bit set is a feature this reader does not know.
+    # The low half is must-understand. Version 1 defines bit 0 and nothing
+    # else, so any OTHER low bit is a feature this reader does not know.
+    unknown = features & 0xFFFF_FFFF & ~FEATURE_MOMENT_STREAM
+    if unknown:
         raise CorruptFile("unknown-must-understand-feature-bit",
-                          f"0x{features & 0xFFFFFFFF:08X}")
+                          f"0x{unknown:08X}")
+    has_moments = bool(features & FEATURE_MOMENT_STREAM)
 
     n_groups, = struct.unpack_from("<H", data, 14)
     n_channels, = struct.unpack_from("<I", data, 16)
@@ -264,7 +281,8 @@ def open_v1(data: bytes) -> dict:
                 body = data[fo:fo + cs]
                 validate_streams(
                     body,
-                    stream_count(body, lv, timing_mode, aggregation_mode, us),
+                    stream_count(body, lv, timing_mode, aggregation_mode, us,
+                                 has_moments, profile),
                     profile)
                 blocks += 1
     return {"branching_factor": bf, "block_samples": block_samples,
@@ -617,6 +635,10 @@ def c_profile0(v, c):
     assert info["block_samples"] == c["block_samples"]
     assert info["block_count"] == c["block_count"], (
         f"walked {info['block_count']} blocks, the vector says {c['block_count']}")
+    features, = struct.unpack_from("<Q", data, 92)
+    assert str(features) == c["features"], (
+        f"header.features is {features}, the vector says {c['features']}")
+    assert bool(features & FEATURE_MOMENT_STREAM) == c["moment_stream_present"]
 
 
 def c_negative(v, c):
