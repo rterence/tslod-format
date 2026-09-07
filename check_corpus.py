@@ -122,15 +122,15 @@ def _check_recipe(byte: int) -> None:
         raise CorruptFile("unknown-recipe-byte", f"0x{byte:02X}")
 
 
-def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
-    """Every stream but the last is prefixed by its own u32 length.
+def _validate_prefixed(body: bytes, offset: int, count: int, profile: int) -> int:
+    """Validate `count` length-prefixed streams from `offset`; return the next.
 
-    The length counts the stream's own recipe byte, so the next stream begins
-    at `offset + 4 + prefix`. A reader that treats the prefix as the payload
-    length places the next recipe byte one early and decodes garbage.
+    Split out of `validate_streams` because the reader's evaluation order runs
+    the moment-flag cross-check BETWEEN the leading prefix and the rest: the
+    leading stream's position does not depend on feature bit 0, and every
+    stream after it does.
     """
-    offset = 0
-    for i in range(n_streams - 1):
+    for i in range(count):
         if offset + 4 > len(body):
             raise CorruptFile("stream-length-prefix-out-of-range",
                               f"stream {i} prefix runs past the block")
@@ -147,6 +147,11 @@ def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
         if profile == 0 and recipe != 0x00:
             raise CorruptFile("profile0-recipe-mismatch", f"0x{recipe:02X}")
         offset += 4 + prefix
+    return offset
+
+
+def _validate_last(body: bytes, offset: int, profile: int) -> None:
+    """The final stream carries no prefix; it runs to `compressed_size`."""
     if len(body) - offset < 1:
         raise CorruptFile("stream-length-prefix-consumes-block",
                           "the prefixes leave no bytes for the last stream")
@@ -156,51 +161,76 @@ def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
         raise CorruptFile("profile0-recipe-mismatch", f"0x{recipe:02X}")
 
 
+def validate_streams(body: bytes, n_streams: int, profile: int) -> None:
+    """Every stream but the last is prefixed by its own u32 length.
+
+    The length counts the stream's own recipe byte, so the next stream begins
+    at `offset + 4 + prefix`. A reader that treats the prefix as the payload
+    length places the next recipe byte one early and decodes garbage.
+    """
+    _validate_last(body, _validate_prefixed(body, 0, n_streams - 1, profile),
+                   profile)
+
+
+def _leading_count(level: int, timing_mode: int, aggregation_mode: int) -> int:
+    """How many streams precede the values stream in this block kind.
+
+    A fixed-rate block carries a leading stream only where it has positions:
+    numeric, level >= 1. A variable-rate block always leads with timestamps.
+    """
+    if timing_mode == 0:
+        return 1 if (level >= 1 and aggregation_mode == 0) else 0
+    return 1
+
+
 def stream_count(body: bytes, level: int, timing_mode: int,
                  aggregation_mode: int, uncompressed_size: int,
                  has_moments: bool, profile: int) -> int:
-    """How many streams this block has.
+    """How many streams this block has, from `features` bit 0 and nothing else.
 
-    The stream table in spec/v1 gives the block kind's shape; whether the
-    moment stream is among them is `header.features` bit 0, file-wide. It is
-    not discovered, and at profile 2 it cannot be: the values stream's encoded
-    length is unknown before it is decoded, so there is no arithmetic to do and
-    no first byte to read — `v1_block_samples_256.tslod` has a three-stream
-    block beginning `01 02 00 00`, where `0x01` is a length prefix and not the
-    zstd recipe it looks like.
-
-    At profile 0 the arithmetic still holds, so the bit can be checked rather
-    than trusted: `uncompressed_size` counts the values stream's decoded bytes
-    and nothing else, and under the identity recipe the values stream is stored
-    in `1 + uncompressed_size` bytes. A block whose framing disagrees with the
-    bit is a corrupt file, not a block to reinterpret.
+    The count is not discovered. At profile 2 it cannot be: the values stream's
+    encoded length is unknown before it is decoded, so there is no arithmetic
+    to do and no first byte to read — `v1_block_samples_256.tslod` has a
+    three-stream block beginning `01 02 00 00`, where `0x01` is a length prefix
+    and not the zstd recipe it looks like. Profile 0 answers the same way, so
+    there is one rule and not two; the arithmetic that profile 0 still permits
+    becomes a cross-check of the bit rather than a substitute for it.
     """
-    # A fixed-rate block carries a leading stream only where it has positions:
-    # numeric, level >= 1. A variable-rate block always leads with timestamps.
-    if timing_mode == 0:
-        leading = 1 if (level >= 1 and aggregation_mode == 0) else 0
-    else:
-        leading = 1
-    if aggregation_mode == 1:                  # bitfield buckets carry no moments
+    leading = _leading_count(level, timing_mode, aggregation_mode)
+    if aggregation_mode == 1 or level == 0:
         return leading + 1
-    if level == 0:
-        return leading + 1
-
-    if profile == 0:
-        values_stored = 1 + uncompressed_size  # identity recipe
-        offset = 0
-        for _ in range(leading):
-            if offset + 4 > len(body):
-                raise CorruptFile("stream-length-prefix-out-of-range")
-            prefix, = struct.unpack_from("<I", body, offset)
-            offset += 4 + prefix
-        framed = len(body) - offset != values_stored
-        if framed != has_moments:
-            raise CorruptFile(
-                "moment-stream-flag-mismatch",
-                f"feature bit 0 is {int(has_moments)} but this block is framed "
-                f"with {leading + 1 + int(framed)} streams")
     return leading + 1 + int(has_moments)
+
+
+def split_streams(body: bytes, n_streams: int) -> list:
+    """The framing, read back: every stream but the last carries a u32 prefix."""
+    out, off = [], 0
+    for _ in range(n_streams - 1):
+        prefix, = struct.unpack_from("<I", body, off)
+        out.append(body[off + 4:off + 4 + prefix])
+        off += 4 + prefix
+    out.append(body[off:])
+    return out
+
+
+def check_flag_against_framing(body: bytes, offset: int, uncompressed_size: int,
+                               has_moments: bool) -> None:
+    """Step 3, profile 0 only: the bit must agree with the length arithmetic.
+
+    `offset` is where the leading stream ended, which step 2 has already
+    established and which the bit cannot move. Under the identity recipe the
+    values stream occupies `1 + uncompressed_size` bytes, so what remains
+    after it either is the whole rest of the block or is not.
+    """
+    values_stored = 1 + uncompressed_size          # identity recipe
+    framed = len(body) - offset != values_stored
+    if framed != has_moments:
+        raise CorruptFile(
+            "moment-stream-flag-mismatch",
+            f"feature bit 0 is {int(has_moments)} but the bytes after the "
+            f"leading stream are framed with{'' if framed else 'out'} "
+            f"a moment stream")
+
 
 
 def open_v1(data: bytes) -> dict:
@@ -256,6 +286,7 @@ def open_v1(data: bytes) -> dict:
     blocks = 0
     for ci in range(n_channels):
         base = channel_off + ci * CHANNEL_ENTRY_SIZE
+        ch_dtype = DTYPE_BY_ENUM[data[base + 64]]
         aggregation_mode = data[base + 65]
         group_id, = struct.unpack_from("<H", data, base + 66)
         num_levels, = struct.unpack_from("<I", data, base + 68)
@@ -280,11 +311,41 @@ def open_v1(data: bytes) -> dict:
                     raise CorruptFile("block-crc-mismatch",
                                       f"channel {ci} level {lv} block {b}")
                 body = data[fo:fo + cs]
-                validate_streams(
-                    body,
-                    stream_count(body, lv, timing_mode, aggregation_mode, us,
-                                 has_moments, profile),
-                    profile)
+                # Steps 2 to 6 of the evaluation order spec/v1 states, in that
+                # order, so that two readers give a broken file the same class.
+                n = stream_count(body, lv, timing_mode, aggregation_mode, us,
+                                 has_moments, profile)
+                leading = _leading_count(lv, timing_mode, aggregation_mode)
+
+                # (2) the leading stream's prefix, whose position bit 0 cannot
+                #     move.
+                after_leading = _validate_prefixed(body, 0, leading, profile)
+
+                # (3) at profile 0 only, the bit against the length arithmetic.
+                #     It sits between the two prefix checks because it needs
+                #     nothing but the leading prefix and the bytes remaining,
+                #     while every check below is parameterised by the stream
+                #     count the bit supplies.
+                if profile == 0 and aggregation_mode == 0 and lv >= 1:
+                    check_flag_against_framing(body, after_leading, us,
+                                               has_moments)
+
+                # (4) the remaining prefixes and the last stream's recipe.
+                rest = _validate_prefixed(body, after_leading,
+                                          n - 1 - leading, profile)
+                _validate_last(body, rest, profile)
+
+                # (5) the values stream decodes to exactly uncompressed_size.
+                decoded = _decode(split_streams(body, n)[leading], ch_dtype)
+                if len(decoded) != us:
+                    raise CorruptFile(
+                        "decoded-size-mismatch",
+                        f"the values stream decodes to {len(decoded)} bytes, "
+                        f"the index entry says {us}")
+
+                # (6) the moment stream, where the bit says there is one. Its
+                #     recipe was checked in (4) and it carries no stated
+                #     length, so nothing here rejects on it.
                 blocks += 1
     return {"branching_factor": bf, "block_samples": block_samples,
             "profile": profile, "block_count": blocks}

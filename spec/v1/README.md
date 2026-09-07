@@ -148,8 +148,46 @@ not exist; and the block's first byte does not answer it either. The three-strea
 prefix and not the zstd recipe byte it resembles. This is why the presence is a header bit and not
 something a reader works out.
 
+It follows that at profile 2 a file whose bit contradicts its blocks is malformed in a way **no rule
+detects before the payload is decoded**. There is no arithmetic to catch it and no byte to read: the
+reader takes the count the bit gives, splits the block accordingly, and hands the wrong bytes to a
+decoder. This is stated rather than left to be discovered, and it is why there is no conformance
+case for it — a case would pin one implementation's accidental failure mode as though it were the
+format's.
+
+⛔ **The values stream decodes to exactly `uncompressed_size` bytes, at every profile.** It is a
+writer's obligation and a reader's check: a reader that decodes the values stream to any other
+length rejects the file (`decoded-size-mismatch`). At profile 0 the length is knowable in advance
+and this is arithmetic; at profile 2 it is knowable only after decoding, which is precisely where a
+block whose index entry and payload disagree would otherwise be read as though they agreed. It is
+the only check a profile-2 reader has on a block's size.
+
 Every payload is the array's bytes, little-endian, **row-major** — the four values of bucket 0, then
 the four of bucket 1, never planar (`v1-block-framing`).
+
+### The order a reader checks in
+
+Two readers must give the same broken file the same rejection class, so the order is part of the
+format:
+
+1. The header and the index entries, as above.
+2. The **leading** stream's length prefix — the positions or timestamps stream — whose position
+   feature bit 0 cannot move.
+3. At profile 0 only, feature bit 0 against the length arithmetic
+   (`moment-stream-flag-mismatch`).
+4. The remaining length prefixes, and the last stream's recipe byte.
+5. Decode the values stream and compare its length with `uncompressed_size`
+   (`decoded-size-mismatch`).
+6. The moment stream, where bit 0 says there is one.
+
+Step 3 sits between the two prefix checks, and it has to. The cross-check needs only the leading
+stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on
+no later prefix being valid — while every check from step 4 onward is parameterised by the stream
+count that bit 0 supplies. Run the full prefix walk first and a wrong bit derails the walk before
+the cross-check is ever reached, so the file is refused for a damaged prefix or an unknown recipe
+byte, whichever the values stream's first bytes happen to look like. The class would then depend on
+the data rather than on the defect, and `moment-stream-flag-mismatch` would sit in this
+specification while no file could produce it.
 
 ## Codecs
 

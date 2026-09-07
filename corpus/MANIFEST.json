@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 25,
-    "cases": 1275,
+    "cases": 1278,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1051,11 +1051,11 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 24,
+      "case_count": 27,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "348f223a53fc91f95e51eb690a504e76ebbdd3d92b0889c50434e49d53339c8e"
+          "sha256": "0dac05839e484b96cdeeee474836492c96e02a3ec8cfe2f1a1feb733bfadf220"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
@@ -1100,6 +1100,18 @@
         {
           "path": "v1-format/files/v1_no_moment_stream.tslod",
           "sha256": "41cf8430b0bdeca3c1b637c57ba41e4974d00535f882e50557551f88e4713965"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "af7a78c2880bb1b01bc6fc9e87de68f02d1d8e53c75e7260d353bb3b4a1dd17c"
+        },
+        {
+          "path": "v1-format/files/v1_p2_with_moments.tslod",
+          "sha256": "80d2ff45f1633e3c3ddc4f62bb92c230d9e130ee71552e4a8a6e609abb81f3f3"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",

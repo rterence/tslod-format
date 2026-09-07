@@ -367,6 +367,11 @@ def _walk_payloads(spec, result) -> list:
 # ---------------------------------------------------------------------------
 
 
+#: The profile-2 files, kept so a negative case can patch one. A rule that
+#: exists FOR profile 2 has to have a case at profile 2.
+_PROFILE2_BUILDS: dict = {}
+
+
 def gen_profile2_set() -> Vector:
     v = Vector(
         id="v1-profile2-conformance-set",
@@ -404,6 +409,7 @@ def gen_profile2_set() -> Vector:
         spec.recipes = recipes
         result = B.build(spec)
         rel = _write_file(name, result)
+        _PROFILE2_BUILDS[name] = (rel, result)
 
         for (ci, level, bi, blk) in result.blocks:
             lo = blk["file_offset"]
@@ -931,6 +937,53 @@ def gen_v1_negatives() -> Vector:
                   "length prefix as the values stream, and then reads whatever follows "
                   "as moments. The file that proves the rule is the one file in the set "
                   "written without moments, which is also why it is kept")
+
+    # ---- the values stream must decode to exactly uncompressed_size.
+    # The index entry lies outside the block's CRC range, so these patches
+    # leave every CRC verifying: the file is well formed until the length it
+    # promises is compared with the length it delivers.
+    us_off = B.block_offset(good.layout, 0, 1, 0, "uncompressed_size")
+    good_us, = struct.unpack_from("<Q", good.data, us_off)
+
+    for slug, value, why in (
+        ("v1-decoded-size-smaller-than-index-entry", good_us - 1,
+         "the index entry promises one byte fewer than the values stream "
+         "decodes to. A reader that trusts the entry allocates short and "
+         "either truncates the block or walks off the end of it; a reader "
+         "that trusts the stream silently disagrees with the index it will "
+         "use to seek. Neither is a reading of this file, so it is refused"),
+        ("v1-decoded-size-larger-than-index-entry", good_us + 1,
+         "the same disagreement from the other side, and the one a writer is "
+         "likelier to produce: the entry was written before the stream was "
+         "encoded and never corrected. Feature bit 0 still agrees with the "
+         "framing here, so this fails at the decoded length and not before it"),
+    ):
+        raw = struct.pack("<Q", value)
+        v.case(slug, file=rel, rejection_class="decoded-size-mismatch",
+               patch={"offset": u64(us_off), "width_bytes": 8,
+                      "original_hex": good.data[us_off:us_off + 8].hex().upper(),
+                      "patched_hex": raw.hex().upper()},
+               field="block_index_entry.uncompressed_size",
+               expected_error="CorruptFileError",
+               verified_against_an_implementation=False, reason=why)
+
+    p2_rel, p2 = _PROFILE2_BUILDS["v1_p2_with_moments.tslod"]
+    p2_off = B.block_offset(p2.layout, 0, 1, 0, "uncompressed_size")
+    p2_us, = struct.unpack_from("<Q", p2.data, p2_off)
+    v.case("v1-decoded-size-mismatch-at-profile-2",
+           file=p2_rel, rejection_class="decoded-size-mismatch",
+           patch={"offset": u64(p2_off), "width_bytes": 8,
+                  "original_hex": p2.data[p2_off:p2_off + 8].hex().upper(),
+                  "patched_hex": struct.pack("<Q", p2_us - 1).hex().upper()},
+           field="block_index_entry.uncompressed_size",
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="the rule exists for this profile, so this is the case that "
+                  "proves it. Here there is no length arithmetic to catch the "
+                  "disagreement earlier — the values stream is compressed, so "
+                  "its decoded length is not knowable until it has been "
+                  "decoded, and comparing that length with the index entry is "
+                  "the only check a profile-2 reader has on the block's size")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",

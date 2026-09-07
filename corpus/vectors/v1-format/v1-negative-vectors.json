@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 24,
+  "case_count": 27,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -177,6 +177,51 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "the same rule from the other side: the bit promises a moment stream the blocks do not carry. This is the direction that corrupts a reader quietly rather than loudly \u2014 it reads the values stream's length prefix as the values stream, and then reads whatever follows as moments. The file that proves the rule is the one file in the set written without moments, which is also why it is kept"
+    },
+    {
+      "name": "v1-decoded-size-smaller-than-index-entry",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "patch": {
+        "offset": "5042",
+        "width_bytes": 8,
+        "original_hex": "4000000000000000",
+        "patched_hex": "3F00000000000000"
+      },
+      "field": "block_index_entry.uncompressed_size",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the index entry promises one byte fewer than the values stream decodes to. A reader that trusts the entry allocates short and either truncates the block or walks off the end of it; a reader that trusts the stream silently disagrees with the index it will use to seek. Neither is a reading of this file, so it is refused"
+    },
+    {
+      "name": "v1-decoded-size-larger-than-index-entry",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "patch": {
+        "offset": "5042",
+        "width_bytes": 8,
+        "original_hex": "4000000000000000",
+        "patched_hex": "4100000000000000"
+      },
+      "field": "block_index_entry.uncompressed_size",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same disagreement from the other side, and the one a writer is likelier to produce: the entry was written before the stream was encoded and never corrected. Feature bit 0 still agrees with the framing here, so this fails at the decoded length and not before it"
+    },
+    {
+      "name": "v1-decoded-size-mismatch-at-profile-2",
+      "file": "v1-format/files/v1_p2_with_moments.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "patch": {
+        "offset": "7241",
+        "width_bytes": 8,
+        "original_hex": "0001000000000000",
+        "patched_hex": "FF00000000000000"
+      },
+      "field": "block_index_entry.uncompressed_size",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the rule exists for this profile, so this is the case that proves it. Here there is no length arithmetic to catch the disagreement earlier \u2014 the values stream is compressed, so its decoded length is not knowable until it has been decoded, and comparing that length with the index entry is the only check a profile-2 reader has on the block's size"
     },
     {
       "name": "v1-stream-length-prefix-exceeds-block",

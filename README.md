@@ -34,7 +34,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,275 test cases across 25 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,278 test cases across 25 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -122,13 +122,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 25 vectors, 1275 cases
+corpus: 25 vectors, 1278 cases
 
 skipped, because an optional codec is not installed:
     44 cases need pcodec — pip install pcodec
-    105 cases need zstandard — pip install zstandard
+    106 cases need zstandard — pip install zstandard
 
-passed 1126  failed 0  skipped 149
+passed 1128  failed 0  skipped 150
 RESULT: PASS, with codec cases skipped
 ```
 
