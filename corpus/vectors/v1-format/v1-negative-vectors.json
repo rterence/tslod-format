@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 58,
+  "case_count": 62,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -524,6 +524,66 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "an infinite offset does the same by saturation. Gain and offset are one rule \u2014 a scaling parameter is finite \u2014 so they share a class"
+    },
+    {
+      "name": "v1-block-count-exceeds-allocated",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "block-count-exceeds-allocated",
+      "patch": {
+        "offset": "5146",
+        "width_bytes": 8,
+        "original_hex": "0100000000000000",
+        "patched_hex": "0200000000000000"
+      },
+      "field": "level_entry.block_count",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "allocated is how many index entries were reserved and block_count how many are written; a count above it points at entries that were never filled in. An active file is exactly where the two differ legitimately, which is why the rule is an upper bound and not equality"
+    },
+    {
+      "name": "v1-block-index-offset-out-of-bounds",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "block-index-out-of-bounds",
+      "patch": {
+        "offset": "5162",
+        "width_bytes": 8,
+        "original_hex": "A213000000000000",
+        "patched_hex": "0000000000010000"
+      },
+      "field": "level_entry.block_index_offset",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the last of the four tables, and the same bound as the other three: block_count entries starting here must end inside the file"
+    },
+    {
+      "name": "v1-uncompressed-size-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "zero-size-index-entry",
+      "patch": {
+        "offset": "5042",
+        "width_bytes": 8,
+        "original_hex": "4000000000000000",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "block_index_entry.uncompressed_size",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a block that decodes to nothing is not a block. It shares a class with a zero sample_count because it is one rule \u2014 an index entry describes a block that exists \u2014 and a reader gains nothing from being told which of the two numbers was zero"
+    },
+    {
+      "name": "v1-sample-count-zero",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "zero-size-index-entry",
+      "patch": {
+        "offset": "5050",
+        "width_bytes": 8,
+        "original_hex": "0400000000000000",
+        "patched_hex": "0000000000000000"
+      },
+      "field": "block_index_entry.sample_count",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the same rule from the other field. sample_count also fixes every stream's decoded length, so zero would imply every stream is empty while the block plainly holds bytes"
     },
     {
       "name": "v1-block-extent-past-eof",

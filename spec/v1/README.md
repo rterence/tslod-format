@@ -316,6 +316,15 @@ smallest a channel can have. A level table whose entries end past the end of the
 (`scaling-parameter-not-finite`), either of which turns every sample in the channel into a NaN or a
 saturation.
 
+**The level entry and the block index entry.** A `block_count` above `allocated`
+(`block-count-exceeds-allocated`), which points at entries never filled in — the rule is an upper
+bound and not equality, because an active file is exactly where the two differ legitimately. A block
+index whose entries end past the end of the file (`block-index-out-of-bounds`), the last of the four
+tables under the same bound as the other three. An `uncompressed_size` or `sample_count` of zero
+(`zero-size-index-entry`): one rule, that an index entry describes a block that exists, so one
+class. A `compressed_size` of zero is refused before the CRC is computed, which is what stops an
+all-zero entry passing on the checksum of an empty range (`v1-block-crc`).
+
 `total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
 conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a
 recording that captured nothing rather than a malformed file.

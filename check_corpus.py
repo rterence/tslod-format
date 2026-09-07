@@ -376,7 +376,12 @@ def open_v1(data: bytes) -> dict:
             block_count, allocated, index_off = struct.unpack_from(
                 "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
             if block_count > allocated:
-                raise CorruptFile("block-count-exceeds-allocated")
+                raise CorruptFile("block-count-exceeds-allocated",
+                                  f"{block_count} of {allocated}")
+            if index_off + block_count * BLOCK_INDEX_ENTRY_SIZE > len(data):
+                raise CorruptFile(
+                    "block-index-out-of-bounds",
+                    f"{block_count} entries at {index_off} end past {len(data)}")
             for b in range(block_count):
                 e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
                 fo, cs, us, sc, _ts, crc, _res = struct.unpack_from(

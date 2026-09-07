@@ -1045,6 +1045,38 @@ def gen_v1_negatives() -> Vector:
              f"channel_entry.scaling_{pname}", why,
              rejection_class="scaling-parameter-not-finite")
 
+    # ---- the level entry and the block index entry
+    L = lambda name: B.level_offset(good.layout, 0, 1, name)
+    case("v1-block-count-exceeds-allocated", L("block_count"), "Q", 2,
+         "level_entry.block_count",
+         "allocated is how many index entries were reserved and block_count "
+         "how many are written; a count above it points at entries that were "
+         "never filled in. An active file is exactly where the two differ "
+         "legitimately, which is why the rule is an upper bound and not "
+         "equality",
+         rejection_class="block-count-exceeds-allocated")
+    case("v1-block-index-offset-out-of-bounds", L("block_index_offset"), "Q",
+         1 << 40, "level_entry.block_index_offset",
+         "the last of the four tables, and the same bound as the other three: "
+         "block_count entries starting here must end inside the file",
+         rejection_class="block-index-out-of-bounds")
+
+    _us0 = B.block_offset(good.layout, 0, 1, 0, "uncompressed_size")
+    _sc0 = B.block_offset(good.layout, 0, 1, 0, "sample_count")
+    case("v1-uncompressed-size-zero", _us0, "Q", 0,
+         "block_index_entry.uncompressed_size",
+         "a block that decodes to nothing is not a block. It shares a class "
+         "with a zero sample_count because it is one rule — an index entry "
+         "describes a block that exists — and a reader gains nothing from "
+         "being told which of the two numbers was zero",
+         rejection_class="zero-size-index-entry")
+    case("v1-sample-count-zero", _sc0, "Q", 0,
+         "block_index_entry.sample_count",
+         "the same rule from the other field. sample_count also fixes every "
+         "stream's decoded length, so zero would imply every stream is empty "
+         "while the block plainly holds bytes",
+         rejection_class="zero-size-index-entry")
+
     # ---- a block whose extent leaves the file
     _blk = B.block_offset(good.layout, 0, 1, 0, "file_offset")
     _csz = B.block_offset(good.layout, 0, 1, 0, "compressed_size")
