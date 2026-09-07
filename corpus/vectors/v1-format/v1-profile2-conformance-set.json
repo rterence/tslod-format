@@ -37,6 +37,668 @@
       "decoded_bytes": "35216",
       "decoded_sha256": "76ef9f2f89c7f53db8015722dc751cf5a29eb69ec4a16738c267c672aa2a79a6",
       "every_crc_verifies": true,
+      "blocks": [
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "0e5c208fc805de71b4fd582c990707b92d81a5028d772240bee6c69239a2563e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "29af9d46269fb5743e56021ea8b1af61702380488b6a9eaa037a5c31bd75521d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "3e20d47ff1a3f089748f23bbe1c76ebbe06c6be546d8517b999dee883a661beb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "d9dde1a1a4eefe6304b7ee64f63c07bf54147edb5f9af57f1048914cd193cacb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "2674dd0f430ca893dbbd854516433c8bb8f4886246229f2e93ce1f117f544818"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 5,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "660c0d2c0c3beb936a7c64c309cc59b1dec739db0b585b4501cb8b7c66ae2601"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 6,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "531d0abe8300e76351cf7b888b781813e494fb334b61841c11e090cbfddfacd2"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 7,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "2d1a09f0076259d86a89a8c1a263905a967acc616a47bfbe3c411d5d21736fe5"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 8,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "9ec69ba7a864f5eb189cd2be09286116f90e0e5a173074c2ab1bedf3fc76031e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 9,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "dccd8005bf942f249319dffa40b453a44e96c24904098fd6747d80c85c1b3ae8"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 10,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "35ee1ee0ebc7aa039a97835b77724a852ccc4d5785c128440ce4cb7724debc34"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 11,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "63a0f6eed4db54cf622452d0ad8b52979dde257908b7c2e9c6536da89fbd5ab3"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 12,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "4c759b7147f22c21e4a5b4cf1bbf97b288771b989150e00afea71b6c312a0711"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 13,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "1d8e0a5a8f7967fe0de4b03f038d711757920f633a9c73388f23c4a460b20f01"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 14,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "101f5fe5dda911dca79a270256f0607672bc55a381327dd0f2255ec03768a20f"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 15,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "01432450f3dcbedcea2dc60c26bfd10f44894b9b57c051f1480982c15b6bc23d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                16,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                16,
+                4
+              ],
+              "recipe": "0x03",
+              "sha256": "15598055ebb70bb56e71bde1eba33ce7d873658205f71b6fb014aed65e09d7f4"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                16,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "2916af0b09c5bfaa7aac27b97b8cfa042e9b44f1e296609c06347c98f5e4db5e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x03",
+              "sha256": "dba2825369f5d9b62692d226c00b239e279a6913006f053ba89fcefeeb43eef7"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "3aa4924ded79865dd2e8556c13069ede7345c968568dc7e428977f2e5d67d4a2"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "53980de94d5b157fa3daa570154832b5b9b7d4db2e481a646194fa5155af07cd"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "a723fd1b2a001228c75bffe2e98b20b681576a8e9a747605727201ac470ca3f4"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "1cedf39acb20c32c57c27934cbbc6db3579db11901c1f89a64de841d8807a72a"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "b20f6669cd2a647d709707ec2a747adfbfe2770e2db20c97a3e54d85835ae2ab"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "077b28abf24dc74382bd8ad2ff4302381f43532c1f0059c0c7b5b3f12bbdfcc1"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 5,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "efb8a9103f8d0017d4ba9cc58f45200a513e1ba95854c5c2c5fd03a0ead23d1f"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 6,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "17fd4c4fafad8b48b0dcccac0d85f40b70c70f092fb96bc918108d3a016c6774"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 7,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "ed603bf9a2be1ce4789a7d15f1f77685371f95b088b567338a4cdc5ec173533a"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 8,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "273e94cabce2c28ab05edb05964927adb32136666a1da45b45289e1320da4d5b"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 9,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "f5586a302487989b531b09e6bad1845900720d3a03423f7bd2699edef8f4867d"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 10,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "35b5a327f94d3819474811e316dfc25d290ca0e941035efde28157e460d9ea35"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 11,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "14dc21b9da272e4eb78f4ee0e0d910cb97abffcff2e8cff95420499ea3d08d72"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 12,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "0b6fc626f1161cc97146355f9ce7ce3e19eb43f87eebed1595aab0f4680e89bc"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 13,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "0fa1d8db7761fa5e0f15f641e5e90cdb8fad23274783ccdc2896c546f09d953d"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 14,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "c5660d947e2b5071a3a3a3fc45bfb404e3eb69efa0fbccc04ae1d8d3c5371fd7"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 15,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x03",
+              "sha256": "35a3f65daec6c108ae8a55455478ab6db8a9707080405ae63bc2bbbda936c829"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                16,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "b9bee80b7e35d1595d8cf1b16fa370653639402d643565a5286fccc8c3c91b8d"
+            },
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                16,
+                4
+              ],
+              "recipe": "0x03",
+              "sha256": "4b7195dd40119255138bf86b5c8a61e2db02b08214180effcb8519d62a5922b0"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                16,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "06375d6dc76ec79b232fb7c41344d3929d889e5c18c9e9bbabdf5ac4c7dd8fcb"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+            },
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x03",
+              "sha256": "cd8a0a96483892898066bd0e44d61a3bee0e7fe99b7f7e4ee5628827460dc68d"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "d442cd75c3b854505b3dbc39198852ababd5c91530710330ce046a28c1e78adb"
+            }
+          ]
+        }
+      ],
       "note": "three recipes in one file, one per stream kind: positions under pco, values under transpose+zstd, moments under zstd. Feature bit 0 is set, so every numeric level-1 block has three streams and a reader knows it before it decodes anything"
     },
     {
@@ -59,6 +721,628 @@
       "decoded_bytes": "33856",
       "decoded_sha256": "7e522d8bd7c2388a46c26e289039518108d0503688b4c86541e8915e3f7df20d",
       "every_crc_verifies": true,
+      "blocks": [
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "0e5c208fc805de71b4fd582c990707b92d81a5028d772240bee6c69239a2563e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "29af9d46269fb5743e56021ea8b1af61702380488b6a9eaa037a5c31bd75521d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "3e20d47ff1a3f089748f23bbe1c76ebbe06c6be546d8517b999dee883a661beb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "d9dde1a1a4eefe6304b7ee64f63c07bf54147edb5f9af57f1048914cd193cacb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "2674dd0f430ca893dbbd854516433c8bb8f4886246229f2e93ce1f117f544818"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 5,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "660c0d2c0c3beb936a7c64c309cc59b1dec739db0b585b4501cb8b7c66ae2601"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 6,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "531d0abe8300e76351cf7b888b781813e494fb334b61841c11e090cbfddfacd2"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 7,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "2d1a09f0076259d86a89a8c1a263905a967acc616a47bfbe3c411d5d21736fe5"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 8,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "9ec69ba7a864f5eb189cd2be09286116f90e0e5a173074c2ab1bedf3fc76031e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 9,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "dccd8005bf942f249319dffa40b453a44e96c24904098fd6747d80c85c1b3ae8"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 10,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "35ee1ee0ebc7aa039a97835b77724a852ccc4d5785c128440ce4cb7724debc34"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 11,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "63a0f6eed4db54cf622452d0ad8b52979dde257908b7c2e9c6536da89fbd5ab3"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 12,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "4c759b7147f22c21e4a5b4cf1bbf97b288771b989150e00afea71b6c312a0711"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 13,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "1d8e0a5a8f7967fe0de4b03f038d711757920f633a9c73388f23c4a460b20f01"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 14,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "101f5fe5dda911dca79a270256f0607672bc55a381327dd0f2255ec03768a20f"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 15,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "01432450f3dcbedcea2dc60c26bfd10f44894b9b57c051f1480982c15b6bc23d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                16,
+                2
+              ],
+              "recipe": "0x01",
+              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                16,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "15598055ebb70bb56e71bde1eba33ce7d873658205f71b6fb014aed65e09d7f4"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x01",
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "dba2825369f5d9b62692d226c00b239e279a6913006f053ba89fcefeeb43eef7"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "53980de94d5b157fa3daa570154832b5b9b7d4db2e481a646194fa5155af07cd"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "a723fd1b2a001228c75bffe2e98b20b681576a8e9a747605727201ac470ca3f4"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "1cedf39acb20c32c57c27934cbbc6db3579db11901c1f89a64de841d8807a72a"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "b20f6669cd2a647d709707ec2a747adfbfe2770e2db20c97a3e54d85835ae2ab"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "077b28abf24dc74382bd8ad2ff4302381f43532c1f0059c0c7b5b3f12bbdfcc1"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 5,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "efb8a9103f8d0017d4ba9cc58f45200a513e1ba95854c5c2c5fd03a0ead23d1f"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 6,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "17fd4c4fafad8b48b0dcccac0d85f40b70c70f092fb96bc918108d3a016c6774"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 7,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "ed603bf9a2be1ce4789a7d15f1f77685371f95b088b567338a4cdc5ec173533a"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 8,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "273e94cabce2c28ab05edb05964927adb32136666a1da45b45289e1320da4d5b"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 9,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "f5586a302487989b531b09e6bad1845900720d3a03423f7bd2699edef8f4867d"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 10,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "35b5a327f94d3819474811e316dfc25d290ca0e941035efde28157e460d9ea35"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 11,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "14dc21b9da272e4eb78f4ee0e0d910cb97abffcff2e8cff95420499ea3d08d72"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 12,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "0b6fc626f1161cc97146355f9ce7ce3e19eb43f87eebed1595aab0f4680e89bc"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 13,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "0fa1d8db7761fa5e0f15f641e5e90cdb8fad23274783ccdc2896c546f09d953d"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 14,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "c5660d947e2b5071a3a3a3fc45bfb404e3eb69efa0fbccc04ae1d8d3c5371fd7"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 15,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "35a3f65daec6c108ae8a55455478ab6db8a9707080405ae63bc2bbbda936c829"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                16,
+                2
+              ],
+              "recipe": "0x01",
+              "sha256": "b9bee80b7e35d1595d8cf1b16fa370653639402d643565a5286fccc8c3c91b8d"
+            },
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                16,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "4b7195dd40119255138bf86b5c8a61e2db02b08214180effcb8519d62a5922b0"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x01",
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+            },
+            {
+              "kind": "values",
+              "dtype": "int32",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "cd8a0a96483892898066bd0e44d61a3bee0e7fe99b7f7e4ee5628827460dc68d"
+            }
+          ]
+        }
+      ],
       "note": "the same shape with NO moment stream and bit 0 clear. This is the pair that matters at profile 2: the two files differ in stream count, and only the header bit says so \u2014 there is no length arithmetic here to fall back on"
     },
     {
@@ -82,6 +1366,210 @@
       "decoded_bytes": "17176",
       "decoded_sha256": "d321ccc94ad0fe4ff9dffe1139f9c966b0b747225a3a0877c5a2763ef63892f5",
       "every_crc_verifies": true,
+      "blocks": [
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "c04359a1cce55a6a87fb7749fc0e5d3d5ea2f073099e48e060f7d6f0c80e1232"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "6fd11938420222fcadaa3960a94353225f0cbbeb23028b1ada2743ea25e9f0a6"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "099e25177f5819e413fe6abb72a826f54c96e4d30e40dfc7ed67d589481eb80e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "aaee6f888f76bf8d529bb8019eed079a3c04a9933e441b65badcb5eda03a2a03"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "bbeef513f381dc090f95ee9562dffa6e9134998e32f262194f3cec1d49cf4526"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 5,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "897393a6fb89e13c60b74089f8be8e6e13ce551293f2d359620c73654b71a71f"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 6,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "d2c9eaa5edf175c7b48f7ca56e26f453b8ba7460c92c82b51632fb8f55b9122b"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 7,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                256
+              ],
+              "recipe": "0x02",
+              "sha256": "3c3db71a86f8949094379aab1217f0a5c95f084a286421c27e4f4104b45f8f0c"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                8,
+                2
+              ],
+              "recipe": "0x03",
+              "sha256": "2b3f958f836255607de27a2da5110cf3e90c5ba72c12de5a382304aee1b31525"
+            },
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                8,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "ff69d5c34c16c3f41ad9ca06c9841163b77902d62a966929a01fbe11d4f46123"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                8,
+                5
+              ],
+              "recipe": "0x03",
+              "sha256": "9b4924ce8be7fb07b7f369119729f1b4f4820e1b08964885da69be125525cccf"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x03",
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+            },
+            {
+              "kind": "values",
+              "dtype": "int64",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x02",
+              "sha256": "570e47bcc2e5ece953d98be82d0b5f41f513d0cfbd9a74e823377f0ac1c76bf8"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x03",
+              "sha256": "587ac74dae86949b2e5f8544ecd283bd6dcb12ed57a0ab1e4747292f9d40e1ce"
+            }
+          ]
+        }
+      ],
       "note": "an ACTIVE profile-2 file: file_state = 1 and moments present. A writer that is still appending compresses what it has already flushed, so the active case and the codec case meet here rather than in separate files"
     }
   ]

@@ -622,6 +622,128 @@ def c_framing(v, c):
         validate_streams(body, 1, 0)
 
 
+def _walk_streams(data: bytes, has_moments: bool):
+    """Yield `(ci, level, block, kind, dtype, columns, stream)` in file order.
+
+    The one place the block table in spec/v1 is turned into stream kinds. Every
+    check that reads a file goes through here, so a per-stream check and a
+    rolled-up one can never disagree about what the streams are.
+    """
+    n_groups, = struct.unpack_from("<H", data, 14)
+    n_channels, = struct.unpack_from("<I", data, 16)
+    group_off, = struct.unpack_from("<Q", data, 24)
+    channel_off, = struct.unpack_from("<Q", data, 32)
+    groups = [data[group_off + gi * GROUP_ENTRY_SIZE + 24] for gi in range(n_groups)]
+    for ci in range(n_channels):
+        base = channel_off + ci * CHANNEL_ENTRY_SIZE
+        ch_dtype = DTYPE_BY_ENUM[data[base + 64]]
+        agg = data[base + 65]
+        gid, = struct.unpack_from("<H", data, base + 66)
+        n_levels, = struct.unpack_from("<I", data, base + 68)
+        level_off, = struct.unpack_from("<Q", data, base + 72)
+        tm = groups[gid] if groups else 0
+        for lv in range(n_levels):
+            block_count, _a, index_off = struct.unpack_from(
+                "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
+            for b in range(block_count):
+                e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
+                fo, cs, _us, _sc, _ts, _crc, _r = struct.unpack_from(
+                    "<QQQQqII", data, e)
+                body = data[fo:fo + cs]
+
+                kinds = []
+                if tm == 1 and lv == 0:
+                    kinds.append(("timestamps", "int64", 1))
+                elif lv >= 1 and agg == 0:
+                    kinds.append(("positions", "int64", 2) if tm == 0
+                                 else ("timestamps", "int64", 4))
+                elif lv >= 1 and agg == 1 and tm == 1:
+                    kinds.append(("timestamps", "int64", 1))
+                kinds.append(("values", ch_dtype, 4 if lv >= 1 else 1))
+                if lv >= 1 and agg == 0 and has_moments:
+                    kinds.append(("moments", "float64", 5))
+
+                off = 0
+                for i, (kind, dtype, cols) in enumerate(kinds):
+                    if i < len(kinds) - 1:
+                        prefix, = struct.unpack_from("<I", body, off)
+                        stream = body[off + 4:off + 4 + prefix]
+                        off += 4 + prefix
+                    else:
+                        stream = body[off:]
+                    yield ci, lv, b, kind, dtype, cols, stream
+
+
+def _rollup(data: bytes, has_moments: bool):
+    """`(stream count, decoded byte count, SHA-256)` over the whole file.
+
+    What a file carries instead of per-stream detail when its purpose is block
+    count rather than shape variety.
+    """
+    digest = hashlib.sha256()
+    n = total = 0
+    for _ci, _lv, _b, _kind, dtype, _cols, stream in _walk_streams(data, has_moments):
+        payload = _decode(stream, dtype)
+        digest.update(payload)
+        total += len(payload)
+        n += 1
+    return n, total, digest.hexdigest()
+
+
+def _verify_blocks(data: bytes, c: dict, has_moments: bool) -> None:
+    """Every block's streams: kind, dtype, shape, recipe and decoded bytes.
+
+    The kinds are re-derived from the rules in spec/v1 rather than read out of
+    the vector, so this compares two derivations and not a value with itself.
+    """
+    expected = c["blocks"]
+    by_block: dict = {}
+    order: list = []
+    for ci, lv, b, kind, dtype, cols, stream in _walk_streams(data, has_moments):
+        if (ci, lv, b) not in by_block:
+            by_block[(ci, lv, b)] = []
+            order.append((ci, lv, b))
+        by_block[(ci, lv, b)].append((kind, dtype, cols, stream))
+
+    assert len(order) == len(expected), (
+        f"walked {len(order)} blocks, the vector lists {len(expected)}")
+    for (ci, lv, b), want in zip(order, expected):
+        assert (want["channel"], want["level"], want["block"]) == (ci, lv, b), (
+            f"block order differs: vector says "
+            f"{(want['channel'], want['level'], want['block'])}, walked {(ci, lv, b)}")
+        streams = by_block[(ci, lv, b)]
+        assert len(want["streams"]) == len(streams), (
+            f"channel {ci} level {lv} block {b}: vector lists "
+            f"{len(want['streams'])} streams, the rules give {len(streams)}")
+        for i, ((kind, dtype, cols, stream), ws) in enumerate(zip(streams, want["streams"])):
+            assert ws["kind"] == kind, f"stream {i}: {ws['kind']} != {kind}"
+            assert ws["dtype"] == dtype, f"stream {i}: {ws['dtype']} != {dtype}"
+            assert ws["recipe"] == f"0x{stream[0]:02X}", (
+                f"stream {i}: recipe {stream[0]:#04x} is not {ws['recipe']}")
+            payload = _decode(stream, dtype)
+            item = np.dtype(dtype).itemsize
+            assert len(payload) % (item * cols) == 0
+            n = len(payload) // (item * cols)
+            shape = [n] if cols == 1 else [n, cols]
+            assert ws["shape"] == shape, f"stream {i}: shape {ws['shape']} != {shape}"
+            assert hashlib.sha256(payload).hexdigest() == ws["sha256"], (
+                f"channel {ci} level {lv} block {b} {kind}: decoded bytes are "
+                f"not what the vector says")
+
+
+def _verify_content(data: bytes, c: dict, has_moments: bool) -> None:
+    """Per-stream detail where the case carries it, the roll-up where it does not."""
+    if "blocks" in c:
+        _verify_blocks(data, c, has_moments)
+        return
+    n, total, sha = _rollup(data, has_moments)
+    assert n == c["decoded_stream_count"], (
+        f"decoded {n} streams, the vector says {c['decoded_stream_count']}")
+    assert str(total) == c["decoded_bytes"]
+    assert sha == c["decoded_sha256"], (
+        "the decoded bytes are not what the vector says they are")
+
+
 def c_profile0(v, c):
     """Read a profile-0 file with struct and zlib alone.
 
@@ -640,6 +762,7 @@ def c_profile0(v, c):
     assert str(features) == c["features"], (
         f"header.features is {features}, the vector says {c['features']}")
     assert bool(features & FEATURE_MOMENT_STREAM) == c["moment_stream_present"]
+    _verify_content(data, c, bool(features & FEATURE_MOMENT_STREAM))
 
 
 #: Wire dtype enum, restated here rather than imported — this file is the
@@ -691,59 +814,11 @@ def c_profile2(v, c):
     has_moments = bool(features & FEATURE_MOMENT_STREAM)
     assert has_moments == c["moment_stream_present"]
 
-    digest = hashlib.sha256()
-    n_streams_total = 0
-    total = 0
-    n_groups, = struct.unpack_from("<H", data, 14)
-    n_channels, = struct.unpack_from("<I", data, 16)
-    group_off, = struct.unpack_from("<Q", data, 24)
-    channel_off, = struct.unpack_from("<Q", data, 32)
-    groups = [data[group_off + gi * GROUP_ENTRY_SIZE + 24] for gi in range(n_groups)]
-    for ci in range(n_channels):
-        base = channel_off + ci * CHANNEL_ENTRY_SIZE
-        ch_dtype = DTYPE_BY_ENUM[data[base + 64]]
-        agg = data[base + 65]
-        gid, = struct.unpack_from("<H", data, base + 66)
-        n_levels, = struct.unpack_from("<I", data, base + 68)
-        level_off, = struct.unpack_from("<Q", data, base + 72)
-        tm = groups[gid] if groups else 0
-        for lv in range(n_levels):
-            block_count, _alloc, index_off = struct.unpack_from(
-                "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
-            for b in range(block_count):
-                e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
-                fo, cs, us, _sc, _ts, _crc, _r = struct.unpack_from(
-                    "<QQQQqII", data, e)
-                body = data[fo:fo + cs]
-                n = stream_count(body, lv, tm, agg, us, has_moments, 2)
-                kinds = []
-                if n > (2 if (agg == 0 and lv >= 1 and has_moments) else 1):
-                    kinds.append("int64")          # the leading position/ts stream
-                kinds.append(ch_dtype)
-                if agg == 0 and lv >= 1 and has_moments:
-                    kinds.append("float64")
-                assert len(kinds) == n, (
-                    f"{c['name']}: worked out {len(kinds)} stream kinds for a "
-                    f"block the bit says has {n}")
-                off = 0
-                for i, dt in enumerate(kinds):
-                    if i < n - 1:
-                        prefix, = struct.unpack_from("<I", body, off)
-                        stream = body[off + 4:off + 4 + prefix]
-                        off += 4 + prefix
-                    else:
-                        stream = body[off:]
-                    payload = _decode(stream, dt)
-                    digest.update(payload)
-                    total += len(payload)
-                    n_streams_total += 1
-
-    assert n_streams_total == c["decoded_stream_count"], (
-        f"decoded {n_streams_total} streams, the vector says "
-        f"{c['decoded_stream_count']}")
+    _verify_content(data, c, has_moments)
+    n, total, sha = _rollup(data, has_moments)
+    assert n == c["decoded_stream_count"]
     assert str(total) == c["decoded_bytes"]
-    assert digest.hexdigest() == c["decoded_sha256"], (
-        "the decoded bytes are not what the vector says they are")
+    assert sha == c["decoded_sha256"]
 
 
 def c_negative(v, c):

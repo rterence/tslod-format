@@ -32,6 +32,15 @@ arrays. Every vector carries these keys:
 - **`negative`** — a well-formed input with one field patched; the assertion is that the reader
   **rejects** it, and the rejection class is named.
 
+**The two conformance sets carry per-block, per-stream detail** — for every block, each stream's
+`kind` (`positions`, `timestamps`, `values` or `moments`), `dtype`, `shape`, `recipe` byte and the
+SHA-256 of its decoded payload. One file does not: where a file exists to vary the block **count**
+rather than the shapes, that detail is thousands of repetitions of the same few streams, so it
+carries a single rolled-up hash over its decoded bytes instead — `v1_branching_factor_2.tslod`,
+whose 4,096 blocks are the deepest pyramid in the corpus. The difference is a rule and not an
+omission: every stream kind, dtype and shape that file contains appears in the others, and its own
+bytes stay pinned by the roll-up and by every block's CRC.
+
 **A rejection is a class, never a language's exception type.** Any case whose expected outcome is a
 refusal carries `rejection_class`: a kebab-case name stated in the format's terms, corresponding to
 a rule in `spec/v1`. It may also carry `message`, which is informative and compared by nothing — an
@@ -79,8 +88,8 @@ hexadecimal.** It is unsigned, and its digits are zero-padded to the field's wid
 { "recipe": "0x02", "expected_crc32": "0xCBF43926" }
 ```
 
-Fourteen fields are written this way. One byte, two digits: `recipe` (the largest, at 208
-occurrences), `recipe_byte`, `bit_mask`, `original_byte`, `flipped_byte`, and the per-stream values
+Fourteen fields are written this way. One byte, two digits: `recipe` (the largest, at 902
+occurrences — every stream a conformance case lists records the one it carries), `recipe_byte`, `bit_mask`, `original_byte`, `flipped_byte`, and the per-stream values
 of a profile-2 case's `recipes` map — `timestamps`, `values` and `moments`. Thirty-two bits, eight
 digits: `expected_crc32`, `stored_crc32`, `crc32_after_flip`, `crc32_of_empty_range`, `init` and
 `xor_out`.

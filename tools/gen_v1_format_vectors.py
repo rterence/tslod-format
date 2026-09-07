@@ -98,7 +98,16 @@ def gen_profile0_set() -> Vector:
     )
     ts = 1_700_000_000_000_000_000
 
-    def emit(name, spec, checks, note):
+    def emit(name, spec, checks, note, roll_up=False):
+        """`roll_up` swaps per-stream detail for one hash over the whole file.
+
+        A file carries per-block, per-stream records because its purpose is to
+        vary SHAPE. Where a file exists to vary block COUNT instead, those
+        records are the same few kinds repeated thousands of times, so it
+        carries the rolled-up form the profile-2 set uses and nothing is lost:
+        every kind, dtype and shape it contains appears in the other files, and
+        its bytes stay pinned by the hash and by every block's CRC.
+        """
         result = B.build(spec)
         rel = _write_file(name, result)
         # Every block's CRC must verify over exactly its stored extent.
@@ -141,6 +150,16 @@ def gen_profile0_set() -> Vector:
                     features=u64(features),
                     moment_stream_present=bool(features & B.FEATURE_MOMENT_STREAM),
                     every_crc_verifies=True, note=note)
+        if roll_up:
+            payloads = _walk_payloads(spec, result)
+            rolled = hashlib.sha256()
+            for _n, _d, payload in payloads:
+                rolled.update(payload)
+            body.update(decoded_stream_count=len(payloads),
+                        decoded_bytes=u64(sum(len(p) for _n, _d, p in payloads)),
+                        decoded_sha256=rolled.hexdigest())
+        else:
+            body["blocks"] = _block_records(spec, result)
         body.update(checks)      # a check may restate a field; the check wins
         v.case(name, **body)
 
@@ -231,13 +250,17 @@ def gen_profile0_set() -> Vector:
              f"geometry is UNCHANGED — only how many buckets share a block moves")
 
     for bf in (2, 16, 1024):
+        # BF=2 is the deepest pyramid in the set: 4,096 blocks, whose per-stream
+        # records would be the same three kinds repeated and nine tenths of the
+        # vector's bytes. It varies block count, not shape, so it rolls up.
         emit(f"v1_branching_factor_{bf}.tslod",
              B.FileSpec(compression_id=0, branching_factor=bf,
                         groups=[B.GroupSpec(1000.0, ts)],
                         channels=[B.ChannelSpec("sig", ramp("float32", 4096))]),
              {"branching_factor": bf,
               "num_levels": B.compute_num_levels(4096, bf)},
-             f"BF={bf}; no file that exists uses anything but 256")
+             f"BF={bf}; no file that exists uses anything but 256",
+             roll_up=(bf == 2))
     return v
 
 
@@ -277,14 +300,53 @@ def _decode_stream(stream: bytes, dtype: str) -> bytes:
 
 
 def _stream_kinds(spec, ci: int, level: int, blk: dict) -> list:
-    """(name, dtype) per stream of this block, in wire order."""
+    """(name, dtype, columns) per stream of this block, in wire order.
+
+    The leading stream is POSITIONS on a fixed-rate numeric level >= 1 block —
+    `[min_ts, max_ts]` per bucket — and TIMESTAMPS everywhere else it appears.
+    `ts_columns` is what tells them apart, so the two names are derived from
+    the data rather than asserted.
+    """
+    ch = spec.channels[ci]
     kinds = []
-    if blk.get("ts_columns"):
-        kinds.append(("timestamps", "int64"))
-    kinds.append(("values", np.dtype(spec.channels[ci].data.dtype).name))
-    if (level >= 1 and spec.channels[ci].aggregation_mode == 0 and spec.moments):
-        kinds.append(("moments", "float64"))
+    tsc = blk.get("ts_columns") or 0
+    if tsc:
+        kinds.append(("positions" if tsc == 2 else "timestamps", "int64", tsc))
+    kinds.append(("values", np.dtype(ch.data.dtype).name, 4 if level >= 1 else 1))
+    if level >= 1 and ch.aggregation_mode == 0 and spec.moments:
+        kinds.append(("moments", "float64", 5))
     return kinds
+
+
+def _block_records(spec, result) -> list:
+    """Per block, per stream: kind, dtype, shape, recipe and decoded SHA-256.
+
+    This is what a reader test wants and what neither conformance set carried:
+    the shape says how to interpret the bytes, and the hash says whether the
+    bytes are right, per stream rather than per file.
+    """
+    out = []
+    for (ci, level, bi, blk) in result.blocks:
+        lo = blk["file_offset"]
+        body = result.data[lo:lo + blk["compressed_size"]]
+        kinds = _stream_kinds(spec, ci, level, blk)
+        streams = []
+        for stream, (kind, dtype, cols) in zip(_split_streams(body, len(kinds)),
+                                               kinds):
+            payload = _decode_stream(stream, dtype)
+            item = np.dtype(dtype).itemsize
+            assert len(payload) % (item * cols) == 0, (
+                f"{kind} payload is not a whole number of {cols}-column rows")
+            n = len(payload) // (item * cols)
+            streams.append({
+                "kind": kind, "dtype": dtype,
+                "shape": [n] if cols == 1 else [n, cols],
+                "recipe": f"0x{stream[0]:02X}",
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            })
+        out.append({"channel": ci, "level": level, "block": bi,
+                    "streams": streams})
+    return out
 
 
 def _walk_payloads(spec, result) -> list:
@@ -294,7 +356,8 @@ def _walk_payloads(spec, result) -> list:
         lo = blk["file_offset"]
         body = result.data[lo:lo + blk["compressed_size"]]
         kinds = _stream_kinds(spec, ci, level, blk)
-        for stream, (name, dtype) in zip(_split_streams(body, len(kinds)), kinds):
+        for stream, (name, dtype, _cols) in zip(_split_streams(body, len(kinds)),
+                                                kinds):
             out.append((name, dtype, _decode_stream(stream, dtype)))
     return out
 
@@ -381,7 +444,8 @@ def gen_profile2_set() -> Vector:
                decoded_stream_count=len(got),
                decoded_bytes=u64(sum(len(p) for _, _, p in got)),
                decoded_sha256=digest.hexdigest(),
-               every_crc_verifies=True, note=note)
+               every_crc_verifies=True,
+               blocks=_block_records(spec, result), note=note)
 
     emit2("v1_p2_with_moments.tslod",
           B.FileSpec(branching_factor=256,
