@@ -173,3 +173,8 @@ implementation, it is an oracle and must carry a tolerance.
 ## Status
 
 Version 1 is not released and carries no stability guarantee.
+
+## Licence
+
+This repository is licensed under the Apache License 2.0; see [`LICENSE`](LICENSE).
+Copyright the tslod-format authors.
