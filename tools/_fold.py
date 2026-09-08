@@ -40,20 +40,25 @@ def _numeric_group(block: np.ndarray, from_raw: bool):
     if np.issubdtype(block.dtype, np.floating):
         nan_min = np.isnan(mins)
         nan_max = np.isnan(maxs)
-        if nan_min.all():
-            # An all-NaN bucket: four NaNs and positions [0, 0]. The NaN that
-            # lands in min/max is the FIRST element's, not a manufactured one,
-            # which is what keeps a fixture extracted on one machine valid on
-            # another (the bit-pattern rule).
-            return mins[0], maxs[0], first, last, 0, 0
+        # The two columns are resolved INDEPENDENTLY. Folding stored tuples,
+        # the min column being all NaN says nothing about the max column, and
+        # gating one on the other couples them exactly where the rule says
+        # they do not touch. An all-NaN column falls back to its own first
+        # child, at position 0, and the NaN that lands there is that child's
+        # own — payload preserved, never a manufactured canonical one.
+        #
         # +inf / -inf sentinels rather than np.nanargmin: argmin returns the
         # FIRST minimum, which is exactly the strict-`<` tie-break, and a
-        # bucket whose real values are all +inf still resolves correctly
+        # column whose real values are all +inf still resolves correctly
         # because the sentinel only replaces NaN.
-        safe_min = np.where(nan_min, np.inf, mins)
-        safe_max = np.where(nan_max, -np.inf, maxs)
-        i_min = int(np.argmin(safe_min))
-        i_max = int(np.argmax(safe_max))
+        if nan_min.all():
+            i_min = 0
+        else:
+            i_min = int(np.argmin(np.where(nan_min, np.inf, mins)))
+        if nan_max.all():
+            i_max = 0
+        else:
+            i_max = int(np.argmax(np.where(nan_max, -np.inf, maxs)))
     else:
         i_min = int(np.argmin(mins))
         i_max = int(np.argmax(maxs))

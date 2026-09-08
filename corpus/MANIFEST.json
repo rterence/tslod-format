@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 25,
-    "cases": 1313,
+    "cases": 1319,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -742,11 +742,11 @@
         "dtype:float32",
         "dtype:float64"
       ],
-      "case_count": 36,
+      "case_count": 42,
       "files": [
         {
           "path": "set3-build-level/set3-build-level-nan-matrix.json",
-          "sha256": "96217265ed31b0e182378383222692465aa74d56ebbf560d171fbf53cd75c4e5"
+          "sha256": "f77c26d6a5e550b6ec3fe1b8518fa1180377e9c29326a11369fcc723c8ff5154"
         }
       ]
     },

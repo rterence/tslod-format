@@ -254,6 +254,84 @@ def gen_nan_matrix() -> Vector:
                                        "NaN — the class a hand-written fold and a "
                                        "vectorised one were measured to diverge on"),
                           })
+    # ------------------------------------------------------------------
+    # The two columns are resolved INDEPENDENTLY, and a NaN carried through
+    # the fold keeps the payload it was written with.
+    #
+    # Every NaN elsewhere in set 3 is one of the two canonical quiet forms, so
+    # no existing case can tell a preserved payload from a manufactured one.
+    # These use non-canonical payloads, which is the only way to pin it.
+    # ------------------------------------------------------------------
+    def _nan(width: int, payload: int):
+        if width == 8:
+            return struct.unpack("<d", struct.pack("<Q", 0x7FF8000000000000 | payload))[0]
+        return struct.unpack("<f", struct.pack("<I", 0x7FC00000 | payload))[0]
+
+    N_A = _nan(8, 0x0ABCDE)          # non-canonical, and distinct from
+    N_B = _nan(8, 0x0123456)         # each other, so a swap is visible
+    N_C = _nan(8, 0x00BEEF)
+
+    _numeric_case(
+        vec, "columns-independent/min-column-all-nan",
+        np.array([[N_A, 1.0, 10.0, 20.0], [N_B, 5.0, 11.0, 21.0],
+                  [N_C, 2.0, 12.0, 22.0], [N_A, 3.0, 13.0, 23.0]],
+                 dtype=np.float64), 4, 0,
+        extra={"note": (
+            "the min column is entirely NaN and the max column is not. The "
+            "bucket's max is still 5.0 at index 1: an all-NaN min column says "
+            "nothing about the max column, and a fold that lets one gate the "
+            "other returns the FIRST child's max here instead of the largest")})
+
+    _numeric_case(
+        vec, "columns-independent/max-column-all-nan",
+        np.array([[3.0, N_A, 10.0, 20.0], [1.0, N_B, 11.0, 21.0],
+                  [2.0, N_C, 12.0, 22.0], [4.0, N_A, 13.0, 23.0]],
+                 dtype=np.float64), 4, 0,
+        extra={"note": (
+            "the same rule mirrored: the max column is entirely NaN and the "
+            "min is not, so min is 1.0 at index 1 while max falls back to the "
+            "first child's max with position 0")})
+
+    _numeric_case(
+        vec, "columns-independent/one-half-nan-tuple",
+        np.array([[3.0, 4.0, 10.0, 20.0], [N_A, 7.0, 11.0, 21.0],
+                  [2.0, 5.0, 12.0, 22.0], [6.0, 1.0, 13.0, 23.0]],
+                 dtype=np.float64), 4, 0,
+        extra={"note": (
+            "one child has a NaN min and a valid max. Its min is skipped and "
+            "its max still competes and wins, which is what per-column means "
+            "at the granularity of a single child")})
+
+    _numeric_case(
+        vec, "nan-payload-preserved/tuples-wholly-nan",
+        np.array([[N_A, N_B, N_A, N_B], [N_C, N_C, N_C, N_C],
+                  [N_C, N_C, N_C, N_C], [N_C, N_C, N_C, N_C]],
+                 dtype=np.float64), 4, 0,
+        extra={"nan_payload_is_preserved": True,
+               "note": (
+                   "both columns are wholly NaN, so each falls back to its own "
+                   "first child — and the bytes that come back are that "
+                   "child's, 0x7FF800000000ABCDE for min and 0x7FF8000001234"
+                   "56 for max, NOT the canonical 0x7FF8000000000000 a "
+                   "manufactured NaN would carry. Different payloads in the "
+                   "two columns, so a fold that returns one for both fails")})
+
+    for dtype, width in (("float32", 4), ("float64", 8)):
+        first = _nan(width, 0x0ABCDE if width == 8 else 0x0ABCDE)
+        rest = _nan(width, 0)
+        _numeric_case(
+            vec, f"nan-payload-preserved/raw-wholly-nan/{dtype}",
+            np.array([first, rest, rest, rest], dtype=dtype), 4, 1,
+            extra={"nan_payload_is_preserved": True,
+                   "note": (
+                       "the raw path, which runs on every sample and is "
+                       "therefore the one that matters most. A bucket of "
+                       "samples that are all NaN folds to the FIRST sample's "
+                       "NaN, payload and all, at positions [0, 0]. A "
+                       "disconnected sensor for a few seconds produces a run "
+                       "longer than the branching factor, so this bucket is "
+                       "ordinary rather than contrived")})
+
     return vec
 
 

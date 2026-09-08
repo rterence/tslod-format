@@ -62,9 +62,23 @@ Bucket *j* at level *k* covers raw samples `[j·BF^k, (j+1)·BF^k)`, **anchored 
 sample `b · block_samples · BF^k`. `num_levels` counts level 0, so it is one more than the count of
 aggregation levels (`set2-anchored-bucket-geometry`, `set2-compute-num-levels`).
 
-A numeric bucket is `[min, max, first, last]` **in that column order**. NaN is skipped in `min` and
-`max`; an all-NaN bucket yields four NaNs; `first` and `last` are the literal first and last
-elements and may themselves be NaN. The comparison is strict `<` and `>`, so on a tie the **first**
+A numeric bucket is `[min, max, first, last]` **in that column order**. `first` and `last` are the
+literal first and last elements and may themselves be NaN.
+
+⛔ **`min` and `max` are resolved independently, one column each.** The bucket's `min` is the
+minimum over its children's `min` column with NaN skipped; if that whole column is NaN, it is the
+**first child's `min` as stored**, at position 0. The bucket's `max` is the maximum over the
+children's `max` column, by the same rule and separately. **Neither column gates the other**: a
+`min` column that is entirely NaN says nothing about the `max` column, and a fold that lets one
+decide the other returns the first child's max where it should return the largest. At level 1 both
+columns are the raw samples, so the two rules coincide there and diverge only above it.
+
+**A NaN carried through the fold keeps the payload it was written with**, and is never replaced by a
+canonical one. A wholly-NaN bucket's `min` and `max` are the first child's own bits. This is a
+different rule from the moments', where an all-NaN bucket's four moments are the canonical quiet NaN
+because nothing was carried through — there, the value is manufactured; here, it is copied.
+
+The comparison is strict `<` and `>`, so on a tie the **first**
 occurrence wins — and that choice is what decides the stored position timestamps, which is why the
 tie-break vector checks positions and not only values. A bitfield bucket is `[OR, AND, first, last]`
 on the two's-complement bit pattern including the sign bit, and is defined only for integer dtypes

@@ -766,12 +766,14 @@ def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: boo
                 continue
             if i_max is None or x > hi[i_max]:
                 i_max = i
-        if i_min is None:                            # the whole bucket is NaN
-            out[b] = (lo[0], hi[0], first, last)
-            pos[b] = (0, 0)
-        else:
-            out[b] = (lo[i_min], hi[i_max if i_max is not None else 0], first, last)
-            pos[b] = (i_min, i_max if i_max is not None else 0)
+        # Each column falls back on its own. A min column that is all NaN
+        # does not decide the max column, and vice versa.
+        if i_min is None:
+            i_min = 0
+        if i_max is None:
+            i_max = 0
+        out[b] = (lo[i_min], hi[i_max], first, last)
+        pos[b] = (i_min, i_max)
 
     return (out, pos) if want_positions else out
 

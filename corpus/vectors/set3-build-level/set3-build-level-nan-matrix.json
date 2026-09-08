@@ -11,7 +11,7 @@
     "dtype:float64"
   ],
   "notes": "The spec's only NaN sentence is about bitfield mode, which has no NaN. This vector is the whole of the NaN contract. Bit-pattern equality matters here more than anywhere: a manufactured NaN is the canonical quiet NaN, a propagated one keeps its input's payload, and numeric equality cannot tell them apart because NaN != NaN.",
-  "case_count": 36,
+  "case_count": 42,
   "cases": [
     {
       "name": "float32/some-nan/bf4",
@@ -1512,6 +1512,259 @@
       "column_order": "min,max,first,last",
       "nan_pattern": "nan-with-infinities",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "columns-independent/min-column-all-nan",
+      "branching_factor": 4,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87F000000000000F03F00000000000024400000000000003440563412000000F87F000000000000144000000000000026400000000000003540EFBE00000000F87F000000000000004000000000000028400000000000003640DEBC0A000000F87F00000000000008400000000000002A400000000000003740"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87F000000000000144000000000000024400000000000003740"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "the min column is entirely NaN and the max column is not. The bucket's max is still 5.0 at index 1: an all-NaN min column says nothing about the max column, and a fold that lets one gate the other returns the FIRST child's max here instead of the largest",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "columns-independent/max-column-all-nan",
+      "branching_factor": 4,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000840DEBC0A000000F87F00000000000024400000000000003440000000000000F03F563412000000F87F000000000000264000000000000035400000000000000040EFBE00000000F87F000000000000284000000000000036400000000000001040DEBC0A000000F87F0000000000002A400000000000003740"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F03FDEBC0A000000F87F00000000000024400000000000003740"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "the same rule mirrored: the max column is entirely NaN and the min is not, so min is 1.0 at index 1 while max falls back to the first child's max with position 0",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "01000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "columns-independent/one-half-nan-tuple",
+      "branching_factor": 4,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000840000000000000104000000000000024400000000000003440DEBC0A000000F87F0000000000001C400000000000002640000000000000354000000000000000400000000000001440000000000000284000000000000036400000000000001840000000000000F03F0000000000002A400000000000003740"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000400000000000001C4000000000000024400000000000003740"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "note": "one child has a NaN min and a valid max. Its min is skipped and its max still competes and wins, which is what per-column means at the granularity of a single child",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "02000000000000000100000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "nan-payload-preserved/tuples-wholly-nan",
+      "branching_factor": 4,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87F563412000000F87FDEBC0A000000F87F563412000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87F"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87F563412000000F87FDEBC0A000000F87FEFBE00000000F87F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "nan_payload_is_preserved": true,
+      "note": "both columns are wholly NaN, so each falls back to its own first child \u2014 and the bytes that come back are that child's, 0x7FF800000000ABCDE for min and 0x7FF800000123456 for max, NOT the canonical 0x7FF8000000000000 a manufactured NaN would carry. Different payloads in the two columns, so a fold that returns one for both fails",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "nan-payload-preserved/raw-wholly-nan/float32",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBCCA7F0000C07F0000C07F0000C07F"
+      },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBCCA7FDEBCCA7FDEBCCA7F0000C07F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "nan_payload_is_preserved": true,
+      "note": "the raw path, which runs on every sample and is therefore the one that matters most. A bucket of samples that are all NaN folds to the FIRST sample's NaN, payload and all, at positions [0, 0]. A disconnected sensor for a few seconds produces a run longer than the branching factor, so this bucket is ordinary rather than contrived",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "nan-payload-preserved/raw-wholly-nan/float64",
+      "branching_factor": 4,
+      "from_raw": 1,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87F000000000000F87F000000000000F87F000000000000F87F"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "DEBC0A000000F87FDEBC0A000000F87FDEBC0A000000F87F000000000000F87F"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,last",
+      "nan_payload_is_preserved": true,
+      "note": "the raw path, which runs on every sample and is therefore the one that matters most. A bucket of samples that are all NaN folds to the FIRST sample's NaN, payload and all, at positions [0, 0]. A disconnected sensor for a few seconds produces a run longer than the branching factor, so this bucket is ordinary rather than contrived",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
