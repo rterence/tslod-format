@@ -1009,6 +1009,36 @@ def gen_v1_negatives() -> Vector:
          "channel has not even a level 0, which no channel can be, and a "
          "reader looping over levels would silently read nothing",
          rejection_class="num-levels-zero")
+    # 1,024 level-0 samples at branching_factor 256 give a three-level
+    # pyramid, and the field must hold that number and no other. The patch
+    # goes DOWNWARD, from 3 to 2, and that is the whole of why 2 is the value:
+    # a stored depth LARGER than the level table that was written sends a
+    # reader to a level entry that is not there, and which class that produces
+    # depends on the bytes that happen to follow the table. The class would
+    # then be decided by the data rather than by the defect, which is the
+    # failure the evaluation order exists to prevent.
+    case("v1-num-levels-disagrees-with-sample-count", C("num_levels"), "I", 2,
+         "channel_entry.num_levels",
+         "the pyramid's depth is stored, and it must be the depth the channel's "
+         "own samples imply: 1,024 level-0 samples at branching_factor 256 fold "
+         "to 4 buckets and then to 1, which is three levels counting level 0. "
+         "The patch stores two, so a reader walking the stored count builds a "
+         "level table of the wrong length and answers every query above level 1 "
+         "from a level it decided was not there. The input is the CHANNEL's own "
+         "level-0 sample count and never the group's total_samples, which sits "
+         "one record away under a plausible name: a channel that is empty in a "
+         "group that is not has depth 1 whatever the group holds. The patch is "
+         "DOWNWARD, from 3 to 2, and deliberately so — a stored depth larger "
+         "than the level table that was written makes a reader read a level "
+         "entry that does not exist, and the class it then produces depends on "
+         "the bytes that happen to follow the table rather than on the defect. "
+         "At two, every table stays in bounds and every CRC verifies, so only "
+         "the depth rule notices. The accepting half of this boundary is "
+         "already in the corpus and must keep passing: v1_enums_and_units.tslod "
+         "carries a zero-sample channel storing num_levels = 1 in a group "
+         "reporting 1,024 samples, and a reader that took the group total would "
+         "refuse a profile-0 conformance file",
+         rejection_class="num-levels-mismatch")
     case("v1-level-table-offset-out-of-bounds", C("level_table_offset"), "Q",
          1 << 40, "channel_entry.level_table_offset",
          "the same bound as the group and channel tables, one level down: the "

@@ -245,6 +245,24 @@ def check_flag_against_framing(body: bytes, offset: int, uncompressed_size: int,
 
 
 
+def _level_entry(data: bytes, level_off: int, lv: int) -> tuple[int, int, int]:
+    """One level table entry, with the two bounds its own fields must satisfy.
+
+    Shared by the depth check and the level walk so that a level entry is
+    refused the same way whichever of the two reaches it first.
+    """
+    block_count, allocated, index_off = struct.unpack_from(
+        "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
+    if block_count > allocated:
+        raise CorruptFile("block-count-exceeds-allocated",
+                          f"{block_count} of {allocated}")
+    if index_off + block_count * BLOCK_INDEX_ENTRY_SIZE > len(data):
+        raise CorruptFile(
+            "block-index-out-of-bounds",
+            f"{block_count} entries at {index_off} end past {len(data)}")
+    return block_count, allocated, index_off
+
+
 def open_v1(data: bytes) -> dict:
     """Parse and validate a version-1 file, or raise CorruptFile."""
     # A truncated file and a file that is not one of ours are different
@@ -371,17 +389,39 @@ def open_v1(data: bytes) -> dict:
             if not -float("inf") < value < float("inf"):
                 raise CorruptFile("scaling-parameter-not-finite",
                                   f"{pname}={value!r}")
+        # The stored depth must be the depth this channel's own data implies.
+        # N is the channel's LEVEL-0 sample count, summed from its own level-0
+        # block index — never the group's total_samples, which is one record
+        # away under a plausible name and gives 3 where the answer is 1 for a
+        # channel that is empty in a group that is not. Only a sealed file's
+        # field is authoritative: an active file may hold flushed level-0
+        # blocks whose level table has not been extended yet, so its depth is
+        # derived by walking that table rather than compared against it.
+        #
+        # The fold is re-derived here as repeated ceiling division rather than
+        # imported from the generator: a check that agrees with the code that
+        # wrote its data proves nothing.
+        if file_state == 0:
+            bc0, _alloc0, ioff0 = _level_entry(data, level_off, 0)
+            n0 = sum(struct.unpack_from(  # sample_count is at entry offset 24
+                "<Q", data, ioff0 + b * BLOCK_INDEX_ENTRY_SIZE + 24)[0]
+                for b in range(bc0))
+            depth, samples = 1, n0
+            while samples > 1:
+                buckets = -(-samples // bf)
+                depth += 1
+                if buckets <= 1:
+                    break
+                samples = buckets
+            if num_levels != depth:
+                raise CorruptFile(
+                    "num-levels-mismatch",
+                    f"stored {num_levels}; {n0} level-0 samples at "
+                    f"branching_factor {bf} give {depth}")
+
         timing_mode = groups[group_id]["timing_mode"]
         for lv in range(num_levels):
-            block_count, allocated, index_off = struct.unpack_from(
-                "<QQQ", data, level_off + lv * LEVEL_ENTRY_SIZE)
-            if block_count > allocated:
-                raise CorruptFile("block-count-exceeds-allocated",
-                                  f"{block_count} of {allocated}")
-            if index_off + block_count * BLOCK_INDEX_ENTRY_SIZE > len(data):
-                raise CorruptFile(
-                    "block-index-out-of-bounds",
-                    f"{block_count} entries at {index_off} end past {len(data)}")
+            block_count, allocated, index_off = _level_entry(data, level_off, lv)
             for b in range(block_count):
                 e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
                 fo, cs, us, sc, _ts, crc, _res = struct.unpack_from(

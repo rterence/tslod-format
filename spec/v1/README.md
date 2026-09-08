@@ -41,6 +41,14 @@ Version 1 defines one feature bit and reserves the rest:
 
 A writer sets bit 0 whenever it writes the moment stream, and never otherwise.
 
+`file_state` also says how far the rest of the file may be trusted. In a **sealed** file every
+stored count is final, and `num_levels` in particular is the depth the channel's own samples imply
+(**The pyramid**). In an **active** file it is not: a writer mid-append may have flushed level-0
+blocks whose level table has not been extended yet, so a reader derives an active channel's depth by
+walking the level table and takes the stored field as authoritative only once the file is sealed.
+That is why the depth rejection binds sealed files alone — an active file is where the two
+legitimately differ, in the same way `block_count` and `allocated` do.
+
 Group entry offsets 0, 8, 16 and 24 are **frozen**: a streaming writer patches `start_timestamp` and
 `total_samples` in place after the entry is written, so a new field may only append at offset 25 or
 later.
@@ -61,6 +69,13 @@ Bucket *j* at level *k* covers raw samples `[j·BF^k, (j+1)·BF^k)`, **anchored 
 0** — never at a block boundary and never at a time. Block *b* at level *k* therefore begins at raw
 sample `b · block_samples · BF^k`. `num_levels` counts level 0, so it is one more than the count of
 aggregation levels (`set2-anchored-bucket-geometry`, `set2-compute-num-levels`).
+
+⛔ **A channel's depth is not a free field: it is the depth its own samples imply.** Let *N* be the
+channel's level-0 sample count — the sum of its own level-0 block index entries' `sample_count`.
+The depth is 1 when *N* is 0 or 1; otherwise it is the number of levels produced by replacing *N*
+with the ceiling of *N* / `branching_factor` until a single bucket remains, counting level 0. Every
+channel in a sealed file stores that number and no other, and a reader refuses one that does not
+(`num-levels-mismatch`, under **Rejection**).
 
 A numeric bucket is `[min, max, first, last]` **in that column order**. `first` and `last` are the
 literal first and last elements and may themselves be NaN.
@@ -322,11 +337,21 @@ because that is where this field defines the time of a sample; a variable-rate g
 timestamps instead.
 
 **The channel entry.** A `dtype` outside 0–9 (`dtype-unknown`), which leaves a reader without the
-width of anything. An `aggregation_mode` outside `{0, 1}` (`aggregation-mode-unknown`), which decides
-what a bucket's four columns mean. Bitfield mode on a float dtype (`bitfield-on-float-dtype`), which
-is the file-level form of a rule set 3 already pins at the kernel. A `group_id` past the group table
-(`group-id-out-of-range`). `num_levels` of zero (`num-levels-zero`): it counts level 0, so 1 is the
-smallest a channel can have. A level table whose entries end past the end of the file
+width of anything. An `aggregation_mode` outside `{0, 1}` (`aggregation-mode-unknown`), which
+decides what a bucket's four columns mean. Bitfield mode on a float dtype
+(`bitfield-on-float-dtype`), which is the file-level form of a rule set 3 already pins at the
+kernel. A `group_id` past the group table (`group-id-out-of-range`). `num_levels` of zero
+(`num-levels-zero`): it counts level 0, so 1 is the smallest a channel can have. In a **sealed**
+file, a `num_levels` that is not the depth the law gives for that channel's own level-0 sample count
+and the header's `branching_factor` (`num-levels-mismatch`, stated under **The pyramid**); an active
+file's stored depth is not authoritative and this rule does not bind it. The input is the channel's
+own count — the sum of its level-0 block index entries' `sample_count` — and never the group's
+`total_samples`, which sits one record away under a plausible name and gives the wrong answer for a
+channel that is empty in a group that is not: such a channel's depth is 1 whatever its group holds,
+and the conformance set carries one, so a reader taking the group total refuses a valid file. The
+check compares the channel entry against its own level-0 block index and reads nothing else, so it
+falls in **step 1** of the reader's evaluation order — with the header and the index entries, before
+any stream is read. A level table whose entries end past the end of the file
 (`level-table-out-of-bounds`). `name`, `unit` or `calibration_id` that is not valid UTF-8
 (`text-field-not-utf8`) — one rule for the three, so one class. A `scaling_type` outside `{0, 1}`
 (`scaling-type-unknown`), and a `scaling_gain` or `scaling_offset` that is not finite
