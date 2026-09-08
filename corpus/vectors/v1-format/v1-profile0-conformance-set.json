@@ -2316,7 +2316,7 @@
       "features": "1",
       "moment_stream_present": true,
       "every_crc_verifies": true,
-      "note": "two numeric channels of ONE fixed-rate group with different lengths and different dtypes: long_f32 holds 4,096 float32 samples and short_i64 holds 700 int64. Both are three levels deep by the depth law, and their bucket counts differ at every level \u2014 4,096/16/1 against 700/3/1. The group's total_samples is the LARGER count, 4,096, which is the group's own count and no channel's. Taking the coarsest level that still offers at least the budget, a query for 8 buckets over the whole group resolves long_f32 to level 1, which offers 16, and short_i64 to level 0, because its level 1 offers only 3 \u2014 so the two channels are served from different levels, from two independent reads, and the pair is trimmed to the span both cover",
+      "note": "two numeric channels of ONE fixed-rate group with different lengths and different dtypes: long_f32 holds 4,096 float32 samples and short_i64 holds 700 int64. Both are three levels deep by the depth law, and their bucket counts differ at every level \u2014 4,096/16/1 against 700/3/1. The group's total_samples is the LARGER count, 4,096, which is the group's own count and no channel's. A reader must therefore take each channel's bucket count at a level from that channel's own level table and block index, rather than from the group or from the other channel",
       "blocks": [
         {
           "channel": 0,
@@ -2791,10 +2791,6 @@
           3,
           1
         ]
-      },
-      "bucket_budget_8_resolves_to_level": {
-        "long_f32": 1,
-        "short_i64": 0
       }
     },
     {

@@ -67,9 +67,11 @@ group — and the field holds the largest of their counts, which is how far the 
 runs. A channel's own count is the sum of its level-0 block index entries' `sample_count`, as the
 depth rule under **The pyramid** states, and it is that count, never `total_samples`, that says what
 the channel holds and how deep its pyramid is. A reader serving two channels of one group therefore
-resolves each to a level from its own count, reads each independently, and trims the pair to the
-span both cover (`v1_group_unequal_lengths.tslod`). The zero-sample channel already in the
-conformance set is the extreme of this rule and not an exception to it.
+reads each channel's buckets from its own level table and block index — never assuming the two hold
+the same number of buckets at any level — and pairs them over the span both cover
+(`v1_group_unequal_lengths.tslod`). Which level a reader chooses to serve is its own policy and is
+not stated here. The zero-sample channel already in the conformance set is the extreme of this rule
+and not an exception to it.
 
 `prev_file_hash` at header offset 60 is the SHA-256 of the **entire** previous file in a chained
 recording, or 32 zero bytes when there is no predecessor. `sequence_number` at 56 is that chain's
