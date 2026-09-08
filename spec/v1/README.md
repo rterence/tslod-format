@@ -61,6 +61,16 @@ Group entry offsets 0, 8, 16 and 24 are **frozen**: a streaming writer patches `
 `total_samples` in place after the entry is written, so a new field may only append at offset 25 or
 later.
 
+`total_samples` is the **group's** count and no channel's. The channels of one group may hold
+different numbers of samples — a channel that stopped recording early is still a channel of that
+group — and the field holds the largest of their counts, which is how far the group's time base
+runs. A channel's own count is the sum of its level-0 block index entries' `sample_count`, as the
+depth rule under **The pyramid** states, and it is that count, never `total_samples`, that says what
+the channel holds and how deep its pyramid is. A reader serving two channels of one group therefore
+resolves each to a level from its own count, reads each independently, and trims the pair to the
+span both cover (`v1_group_unequal_lengths.tslod`). The zero-sample channel already in the
+conformance set is the extreme of this rule and not an exception to it.
+
 `prev_file_hash` at header offset 60 is the SHA-256 of the **entire** previous file in a chained
 recording, or 32 zero bytes when there is no predecessor. `sequence_number` at 56 is that chain's
 index.

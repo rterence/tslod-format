@@ -96,7 +96,7 @@ hexadecimal.** It is unsigned, and its digits are zero-padded to the field's wid
 { "recipe": "0x02", "expected_crc32": "0xCBF43926" }
 ```
 
-Fourteen fields are written this way. One byte, two digits: `recipe` (the largest, at 920
+Fourteen fields are written this way. One byte, two digits: `recipe` (the largest, at 951
 occurrences — every stream a conformance case lists records the one it carries), `recipe_byte`, `bit_mask`, `original_byte`, `flipped_byte`, and the per-stream values
 of a profile-2 case's `recipes` map — `timestamps`, `values` and `moments`. Thirty-two bits, eight
 digits: `expected_crc32`, `stored_crc32`, `crc32_after_flip`, `crc32_of_empty_range`, `init` and

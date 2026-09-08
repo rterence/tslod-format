@@ -224,6 +224,38 @@ def gen_profile0_set() -> Vector:
          "level >= 1 carries no timestamp stream, so the geometry is all a reader has "
          "and an underived clip reports a bucket ending after the recording did")
 
+    # Two channels of ONE group with different sample counts. Every other
+    # same-group pair in the set has equal counts, and the one unequal pair —
+    # the zero-sample channel in v1_enums_and_units.tslod — is degenerate,
+    # yielding no buckets to disagree about. Here the two disagree at every
+    # level, and at a small bucket budget they resolve to different levels, so
+    # a reader has to resolve, read and trim each channel on its own.
+    emit("v1_group_unequal_lengths.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    groups=[B.GroupSpec(1000.0, ts)],
+                    channels=[
+                        B.ChannelSpec("long_f32", ramp("float32", 4096),
+                                      group_id=0),
+                        B.ChannelSpec("short_i64", ramp("int64", 700, 1),
+                                      group_id=0),
+                    ]),
+         {"channel_sample_counts": [u64(4096), u64(700)],
+          "group_total_samples": u64(4096),
+          "num_levels_per_channel": [3, 3],
+          "buckets_per_level": {"long_f32": [4096, 16, 1],
+                                "short_i64": [700, 3, 1]},
+          "bucket_budget_8_resolves_to_level": {"long_f32": 1, "short_i64": 0}},
+         "two numeric channels of ONE fixed-rate group with different lengths and "
+         "different dtypes: long_f32 holds 4,096 float32 samples and short_i64 holds "
+         "700 int64. Both are three levels deep by the depth law, and their bucket "
+         "counts differ at every level — 4,096/16/1 against 700/3/1. The group's "
+         "total_samples is the LARGER count, 4,096, which is the group's own count "
+         "and no channel's. Taking the coarsest level that still offers at least the "
+         "budget, a query for 8 buckets over the whole group resolves long_f32 to "
+         "level 1, which offers 16, and short_i64 to level 0, because its level 1 "
+         "offers only 3 — so the two channels are served from different levels, from "
+         "two independent reads, and the pair is trimmed to the span both cover")
+
     emit("v1_enums_and_units.tslod",
          B.FileSpec(compression_id=0, branching_factor=256,
                     groups=[B.GroupSpec(1000.0, ts, timing_flags=0x03,
