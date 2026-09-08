@@ -260,7 +260,7 @@ def open_v1(data: bytes) -> dict:
         raise CorruptFile("version-must-be-exactly-1", str(version))
     bf, = struct.unpack_from("<I", data, 8)
     if bf < 2:
-        raise CorruptFile("branching-factor-below-2", str(bf))
+        raise CorruptFile("header-branching-factor-below-two", str(bf))
     profile = data[12]
     if profile not in (0, 2):
         raise CorruptFile("profile-unknown", str(profile))

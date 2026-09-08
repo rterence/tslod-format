@@ -902,12 +902,15 @@ def gen_v1_negatives() -> Vector:
              cls="bad-magic")
 
     # ---- header fields whose rule the reader already knew and no case pinned
-    case("v1-branching-factor-below-2", H("branching_factor"), "I", 1,
+    case("v1-header-branching-factor-below-two", H("branching_factor"), "I", 1,
          "header.branching_factor",
          "a branching factor of 1 gives a level that is its own parent, so the "
          "pyramid never terminates. The specification says two or more and the "
-         "reader has always refused it; nothing pinned it until now",
-         rejection_class="branching-factor-below-2")
+         "reader has always refused it; nothing pinned it until now. The class "
+         "names the SURFACE, because the same condition met by a caller passing "
+         "1 to the fold is a different rule with its own class, "
+         "branching-factor-below-two, in set 2 and set 3",
+         rejection_class="header-branching-factor-below-two")
     case("v1-file-state-unknown", H("file_state"), "B", 2, "header.file_state",
          "file_state is 0 sealed or 1 active and there is no third value. A "
          "reader that treats anything non-zero as active reads an unknown "

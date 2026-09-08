@@ -308,7 +308,10 @@ file with no group has no time base, and a file with no channel holds no data. A
 table whose entries end past the end of the file (`group-table-out-of-bounds`,
 `channel-table-out-of-bounds`) — both offsets are `u64` and nothing bounds them but the file's own
 length. A `file_state` outside `{0, 1}` (`file-state-unknown`): a reader that treats any non-zero
-value as active reads an unknown state as one it happens to know.
+value as active reads an unknown state as one it happens to know. A `branching_factor` below two
+(`header-branching-factor-below-two`), which would make a level its own parent so the pyramid never
+terminates — the class names the surface, because a *caller* passing the same value to the fold is a
+separate rule with its own class.
 
 **The group entry.** A `timing_mode` outside `{0, 1}` (`timing-mode-unknown`), which decides both
 which streams a block carries and how its first stream is read. For a **fixed-rate** group, a

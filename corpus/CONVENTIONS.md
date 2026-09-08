@@ -48,6 +48,14 @@ implementation refuses in its own words and with whatever error type its languag
 is part of the format. A vector that named a Python exception would fail every conforming
 implementation that is not Python, and would fail a Python one that chose a different subclass.
 
+**A rejection class is the string a reader produces.** The same condition met on two surfaces — a
+file's bytes and a call's arguments — is two rules, not one, and the name says which surface: a
+header declaring a branching factor below two is `header-branching-factor-below-two`, while a caller
+passing one to the fold is `branching-factor-below-two`. A name is never a numeral-versus-word
+variant of another, because no one should have to hold that distinction in their head to tell two
+rules apart. Some older rows in `v1-negative-vectors` carry a `v1-` prefix on the class as well;
+that is legacy, the checker strips it before comparing, and it is not what a reader emits.
+
 **`rejection_class` names the RULE the file broke, never the value that broke it.** Two cases may
 therefore carry the same class, and often should: `unknown-recipe-byte` covers four cases, one per
 offending byte, because one rule refuses all four. What distinguishes them is the case's own name.
