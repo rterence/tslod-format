@@ -9,8 +9,9 @@ What is here:
 
   * the profile-0 conformance files — every enum value, both timing modes,
     both aggregation modes, all ten dtypes, both file states, two units,
-    `scaling_type = linear`, a zero-sample channel, and `block_samples` both
-    equal to and a multiple of the branching factor;
+    `scaling_type = linear`, a zero-sample channel, `block_samples` both equal
+    to and a multiple of the branching factor, and a level-1 tail the branching
+    factor does not divide, on a bitfield channel and a numeric one beside it;
   * the block framing vectors — one-stream and two-stream, with `ts_len`
     counting the timestamp stream INCLUDING its recipe byte, so the values
     recipe byte sits at `4 + ts_len`;
@@ -197,6 +198,31 @@ def gen_profile0_set() -> Vector:
               "variable/L>=1 bitfield": "two: timestamps (N,) [first], then tuples (N,4)"}},
          "all six rows of the stream table in one file — which streams a block has "
          "is fixed by its KIND, and this is the file that proves each shape exists")
+
+    # Every OTHER bitfield channel in the set holds a sample count that level 1
+    # tiles exactly, so the only ragged bucket in the suite sits at level 2,
+    # which a bucket query never selects. 1,100 samples at branching_factor 256
+    # give five level-1 buckets whose last folds 76 samples, and the numeric
+    # channel beside it is the same length so the two tails are pinned against
+    # each other.
+    emit("v1_bitfield_ragged_tail.tslod",
+         B.FileSpec(compression_id=0, branching_factor=256,
+                    groups=[B.GroupSpec(1000.0, ts)],
+                    channels=[
+                        B.ChannelSpec("ragged_num", ramp("float32", 1100),
+                                      group_id=0),
+                        B.ChannelSpec("ragged_bits", ramp("uint16", 1100),
+                                      group_id=0, aggregation_mode=1),
+                    ]),
+         {"level0_sample_count": u64(1100),
+          "level1_bucket_count": 5,
+          "last_level1_bucket_samples": 76,
+          "num_levels_per_channel": 3},
+         "a level-1 tail that branching_factor does not divide, on a BITFIELD channel "
+         "and on a numeric one of the same length. 1,100 samples at BF 256 give five "
+         "level-1 buckets of which the last folds 76; a fixed-rate bitfield block at "
+         "level >= 1 carries no timestamp stream, so the geometry is all a reader has "
+         "and an underived clip reports a bucket ending after the recording did")
 
     emit("v1_enums_and_units.tslod",
          B.FileSpec(compression_id=0, branching_factor=256,

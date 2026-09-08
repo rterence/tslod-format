@@ -12,7 +12,7 @@
     "feature:crc"
   ],
   "notes": "Profile 0 exists so the reference reader can be written against the SPEC with the standard library alone (the one exemption is pco and zstd for profile-2 files, and profile 0 needs neither). Every file below is decodable by hand.",
-  "case_count": 11,
+  "case_count": 12,
   "cases": [
     {
       "name": "v1_all_ten_dtypes.tslod",
@@ -2015,6 +2015,294 @@
         "variable/L>=1 numeric": "two: timestamps (N,4) [first,last,min,max], then tuples (N,4)",
         "variable/L>=1 bitfield": "two: timestamps (N,) [first], then tuples (N,4)"
       }
+    },
+    {
+      "name": "v1_bitfield_ragged_tail.tslod",
+      "file": "v1-format/files/v1_bitfield_ragged_tail.tslod",
+      "file_size_bytes": "8442",
+      "block_count": 14,
+      "format_version": 1,
+      "compression_id": 0,
+      "branching_factor": 256,
+      "block_samples": 256,
+      "features": "1",
+      "moment_stream_present": true,
+      "every_crc_verifies": true,
+      "note": "a level-1 tail that branching_factor does not divide, on a BITFIELD channel and on a numeric one of the same length. 1,100 samples at BF 256 give five level-1 buckets of which the last folds 76; a fixed-rate bitfield block at level >= 1 carries no timestamp stream, so the geometry is all a reader has and an underived clip reports a bucket ending after the recording did",
+      "blocks": [
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "0e5c208fc805de71b4fd582c990707b92d81a5028d772240bee6c69239a2563e"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "29af9d46269fb5743e56021ea8b1af61702380488b6a9eaa037a5c31bd75521d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "3e20d47ff1a3f089748f23bbe1c76ebbe06c6be546d8517b999dee883a661beb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "d9dde1a1a4eefe6304b7ee64f63c07bf54147edb5f9af57f1048914cd193cacb"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                76
+              ],
+              "recipe": "0x00",
+              "sha256": "29f62544f263f07fccdade58004f506f279afd2c3ba005d1ac649b949ccc53d6"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                5,
+                2
+              ],
+              "recipe": "0x00",
+              "sha256": "a670b92360a7eee0062c924193c83a15a6581d0ce35c49a246e193c7d1973fa3"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                5,
+                4
+              ],
+              "recipe": "0x00",
+              "sha256": "b8e7386883ef519eaced64f2b368d3da142c5edc8e759c6b71f3d675dffa2e94"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                5,
+                5
+              ],
+              "recipe": "0x00",
+              "sha256": "0067779fc6ba870eec150a9284defc96b08858ee65ab6b6f73e1f0244869757d"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x00",
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x00",
+              "sha256": "0d5dfb5191c581494fcbcf61c9a3771a086abbbe3a7ad5ec33940363b49a6b0c"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x00",
+              "sha256": "cccf8d3f0d6345745f0fe1b636e93581e3bb4c63efe078c307d2f98bb7a85afa"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "1c37978cad23b8156201e179a3c9065b3896f4a2fada5bae4926973f7c714a28"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 1,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "13d2266e52f8d61cef57e294b784174dc70958ded9bf8ffa6dff37fd0b533eef"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 2,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "eb22ec1613eaf5b2a8bcbfaacd2fa6444459472a298c62e6037b45b42b19cfeb"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 3,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                256
+              ],
+              "recipe": "0x00",
+              "sha256": "fb35c77c1e565f0f51c73c47dd68a0f69377f8ff5dc3039bed9f0f9b83f1f0c9"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 0,
+          "block": 4,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                76
+              ],
+              "recipe": "0x00",
+              "sha256": "e86f7650e18994961ea48401e287a846faf7a9e841eb358343af06546c71b77c"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                5,
+                4
+              ],
+              "recipe": "0x00",
+              "sha256": "514ce1e14580acaff328eb3db9992421ba7da07ab93220f0a1a13cbdf3bd223e"
+            }
+          ]
+        },
+        {
+          "channel": 1,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "uint16",
+              "shape": [
+                1,
+                4
+              ],
+              "recipe": "0x00",
+              "sha256": "def3df3981ddc6d0f1e7d5b6e52abb52786408607154e119eb8053ff8cc78ed0"
+            }
+          ]
+        }
+      ],
+      "level0_sample_count": "1100",
+      "level1_bucket_count": 5,
+      "last_level1_bucket_samples": 76,
+      "num_levels_per_channel": 3
     },
     {
       "name": "v1_enums_and_units.tslod",

@@ -78,6 +78,16 @@ Bucket *j* at level *k* covers raw samples `[j·BF^k, (j+1)·BF^k)`, **anchored 
 sample `b · block_samples · BF^k`. `num_levels` counts level 0, so it is one more than the count of
 aggregation levels (`set2-anchored-bucket-geometry`, `set2-compute-num-levels`).
 
+⛔ **The last bucket at a level may be partial, and it summarises only the samples that exist.**
+Where a channel's level-0 sample count is not a multiple of `BF^k`, the final bucket's range as
+stated above runs past the last sample: the bucket folds the samples inside it and no others, and
+the time it covers ends at the channel's last sample rather than at raw index `(j+1)·BF^k − 1`. A
+reader deriving a bucket's time span from the geometry must clip it there. Nothing in the block says
+so where it matters most — a fixed-rate bitfield block at level ≥ 1 carries no timestamp stream at
+all, so the geometry is the only thing a reader has, and an unclipped derivation reports a bucket
+that ends after the recording did (`v1_bitfield_ragged_tail.tslod`, whose last level-1 bucket folds
+76 of a 1,100-sample channel).
+
 ⛔ **A channel's depth is not a free field: it is the depth its own samples imply.** Let *N* be the
 channel's level-0 sample count — the sum of its own level-0 block index entries' `sample_count`.
 The depth is 1 when *N* is 0 or 1; otherwise it is the number of levels produced by replacing *N*

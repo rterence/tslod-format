@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 25,
-    "cases": 1320,
+    "cases": 1321,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1292,11 +1292,11 @@
         "recipe:0x00",
         "feature:crc"
       ],
-      "case_count": 11,
+      "case_count": 12,
       "files": [
         {
           "path": "v1-format/v1-profile0-conformance-set.json",
-          "sha256": "69a84a82a601205288a9b3c16ec828cc3f2bbf0eee5118a3ad55b7e376cff2fa"
+          "sha256": "724861c0bd887ecee21aca8dd031439514ffe7737b901a68521830d7f8c43b81"
         },
         {
           "path": "v1-format/files/v1_all_ten_dtypes.tslod",
@@ -1305,6 +1305,10 @@
         {
           "path": "v1-format/files/v1_both_timing_modes.tslod",
           "sha256": "41f2f6d5b735a9b8b9c2efe6b5a7b890c401cab612e2339566bc9ab98c45f789"
+        },
+        {
+          "path": "v1-format/files/v1_bitfield_ragged_tail.tslod",
+          "sha256": "b5743ef14a0be9c61ca31e5100b5c6f846950e4c48cc064d27dea6db8904c4a5"
         },
         {
           "path": "v1-format/files/v1_enums_and_units.tslod",
