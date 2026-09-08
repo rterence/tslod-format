@@ -39,7 +39,15 @@ Version 1 defines one feature bit and reserves the rest:
 | 1–31 | must-understand | Reserved. A reader rejects a file with any of them set. |
 | 32–63 | may-ignore | Reserved. A reader ignores them and reads the file. |
 
-A writer sets bit 0 whenever it writes the moment stream, and never otherwise.
+Bit 0 states the file's **policy** rather than what has been written so far, and it does not change
+during the file's life. A writer sets it at the moment the header is written when every numeric
+value block at level ≥ 1 the file will carry has the moment stream, and leaves it clear when none
+will; on a file that has not yet produced such a block the bit says what its blocks will carry, and
+is vacuously true until the first one exists. A reader that re-reads an active file must find it
+unchanged. Tying the bit to the act of writing a stream instead would leave it clear to a follower
+that opened a growing file before its first level-≥-1 block and set to that same follower on the
+next read, and a must-understand header bit whose meaning changes during a file's life is worse than
+one set slightly before the first stream it describes exists.
 
 `file_state` also says how far the rest of the file may be trusted. In a **sealed** file every
 stored count is final, and `num_levels` in particular is the depth the channel's own samples imply
