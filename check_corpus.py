@@ -1393,6 +1393,7 @@ def c_profile0(v, c):
         f"header.features is {features}, the vector says {c['features']}")
     assert bool(features & FEATURE_MOMENT_STREAM) == c["moment_stream_present"]
     _verify_content(data, c, bool(features & FEATURE_MOMENT_STREAM))
+    _check_stored_representatives(data)
 
 
 #: Wire dtype enum, restated here rather than imported — this file is the
@@ -1449,6 +1450,7 @@ def c_profile2(v, c):
     assert n == c["decoded_stream_count"]
     assert str(total) == c["decoded_bytes"]
     assert sha == c["decoded_sha256"]
+    _check_stored_representatives(data)
 
 
 def c_negative(v, c):
@@ -1689,26 +1691,85 @@ def c_rep_rule(v, c):
             f"bucket {j}: rep_ts {want['rep_ts']}, the time rule gives {t}")
 
 
-def _level0_samples(data: bytes, channel: int, dtype: str):
-    """One channel's raw samples, as its level-0 blocks hold them."""
+def _decoded_by_stream(data: bytes) -> dict:
+    """Every stream of a file, decoded, keyed `(channel, level, kind)`.
+
+    A level's blocks are concatenated in block order and the result shaped by
+    the columns the block table gives that kind, so a level reads as one
+    array: `(N,)` samples at level 0, `(N, 3)` positions and values above it.
+    """
     features, = struct.unpack_from("<Q", data, 92)
-    payload = b"".join(
-        _decode(stream, dt) for ci, lv, _b, kind, dt, _cols, stream
-        in _walk_streams(data, bool(features & FEATURE_MOMENT_STREAM))
-        if ci == channel and lv == 0 and kind == "values")
-    return np.frombuffer(payload, dtype=np.dtype(dtype))
+    parts: dict = {}
+    for ci, lv, _b, kind, dtype, cols, stream in _walk_streams(
+            data, bool(features & FEATURE_MOMENT_STREAM)):
+        parts.setdefault((ci, lv, kind), (dtype, cols, []))[2].append(
+            _decode(stream, dtype))
+    out = {}
+    for key, (dtype, cols, chunks) in parts.items():
+        arr = np.frombuffer(b"".join(chunks), dtype=np.dtype(dtype))
+        out[key] = arr if cols == 1 else arr.reshape(-1, cols)
+    return out
+
+
+def _check_stored_representatives(data: bytes) -> None:
+    """Every representative a file stores is the one the rule names.
+
+    For every numeric channel and every level above 0, the values stream's
+    third column must be, bucket by bucket, the raw sample this file's own walk
+    of the rule picks — bit for bit — and the third column of the positions or
+    timestamps stream that sample's time. The golden files are written by this
+    repository's builder, so this is what keeps them to the specification
+    rather than to the builder: the walk is re-derived here and reads only the
+    file, taking each channel's samples from its level-0 blocks and its group's
+    timing from the group entry.
+    """
+    streams = _decoded_by_stream(data)
+    bf, = struct.unpack_from("<I", data, 8)
+    n_channels, = struct.unpack_from("<I", data, 16)
+    group_off, = struct.unpack_from("<Q", data, 24)
+    channel_off, = struct.unpack_from("<Q", data, 32)
+    for ci in range(n_channels):
+        base = channel_off + ci * CHANNEL_ENTRY_SIZE
+        if data[base + 65] != 0 or (ci, 0, "values") not in streams:
+            continue                        # bitfield, or no samples at all
+        gid, = struct.unpack_from("<H", data, base + 66)
+        entry = group_off + gid * GROUP_ENTRY_SIZE
+        rate, start = struct.unpack_from("<dq", data, entry)
+        variable = data[entry + 24] == 1
+        raw = streams[(ci, 0, "values")]
+        ts = streams[(ci, 0, "timestamps")] if variable else None
+        lead = "timestamps" if variable else "positions"
+        lv = 1
+        while (ci, lv, "values") in streams:
+            reps = _ref_rep_level(raw, bf ** lv, ts, start)
+            values, times = streams[(ci, lv, "values")], streams[(ci, lv, lead)]
+            assert len(reps) == values.shape[0] == times.shape[0], (
+                f"channel {ci} level {lv}: {values.shape[0]} buckets stored, "
+                f"the samples imply {len(reps)}")
+            for j, i in enumerate(reps):
+                assert bits_equal(values[j:j + 1, 2], raw[i:i + 1]), (
+                    f"channel {ci} level {lv} bucket {j}: the stored rep is not "
+                    f"sample {i}, the one the rule names")
+                t = int(ts[i]) if variable else _ref_time(start, rate, i)
+                assert int(times[j, 2]) == t, (
+                    f"channel {ci} level {lv} bucket {j}: rep_ts is "
+                    f"{int(times[j, 2])}, sample {i} is at {t}")
+            lv += 1
 
 
 def c_rep_stored(v, c):
-    """One golden channel's representatives, from its own samples.
+    """One golden channel's representatives, from its own samples, as stored.
 
     The input is required to BE the channel's level-0 samples, so the case
     cannot drift from the file it names, and the group's rate and start are
-    read from the file rather than trusted from the case.
+    read from the file rather than trusted from the case. The expected columns
+    are then required twice over: from the rule, walked here, and from the
+    file's own third columns at this level.
     """
     data = (VECTORS / c["file"]).read_bytes()
+    streams = _decoded_by_stream(data)
     raw = arr_of(c["input"])
-    assert bits_equal(_level0_samples(data, c["channel"], c["dtype"]), raw), (
+    assert bits_equal(streams[(c["channel"], 0, "values")], raw), (
         "the input is not the channel's level-0 samples")
     group_off, = struct.unpack_from("<Q", data, 24)
     rate, start = struct.unpack_from("<dq", data, group_off)
@@ -1726,6 +1787,13 @@ def c_rep_stored(v, c):
     assert bits_equal(np.ascontiguousarray(raw[reps]), arr_of(c["expected_rep"]))
     times = np.array([_ref_time(start, rate, i) for i in reps], dtype=np.int64)
     assert bits_equal(times, arr_of(c["expected_rep_ts"]))
+
+    values = streams[(c["channel"], c["level"], "values")]
+    positions = streams[(c["channel"], c["level"], "positions")]
+    assert bits_equal(values[:, 2], arr_of(c["expected_rep"])), (
+        "the file's stored rep column is not the one the case states")
+    assert bits_equal(positions[:, 2], arr_of(c["expected_rep_ts"])), (
+        "the file's stored rep_ts column is not the one the case states")
 
 
 CHECKS = {
