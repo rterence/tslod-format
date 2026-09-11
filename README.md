@@ -36,7 +36,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,322 test cases across 25 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,340 test cases across 27 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -53,6 +53,7 @@ contract between implementations rather than one implementation's private detail
 | `set2-anchored-fold` | where a bucket sits, and how deep the pyramid is |
 | `set3-build-level` | what a bucket contains: column order, NaN, the tie-break, the bitfield sign bit |
 | `set4-chan-pebay` | the moment merge, its fold order, and its accuracy |
+| `set5-representative` | which sample a bucket stores to draw its shape, one choice of the rule per case, and what one golden channel stores at levels 1 and 2 |
 | `codec-vectors` | what each recipe byte means, per recipe, decode only |
 
 ### An example
@@ -124,13 +125,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 25 vectors, 1322 cases
+corpus: 27 vectors, 1340 cases
 
 skipped, because an optional codec is not installed:
     44 cases need pcodec — pip install pcodec
     106 cases need zstandard — pip install zstandard
 
-passed 1172  failed 0  skipped 150
+passed 1190  failed 0  skipped 150
 RESULT: PASS, with codec cases skipped
 ```
 

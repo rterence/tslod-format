@@ -1555,6 +1555,166 @@ def c_codec(v, c):
         f"decoded {len(got)} bytes, expected {expected.nbytes}")
 
 
+# --------------------------------------------------------------------------
+# The representative, re-derived from spec/v1 in scalar Python
+# --------------------------------------------------------------------------
+
+
+def _ref_rep_coordinates(values, timestamps=None, start_timestamp: int = 0):
+    """`x` and `y` of every raw sample, as the rule's step 1 states them.
+
+    Not `_representative.coordinates`: this is a second reading of the same
+    words. Python's `float()` of an integer rounds to nearest, ties to even,
+    which is the conversion the rule names, and a float32 widens exactly. At
+    variable rate the subtraction is done on integers, so it is exact, and only
+    its result is rounded.
+    """
+    ys = [float(v) for v in values.tolist()]
+    if timestamps is None:
+        return [float(i) for i in range(len(ys))], ys
+    start = int(start_timestamp)
+    return [float(int(t) - start) for t in timestamps.tolist()], ys
+
+
+def _ref_rep_pick(xs, ys, lo: int, hi: int, prev, nxt) -> int:
+    """The raw index a bucket that is not an edge stores: steps 4 and 5.
+
+    A running maximum seeded at -1 and replaced only on a strictly greater
+    area, so the first of two equal areas stays; `area > running` is False for
+    a NaN area, so one never wins. No winner: the first sample whose y is not
+    NaN. None of those either: the bucket's first sample as stored.
+    """
+    pax, pay = prev
+    nax, nay = nxt
+    running, winner, first_valid = -1.0, None, None
+    for i in range(lo, hi):
+        y = ys[i]
+        if y != y:
+            continue
+        if first_valid is None:
+            first_valid = i
+        area = abs((pax - nax) * (y - pay) - (pax - xs[i]) * (nay - pay))
+        if area > running:
+            running, winner = area, i
+    if winner is not None:
+        return winner
+    return lo if first_valid is None else first_valid
+
+
+def _ref_rep_level(values, span: int, timestamps=None, start_timestamp: int = 0):
+    """Every bucket's representative at one level, as raw indices.
+
+    The anchors are left-to-right float64 sums over the non-NaN samples
+    divided by their count — a Python loop, never `sum()` over floats of
+    unknown order and never numpy, whose float sum is pairwise.
+    """
+    xs, ys = _ref_rep_coordinates(values, timestamps, start_timestamp)
+    n = len(ys)
+    buckets = [(lo, min(lo + span, n)) for lo in range(0, n, span)]
+    anchors = []
+    for lo, hi in buckets:
+        sx = sy = 0.0
+        valid = 0
+        for i in range(lo, hi):
+            if ys[i] == ys[i]:
+                sx += xs[i]
+                sy += ys[i]
+                valid += 1
+        anchors.append((sx / valid, sy / valid) if valid
+                       else (float("nan"), float("nan")))
+    reps = []
+    for j, (lo, hi) in enumerate(buckets):
+        if j == 0:
+            reps.append(0)                      # a one-bucket level lands here too
+        elif j == len(buckets) - 1:
+            reps.append(n - 1)
+        else:
+            reps.append(_ref_rep_pick(xs, ys, lo, hi, anchors[j - 1], anchors[j + 1]))
+    return reps
+
+
+def _ref_time(start: int, rate: float, i: int) -> int:
+    """The one time rule, over the exact rational value of the stored rate."""
+    exact = Fraction(i) * NS / Fraction(rate)
+    return start + rhe(exact.numerator, exact.denominator)
+
+
+def _same_sample(values, i: int, want) -> bool:
+    """Sample `i` is the value the case states: its bits, for a float."""
+    if values.dtype.kind == "f":
+        bits = values[i:i + 1].view(f"<u{values.dtype.itemsize}")[0]
+        return want["dtype"] == values.dtype.name and int(want["bits"], 16) == int(bits)
+    return int(values[i]) == int(want)
+
+
+def c_rep_rule(v, c):
+    if c["applies_to"] == "bucket":
+        xs, ys = arr_of(c["xs"]).tolist(), arr_of(c["ys"]).tolist()
+        prev = (f_of(c["prev_anchor"]["x"]), f_of(c["prev_anchor"]["y"]))
+        nxt = (f_of(c["next_anchor"]["x"]), f_of(c["next_anchor"]["y"]))
+        got = _ref_rep_pick(xs, ys, 0, len(ys), prev, nxt)
+        assert got == c["expected_bucket_relative_index"], (
+            f"the rule picks index {got}, the case says "
+            f"{c['expected_bucket_relative_index']}")
+        return
+    values = arr_of(c["input"])
+    span = c["branching_factor"] ** c["level"]
+    assert c["bucket_span"] == span, "bucket_span is not branching_factor ** level"
+    start = int(c["start_timestamp"])
+    ts = arr_of(c["timestamps"]) if c["timing"] == "variable" else None
+    reps = _ref_rep_level(values, span, ts, start)
+    assert len(reps) == c["expected_bucket_count"] == len(c["expected"])
+    for j, (i, want) in enumerate(zip(reps, c["expected"])):
+        assert want["bucket"] == j
+        assert int(want["raw_index"]) == i, (
+            f"bucket {j}: the rule picks sample {i}, the case says {want['raw_index']}")
+        assert want["bucket_relative_index"] == i - j * span
+        assert _same_sample(values, i, want["rep"]), (
+            f"bucket {j}: rep is not sample {i}'s value, bit for bit")
+        t = int(ts[i]) if ts is not None else _ref_time(start, f_of(c["sample_rate"]), i)
+        assert int(want["rep_ts"]) == t, (
+            f"bucket {j}: rep_ts {want['rep_ts']}, the time rule gives {t}")
+
+
+def _level0_samples(data: bytes, channel: int, dtype: str):
+    """One channel's raw samples, as its level-0 blocks hold them."""
+    features, = struct.unpack_from("<Q", data, 92)
+    payload = b"".join(
+        _decode(stream, dt) for ci, lv, _b, kind, dt, _cols, stream
+        in _walk_streams(data, bool(features & FEATURE_MOMENT_STREAM))
+        if ci == channel and lv == 0 and kind == "values")
+    return np.frombuffer(payload, dtype=np.dtype(dtype))
+
+
+def c_rep_stored(v, c):
+    """One golden channel's representatives, from its own samples.
+
+    The input is required to BE the channel's level-0 samples, so the case
+    cannot drift from the file it names, and the group's rate and start are
+    read from the file rather than trusted from the case.
+    """
+    data = (VECTORS / c["file"]).read_bytes()
+    raw = arr_of(c["input"])
+    assert bits_equal(_level0_samples(data, c["channel"], c["dtype"]), raw), (
+        "the input is not the channel's level-0 samples")
+    group_off, = struct.unpack_from("<Q", data, 24)
+    rate, start = struct.unpack_from("<dq", data, group_off)
+    assert (rate, start) == (f_of(c["sample_rate"]), int(c["start_timestamp"]))
+    bf, = struct.unpack_from("<I", data, 8)
+    block_samples, = struct.unpack_from("<I", data, 20)
+    assert (bf, block_samples) == (c["branching_factor"], c["block_samples"])
+    span = bf ** c["level"]
+    assert c["bucket_span"] == span
+
+    reps = _ref_rep_level(raw, span, None, start)
+    assert len(reps) == c["expected_bucket_count"]
+    assert bits_equal(np.array(reps, dtype=np.int64), arr_of(c["expected_raw_index"])), (
+        "the rule picks different samples from the ones the case states")
+    assert bits_equal(np.ascontiguousarray(raw[reps]), arr_of(c["expected_rep"]))
+    times = np.array([_ref_time(start, rate, i) for i in reps], dtype=np.int64)
+    assert bits_equal(times, arr_of(c["expected_rep_ts"]))
+
+
 CHECKS = {
     "set1-div-round-half-even": c_rhe,
     "set1-ticks-to-ns": c_ticks_to_ns,
@@ -1574,6 +1734,8 @@ CHECKS = {
     "set4-chan-pebay-nan": c_merge_nan,
     "set4-chan-pebay-order": c_merge_order,
     "set4-chan-pebay-range": c_range,
+    "set5-representative-rule": c_rep_rule,
+    "set5-representative-stored": c_rep_stored,
     "v1-block-crc": c_crc,
     "v1-block-framing": c_framing,
     "v1-time-axis": c_time_axis,

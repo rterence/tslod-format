@@ -29,6 +29,7 @@ GENERATORS = [
     ("gen_set3_build_level", "numpy"),
     ("gen_set4_chan_pebay", "stdlib"),
     ("gen_v1_format_vectors", "numpy"),
+    ("gen_set5_representative", "numpy"),
     ("gen_codec_vectors", "numpy + zstandard + pcodec"),
 ]
 

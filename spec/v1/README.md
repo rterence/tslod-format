@@ -200,7 +200,9 @@ The rule, for one level *L* ≥ 1 of one channel:
 
 The choices a plausible reimplementation makes differently are the ones stated: the strict
 comparison, the NaN rules, the edges and the pass over the whole channel, the raw samples at every
-level, and `x_i` at variable rate. Each changes which sample is stored.
+level, and `x_i` at variable rate. Each changes which sample is stored, and for each
+`set5-representative-rule` carries a case that an implementation making the other choice fails.
+`set5-representative-stored` states what one golden channel stores at levels 1 and 2.
 
 **What this corpus can check, and what it cannot.** The rule is normative, and it is a rule about
 what a *writer* stores, while this corpus tests *readers*. It can check that a reader decodes the

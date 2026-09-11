@@ -1,0 +1,131 @@
+{
+  "id": "set5-representative-stored",
+  "set": "set5-representative",
+  "kind": "fixture",
+  "asserts": "Channel 0 of v1_branching_factor_16.tslod stores, at levels 1 and 2, the representative the rule names for every bucket \u2014 the third column of each level's values stream is the chosen sample's value and the third column of its positions stream that sample's time \u2014 and level 2's is chosen from the raw samples, not from level 1's representatives.",
+  "source": "tools/_representative.py \u2014 the specification's rule in scalar Python; times by the exact rule in tools/_tslod_build.py; inputs constructed by tools/gen_set5_representative.py",
+  "contract": "A stored representative is a sample two writers must agree on, because a reader draws it, and two files that disagree about it draw different pictures from identical data.",
+  "requires": [
+    "format:v1",
+    "profile:0",
+    "feature:representative",
+    "dtype:float32",
+    "timing:fixed"
+  ],
+  "notes": "v1_branching_factor_16.tslod is the one golden file whose channel is long enough for a level 2 of more than two buckets: 4,096 float32 samples at branching factor 16 give 256 buckets at level 1 and 16 at level 2, so fourteen level-2 buckets run the triangle over 256 raw samples each. `input` is the channel's samples exactly as its level-0 blocks hold them.",
+  "case_count": 2,
+  "cases": [
+    {
+      "name": "level-1",
+      "file": "v1-format/files/v1_branching_factor_16.tslod",
+      "channel": 0,
+      "level": 1,
+      "branching_factor": 16,
+      "bucket_span": 16,
+      "block_samples": 16,
+      "dtype": "float32",
+      "timing": "fixed",
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4096
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set5-representative/bf16_sig_input.bin"
+      },
+      "expected_bucket_count": 256,
+      "expected_raw_index": {
+        "dtype": "int64",
+        "shape": [
+          256
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set5-representative/bf16_sig_level1_raw_index.bin"
+      },
+      "expected_rep": {
+        "dtype": "float32",
+        "shape": [
+          256
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set5-representative/bf16_sig_level1_rep.bin"
+      },
+      "expected_rep_ts": {
+        "dtype": "int64",
+        "shape": [
+          256
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set5-representative/bf16_sig_level1_rep_ts.bin"
+      },
+      "stored_as": "values[:, 2] and positions[:, 2] of every block at this level, in block order",
+      "note": "level 1: 256 buckets of 16 raw samples. Of them, 194 would store a different sample under the bucket's max; 17 would store a different sample under a pass block by block"
+    },
+    {
+      "name": "level-2",
+      "file": "v1-format/files/v1_branching_factor_16.tslod",
+      "channel": 0,
+      "level": 2,
+      "branching_factor": 16,
+      "bucket_span": 256,
+      "block_samples": 16,
+      "dtype": "float32",
+      "timing": "fixed",
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          4096
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "file": "set5-representative/bf16_sig_input.bin"
+      },
+      "expected_bucket_count": 16,
+      "expected_raw_index": {
+        "dtype": "int64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000002201000000000000A60200000000000008030000000000002A04000000000000AE05000000000000D20600000000000032070000000000005608000000000000DA09000000000000FC0A0000000000005E0B0000000000001F0C000000000000A30D000000000000050E000000000000FF0F000000000000"
+      },
+      "expected_rep": {
+        "dtype": "float32",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000020C20000D0420000D042000020C20000D0420000D042000020C20000D042000020C2000020C20000D042000020C20000D0420000D042000020C2000008C1"
+      },
+      "expected_rep_ts": {
+        "dtype": "int64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00002A36FE9C9717800C7347FE9C97178075935EFE9C971700D26A64FE9C971780DEB375FE9C97178047D48CFE9C971780D83B9EFE9C971780B0F4A3FE9C971780415CB5FE9C971780AA7CCCFE9C971700B7C5DDFE9C971780139DE3FE9C9717C0051EEFFE9C9717C06E3E06FF9C971740CB150CFF9C9717C0BD3E2AFF9C9717"
+      },
+      "stored_as": "values[:, 2] and positions[:, 2] of every block at this level, in block order",
+      "note": "level 2: 16 buckets of 256 raw samples. Of them, 12 would store a different sample under the bucket's max; 11 would store a different sample under a choice among level 1's representatives"
+    }
+  ]
+}

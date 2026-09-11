@@ -1,0 +1,1135 @@
+{
+  "id": "set5-representative-rule",
+  "set": "set5-representative",
+  "kind": "fixture",
+  "asserts": "At every level L >= 1 each bucket of a numeric channel stores the representative the specification's rule names \u2014 the channel's first sample in the level's first bucket and its last in the last, and in every other bucket the non-NaN raw sample of greatest triangle area against its neighbours' anchors, the first of equal areas winning \u2014 with its value bit for bit and its time by the one time rule.",
+  "source": "tools/_representative.py \u2014 the specification's rule in scalar Python; times by the exact rule in tools/_tslod_build.py; inputs constructed by tools/gen_set5_representative.py",
+  "contract": "A stored representative is a sample two writers must agree on, because a reader draws it, and two files that disagree about it draw different pictures from identical data.",
+  "requires": [
+    "feature:representative",
+    "dtype:float32",
+    "dtype:float64",
+    "dtype:int64",
+    "timing:fixed",
+    "timing:variable"
+  ],
+  "notes": "A level case gives a whole channel and the level's bucket span and states every bucket's representative: its raw index, its index within the bucket, its value, and its time. A bucket case gives one bucket's coordinates and its neighbours' anchors and states the index the triangle picks, so an implementation can be pinned at either grain. `pins` names the choice a case exists for and `refuses` the readings that fail it; the generator recomputed each case under each of those readings and got a different answer before writing it.",
+  "case_count": 16,
+  "cases": [
+    {
+      "name": "float64/triangle-not-an-extreme",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F0BF00000000000014C000000000000021C0000000000000214000000000000017C0000000000000E8BF000000000000084000000000000011C00000000000002340000000000000244000000000000002400000000000000A40000000000000044000000000000012C000000000000014400000000000002440"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xBFF0000000000000",
+            "repr": "-1.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "7",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC011000000000000",
+            "repr": "-4.25"
+          },
+          "rep_ts": "1700000000007000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "8",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4023000000000000",
+            "repr": "9.5"
+          },
+          "rep_ts": "1700000000008000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4024000000000000",
+            "repr": "10.0"
+          },
+          "rep_ts": "1700000000015000000"
+        }
+      ],
+      "pins": [
+        "the triangle"
+      ],
+      "refuses": [
+        "the bucket's max",
+        "the bucket's min"
+      ],
+      "note": "the middle buckets take the sample of greatest triangle area against their neighbours' anchors \u2014 samples 7 and 8, neither of which is its bucket's max or its min; the first and last buckets take samples 0 and 15"
+    },
+    {
+      "name": "float32/value-stored-in-its-own-dtype",
+      "applies_to": "level",
+      "dtype": "float32",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float32",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "CDCCCC3D9A9999BE9A99D93F9A993940333383C0333353403333333FCDCC0CC00000B0403333F3BF9A99993E66662640CDCC4CBFCDCC8C3FCDCCCC3E9A9919BF"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float32",
+            "bits": "0x3DCCCCCD",
+            "repr": "0.10000000149011612"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "4",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float32",
+            "bits": "0xC0833333",
+            "repr": "-4.099999904632568"
+          },
+          "rep_ts": "1700000000004000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "8",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float32",
+            "bits": "0x40B00000",
+            "repr": "5.5"
+          },
+          "rep_ts": "1700000000008000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float32",
+            "bits": "0xBF19999A",
+            "repr": "-0.6000000238418579"
+          },
+          "rep_ts": "1700000000015000000"
+        }
+      ],
+      "pins": [
+        "what is stored"
+      ],
+      "refuses": [
+        "the bucket's max"
+      ],
+      "note": "y is each float32 widened to float64, which is exact; rep is the chosen sample's float32 bits, never the float64 it was compared as"
+    },
+    {
+      "name": "int64/above-2p53-y-rounds-to-nearest-even",
+      "applies_to": "level",
+      "dtype": "int64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "int64",
+        "shape": [
+          12
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000300000000001001000000000000108000000000000010800000000000001080050000000000108006000000000010FF03000000000010FF0000000000001001010000000000108002000000000010FF000000000000108001000000000010"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 3,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": "1152921504606847744",
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "4",
+          "bucket_relative_index": 0,
+          "rep": "1152921504606848384",
+          "rep_ts": "1700000000004000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "11",
+          "bucket_relative_index": 3,
+          "rep": "1152921504606847360",
+          "rep_ts": "1700000000011000000"
+        }
+      ],
+      "pins": [
+        "the coordinates"
+      ],
+      "refuses": [
+        "exact integer arithmetic",
+        "y rounded toward zero"
+      ],
+      "note": "every value is near 2^60, where float64 steps by 256, so y rounds. The middle bucket's first sample, 2^60 + 1408, sits exactly halfway between two float64 values and rounds to the even one, 2^60 + 1536; rounding toward zero, or comparing the exact integers, picks the next sample instead. rep is stored as the exact int64, not as y"
+    },
+    {
+      "name": "constant/first-of-equal-areas-wins",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001440000000000000144000000000000014400000000000001440000000000000144000000000000014400000000000001440000000000000144000000000000014400000000000001440000000000000144000000000000014400000000000001440000000000000144000000000000014400000000000001440"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4014000000000000",
+            "repr": "5.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "4",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4014000000000000",
+            "repr": "5.0"
+          },
+          "rep_ts": "1700000000004000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "8",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4014000000000000",
+            "repr": "5.0"
+          },
+          "rep_ts": "1700000000008000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4014000000000000",
+            "repr": "5.0"
+          },
+          "rep_ts": "1700000000015000000"
+        }
+      ],
+      "pins": [
+        "the strict comparison"
+      ],
+      "refuses": [
+        "a >= comparison"
+      ],
+      "note": "a constant integer series: every anchor is exactly 5.0 and every area exactly zero, so the strict comparison against a maximum seeded at -1 is all that decides, and each middle bucket takes its first sample"
+    },
+    {
+      "name": "nan/in-a-bucket-before-its-winner",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F000000000000E03F000000000000F83F0000000000000040000000000000F87F00000000000022400000000000000840000000000000F0BF000000000000184000000000000010C00000000000000040000000000000F03F00000000000000000000000000000040000000000000F03F"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x0000000000000000",
+            "repr": "0.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "6",
+          "bucket_relative_index": 2,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4022000000000000",
+            "repr": "9.0"
+          },
+          "rep_ts": "1700000000006000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "10",
+          "bucket_relative_index": 2,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC010000000000000",
+            "repr": "-4.0"
+          },
+          "rep_ts": "1700000000010000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x3FF0000000000000",
+            "repr": "1.0"
+          },
+          "rep_ts": "1700000000015000000"
+        }
+      ],
+      "pins": [
+        "the NaN rules"
+      ],
+      "refuses": [
+        "NaN kept in the anchor sums",
+        "an argmax in which a NaN area wins"
+      ],
+      "note": "sample 5 is NaN. It is skipped in bucket 1's anchor and is never a candidate, so bucket 1 takes the sample of greatest area after it and bucket 2, beside it, still runs the triangle against a real anchor"
+    },
+    {
+      "name": "nan/invalid-bucket-and-its-two-neighbours",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          20
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F03F000000000000004000000000000008400000000000001040A10000000000F87F000000000000184000000000000008C00000000000002040EFBE00000000F87FB20000000000F87FB30000000000F87FB40000000000F87FC10000000000F87F00000000000014C0000000000000244000000000000000400000000000000840000000000000F03F0000000000001040000000000000F83F"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 5,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x3FF0000000000000",
+            "repr": "1.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "5",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4018000000000000",
+            "repr": "6.0"
+          },
+          "rep_ts": "1700000000005000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "8",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x7FF800000000BEEF",
+            "repr": "nan"
+          },
+          "rep_ts": "1700000000008000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "13",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC014000000000000",
+            "repr": "-5.0"
+          },
+          "rep_ts": "1700000000013000000"
+        },
+        {
+          "bucket": 4,
+          "raw_index": "19",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x3FF8000000000000",
+            "repr": "1.5"
+          },
+          "rep_ts": "1700000000019000000"
+        }
+      ],
+      "pins": [
+        "the NaN rules"
+      ],
+      "refuses": [
+        "a fallback to the first sample, NaN or not"
+      ],
+      "note": "bucket 2 holds no valid sample, so it is invalid: its anchor is NaN and it stores its first sample as stored, the NaN with payload 0xBEEF copied bit for bit. Its neighbours' every area is then NaN and none wins, so each takes its first sample that is not NaN \u2014 the second of each, since both begin with a NaN of their own"
+    },
+    {
+      "name": "edges/endpoints-even-when-nan",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          12
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "E10000000000F87F00000000000000400000000000001440000000000000F03F00000000000008400000000000001C4000000000000000C000000000000010400000000000001840000000000000E03F0000000000000440E20000000000F87F"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 3,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x7FF80000000000E1",
+            "repr": "nan"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "6",
+          "bucket_relative_index": 2,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC000000000000000",
+            "repr": "-2.0"
+          },
+          "rep_ts": "1700000000006000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "11",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x7FF80000000000E2",
+            "repr": "nan"
+          },
+          "rep_ts": "1700000000011000000"
+        }
+      ],
+      "pins": [
+        "the edges"
+      ],
+      "refuses": [
+        "edges that skip a NaN"
+      ],
+      "note": "the channel's first and last samples are NaN with distinct payloads. The first and last buckets take them all the same, unconditionally, and store their bits; the NaN is skipped only in those buckets' anchors"
+    },
+    {
+      "name": "one-bucket-level/stores-sample-0",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          3
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E4000000000000022400000000000002040"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 1,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x401E000000000000",
+            "repr": "7.5"
+          },
+          "rep_ts": "1700000000000000000"
+        }
+      ],
+      "pins": [
+        "the edges"
+      ],
+      "refuses": [
+        "a single bucket taking the last sample"
+      ],
+      "note": "three samples at branching factor 4 are one bucket, both the level's first and its last; it takes sample 0"
+    },
+    {
+      "name": "ragged-last-bucket/anchor-over-the-samples-that-exist",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          10
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000018C00000000000001CC0000000000000184000000000000008C000000000000014C00000000000000840000000000000004000000000000000C00000000000000000000000000000F03F"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 3,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC018000000000000",
+            "repr": "-6.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "5",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4008000000000000",
+            "repr": "3.0"
+          },
+          "rep_ts": "1700000000005000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "9",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x3FF0000000000000",
+            "repr": "1.0"
+          },
+          "rep_ts": "1700000000009000000"
+        }
+      ],
+      "pins": [
+        "the anchors"
+      ],
+      "refuses": [
+        "anchors divided by the bucket span"
+      ],
+      "note": "ten samples at branching factor 4: the last bucket holds two. Its anchor is the mean of those two, not a sum over four slots, and the middle bucket's choice depends on it; the last bucket itself takes sample 9"
+    },
+    {
+      "name": "anchors/summed-left-to-right",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 16,
+      "level": 1,
+      "bucket_span": 16,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          49
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0080E03779C34143000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000F03F0080E03779C341C300000000000000C000000000000010C000000000000020C0000000000000184000000000000000C000000000000010C000000000000020C000000000000014C000000000000018C0000000000000F03F00000000000010C0000000000000184000000000000008C0000000000000204000000000000020C000000000000010400000000000001440000000000000004000000000000008400000000000001CC0000000000000224000000000000008C000000000000000C0000000000000004000000000000022C000000000000000400000000000000840000000000000F0BF000000000000104000000000000018C0000000000000204000000000000000400000000000000000"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4341C37937E08000",
+            "repr": "1e+16"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "30",
+          "bucket_relative_index": 14,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC020000000000000",
+            "repr": "-8.0"
+          },
+          "rep_ts": "1700000000030000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "36",
+          "bucket_relative_index": 4,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4022000000000000",
+            "repr": "9.0"
+          },
+          "rep_ts": "1700000000036000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "48",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x0000000000000000",
+            "repr": "0.0"
+          },
+          "rep_ts": "1700000000048000000"
+        }
+      ],
+      "pins": [
+        "the anchors"
+      ],
+      "refuses": [
+        "anchors summed exactly"
+      ],
+      "note": "bucket 0 is 1e16, fourteen 1.0s and -1e16. Summed left to right in float64 every 1.0 is absorbed by 1e16 and the sum is 0; summed exactly it is 14. Bucket 1 is judged against that anchor and takes a different sample under each, so the order of the sum is part of the rule and a pairwise or compensated sum is not"
+    },
+    {
+      "name": "level-2/chosen-from-raw-samples",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 2,
+      "bucket_span": 16,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          64
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000030400000000000002AC00000000000001440000000000000334000000000000028C000000000000034C00000000000001C400000000000002EC000000000000000000000000000003240000000000000264000000000000026400000000000000040000000000000084000000000000031C000000000000028C000000000000000C000000000000026C000000000000030400000000000003440000000000000284000000000000000C00000000000002E400000000000002E40000000000000334000000000000018C000000000000010C000000000000030C00000000000002E4000000000000014C000000000000010C000000000000000C00000000000002A4000000000000028C000000000000014C000000000000008400000000000002240000000000000104000000000000022C000000000000028C000000000000033C0000000000000F03F0000000000002EC0000000000000304000000000000032C00000000000002EC00000000000002AC000000000000028400000000000003240000000000000224000000000000014C000000000000010400000000000002240000000000000244000000000000000000000000000002CC00000000000002A4000000000000033C00000000000002C40000000000000104000000000000031C000000000000026C00000000000001C4000000000000018C0"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x408F400000000000",
+        "repr": "1000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4030000000000000",
+            "repr": "16.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "19",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4034000000000000",
+            "repr": "20.0"
+          },
+          "rep_ts": "1700000000019000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "40",
+          "bucket_relative_index": 8,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC033000000000000",
+            "repr": "-19.0"
+          },
+          "rep_ts": "1700000000040000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "63",
+          "bucket_relative_index": 15,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC018000000000000",
+            "repr": "-6.0"
+          },
+          "rep_ts": "1700000000063000000"
+        }
+      ],
+      "pins": [
+        "the raw samples at every level"
+      ],
+      "refuses": [
+        "a choice among level 1's representatives"
+      ],
+      "note": "64 samples at branching factor 4: level 2 is four buckets of 16 raw samples each, and each middle bucket chooses among all 16 against its neighbours' anchors over their own 16. Choosing among the four level-1 representatives each covers instead stores different samples"
+    },
+    {
+      "name": "variable-rate/x-is-the-timestamp-difference",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "variable",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000144000000000000014C000000000000010C000000000000010C0000000000000104000000000000010C00000000000001CC000000000000008C000000000000020C0000000000000204000000000000018C000000000000008400000000000001CC0000000000000F0BF00000000000020C00000000000002240"
+      },
+      "start_timestamp": "1700000000000000000",
+      "timestamps": {
+        "dtype": "int64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00002A36FE9C971740423936FE9C971780844836FE9C9717C0C65736FE9C971700096736FE9C9717404B7636FE9C9717C03B7139FE9C9717007E8039FE9C9717806E7B3CFE9C9717005F763FFE9C971740A1853FFE9C971780E3943FFE9C9717C025A43FFE9C97170068B33FFE9C971740AAC23FFE9C971780ECD13FFE9C9717"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4014000000000000",
+            "repr": "5.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "4",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4010000000000000",
+            "repr": "4.0"
+          },
+          "rep_ts": "1700000000004000000"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "9",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4020000000000000",
+            "repr": "8.0"
+          },
+          "rep_ts": "1700000000156000000"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4022000000000000",
+            "repr": "9.0"
+          },
+          "rep_ts": "1700000000162000000"
+        }
+      ],
+      "pins": [
+        "the coordinates"
+      ],
+      "refuses": [
+        "x as the sample index"
+      ],
+      "note": "a variable-rate channel with three 50 ms gaps. x is each stored timestamp minus start_timestamp, so the gaps move the anchors and the areas; taking x as the sample index picks a different sample in bucket 1. rep_ts is the chosen sample's stored timestamp"
+    },
+    {
+      "name": "rep-ts/by-the-exact-time-rule",
+      "applies_to": "level",
+      "dtype": "float64",
+      "timing": "fixed",
+      "branching_factor": 4,
+      "level": 1,
+      "bucket_span": 4,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          16
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000000000000000F03F000000000000000000000000000000000000000000000000000000000000204000000000000000000000000000000000000000000000000000000000000020C0000000000000000000000000000000000000000000000000000000000000F03F00000000000000000000000000000000"
+      },
+      "start_timestamp": "1700000000000000000",
+      "sample_rate": {
+        "dtype": "float64",
+        "bits": "0x41B7D78400000000",
+        "repr": "400000000.0"
+      },
+      "expected_bucket_count": 4,
+      "expected": [
+        {
+          "bucket": 0,
+          "raw_index": "0",
+          "bucket_relative_index": 0,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x0000000000000000",
+            "repr": "0.0"
+          },
+          "rep_ts": "1700000000000000000"
+        },
+        {
+          "bucket": 1,
+          "raw_index": "5",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x4020000000000000",
+            "repr": "8.0"
+          },
+          "rep_ts": "1700000000000000012"
+        },
+        {
+          "bucket": 2,
+          "raw_index": "9",
+          "bucket_relative_index": 1,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0xC020000000000000",
+            "repr": "-8.0"
+          },
+          "rep_ts": "1700000000000000022"
+        },
+        {
+          "bucket": 3,
+          "raw_index": "15",
+          "bucket_relative_index": 3,
+          "rep": {
+            "dtype": "float64",
+            "bits": "0x0000000000000000",
+            "repr": "0.0"
+          },
+          "rep_ts": "1700000000000000038"
+        }
+      ],
+      "pins": [
+        "what is stored"
+      ],
+      "refuses": [],
+      "note": "at 400 MHz sample i is at i \u00d7 2.5 ns, so an odd sample falls on half a nanosecond. The middle buckets take samples 5 and 9, whose times 12.5 ns and 22.5 ns round half to even, to 12 and 22; rounding half up gives 13 and 23"
+    },
+    {
+      "name": "bucket/the-stated-association",
+      "applies_to": "bucket",
+      "xs": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000010400000000000001440"
+      },
+      "ys": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "C89ADC952A700740C0CB308422050C40"
+      },
+      "prev_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x3FFC31C8E723B084",
+          "repr": "1.762154486549691"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0xC0093A27F9F603E6",
+          "repr": "-3.153396561451234"
+        }
+      },
+      "next_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x4023124AAADB58B7",
+          "repr": "9.535725917125417"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0x3FF4C7FF0847781C",
+          "repr": "1.2988272021680194"
+        }
+      },
+      "expected_bucket_relative_index": 0,
+      "pins": [
+        "the association"
+      ],
+      "refuses": [
+        "exact arithmetic",
+        "the shoelace association"
+      ],
+      "note": "two samples whose areas differ by less than the rounding of the expression that computes them. In exact arithmetic the second is the larger, and written as the shoelace sum it comes out larger too; in float64, in the stated association, the first does, and the first is what the bucket stores. The rule states the arithmetic and the association, so which sample wins is not left to either"
+    },
+    {
+      "name": "bucket/first-of-equal-nonzero-areas",
+      "applies_to": "bucket",
+      "xs": {
+        "dtype": "float64",
+        "shape": [
+          3
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F03F00000000000000400000000000000840"
+      },
+      "ys": {
+        "dtype": "float64",
+        "shape": [
+          3
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F03F000000000000F0BF000000000000F03F"
+      },
+      "prev_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x0000000000000000",
+          "repr": "0.0"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0x0000000000000000",
+          "repr": "0.0"
+        }
+      },
+      "next_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x4010000000000000",
+          "repr": "4.0"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0x0000000000000000",
+          "repr": "0.0"
+        }
+      },
+      "expected_bucket_relative_index": 0,
+      "pins": [
+        "the strict comparison"
+      ],
+      "refuses": [
+        "a >= comparison"
+      ],
+      "note": "both anchors lie on y = 0, so each sample's area is 4|y|: three equal areas of 4, and the first wins"
+    },
+    {
+      "name": "bucket/no-area-wins-beside-an-invalid-neighbour",
+      "applies_to": "bucket",
+      "xs": {
+        "dtype": "float64",
+        "shape": [
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001040000000000000144000000000000018400000000000001C40"
+      },
+      "ys": {
+        "dtype": "float64",
+        "shape": [
+          4
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F87F0000000000000840000000000000F0BF0000000000001440"
+      },
+      "prev_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0x7FF8000000000000",
+          "repr": "nan"
+        }
+      },
+      "next_anchor": {
+        "x": {
+          "dtype": "float64",
+          "bits": "0x4020000000000000",
+          "repr": "8.0"
+        },
+        "y": {
+          "dtype": "float64",
+          "bits": "0x4000000000000000",
+          "repr": "2.0"
+        }
+      },
+      "expected_bucket_relative_index": 1,
+      "pins": [
+        "the NaN rules"
+      ],
+      "refuses": [
+        "a fallback to the first sample, NaN or not"
+      ],
+      "note": "the previous anchor is NaN, as an invalid bucket's is, so every area is NaN and none beats the seed; the bucket takes its first sample that is not NaN, index 1"
+    }
+  ]
+}
