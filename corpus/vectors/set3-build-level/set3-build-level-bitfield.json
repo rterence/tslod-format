@@ -2,7 +2,7 @@
   "id": "set3-build-level-bitfield",
   "set": "set3-build-level",
   "kind": "fixture",
-  "asserts": "Bitfield mode produces [OR, AND, first, last] per bucket, is permitted on the eight integer dtypes and refused on the two float dtypes, operates on the two's-complement bit pattern including the sign bit for signed dtypes, and does not accept a request for positions.",
+  "asserts": "Bitfield mode produces [OR, AND] per bucket, is permitted on the eight integer dtypes and refused on the two float dtypes, operates on the two's-complement bit pattern including the sign bit for signed dtypes, and does not accept a request for positions.",
   "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
   "contract": "OR and AND over a signed integer act on the bit pattern, so a reader that widens to a signed type and sign-extends produces different flags from the same bytes.",
   "requires": [
@@ -37,14 +37,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0001080F01030F"
+        "hex": "0F000F01"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -58,24 +58,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0001080F01030F"
+        "hex": "0F000F01"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00010F"
+        "hex": "0F00"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -98,14 +98,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000"
+        "hex": "00000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -119,24 +119,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "0000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "int8",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "00000000"
       },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -159,14 +159,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "7F7F7F7F7F7F7F7F"
+        "hex": "7F7F7F7F"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -180,24 +180,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "7F7F7F7F7F7F7F7F"
-      },
-      "expected_tuples": {
-        "dtype": "int8",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "7F7F7F7F"
       },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "7F7F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -220,14 +220,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF00807FFF008080"
+        "hex": "FF00FF00"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -241,24 +241,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF00807FFF008080"
+        "hex": "FF00FF00"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF008080"
+        "hex": "FF00"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -281,14 +281,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF0080FEFF00807F"
+        "hex": "FF00FF00"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -302,24 +302,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF0080FEFF00807F"
+        "hex": "FF00FF00"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF00807F"
+        "hex": "FF00"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -342,14 +342,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFEFFFEFFFEFFFE"
+        "hex": "FFFEFFFE"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -363,24 +363,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFEFFFEFFFEFFFE"
-      },
-      "expected_tuples": {
-        "dtype": "int8",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFEFFFE"
       },
+      "expected_tuples": {
+        "dtype": "int8",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFE"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -403,14 +403,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000010008000F00010003000F00"
+        "hex": "0F0000000F000100"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -424,24 +424,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000010008000F00010003000F00"
+        "hex": "0F0000000F000100"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000001000F00"
+        "hex": "0F000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -464,14 +464,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000"
+        "hex": "0000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -485,24 +485,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "00000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "int16",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "0000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -525,14 +525,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F"
+        "hex": "FF7FFF7FFF7FFF7F"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -546,24 +546,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F"
-      },
-      "expected_tuples": {
-        "dtype": "int16",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FF7FFF7FFF7FFF7F"
       },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FF7FFF7F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -586,14 +586,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000080FF7FFFFF000000800080"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -607,24 +607,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000080FF7FFFFF000000800080"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF000000800080"
+        "hex": "FFFF0000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -647,14 +647,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000080FEFFFFFF00000080FF7F"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -668,24 +668,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000080FEFFFFFF00000080FF7F"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000080FF7F"
+        "hex": "FFFF0000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -708,14 +708,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF"
+        "hex": "FFFFFEFFFFFFFEFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -729,24 +729,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF"
-      },
-      "expected_tuples": {
-        "dtype": "int16",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFEFFFFFFFEFF"
       },
+      "expected_tuples": {
+        "dtype": "int16",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFEFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -769,14 +769,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+        "hex": "0F000000000000000F00000001000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -790,24 +790,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+        "hex": "0F000000000000000F00000001000000"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000000000000010000000F000000"
+        "hex": "0F00000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -830,14 +830,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+        "hex": "00000000000000000000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -851,24 +851,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "int32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "00000000000000000000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -891,14 +891,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
+        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -912,24 +912,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
-      },
-      "expected_tuples": {
-        "dtype": "int32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFF7FFFFFFF7FFFFFFF7FFFFFFF7F"
       },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFF7FFFFFFF7F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -952,14 +952,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000080FFFFFF7FFFFFFFFF000000000000008000000080"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -973,24 +973,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000080FFFFFF7FFFFFFFFF000000000000008000000080"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF000000000000008000000080"
+        "hex": "FFFFFFFF00000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1013,14 +1013,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000080FEFFFFFFFFFFFFFF0000000000000080FFFFFF7F"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1034,24 +1034,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000080FEFFFFFFFFFFFFFF0000000000000080FFFFFF7F"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000080FFFFFF7F"
+        "hex": "FFFFFFFF00000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1074,14 +1074,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
+        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1095,24 +1095,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "int32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFEFFFFFFFFFFFFFFFEFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "int32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFEFFFFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1135,14 +1135,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+        "hex": "0F0000000000000000000000000000000F000000000000000100000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1156,24 +1156,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+        "hex": "0F0000000000000000000000000000000F000000000000000100000000000000"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000000000000000000000000000001000000000000000F00000000000000"
+        "hex": "0F000000000000000000000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1196,14 +1196,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1217,24 +1217,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "int64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "0000000000000000000000000000000000000000000000000000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1257,14 +1257,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1278,24 +1278,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
-      },
-      "expected_tuples": {
-        "dtype": "int64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
       },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1318,14 +1318,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1339,24 +1339,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF000000000000000000000000000000800000000000000080"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1379,14 +1379,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1400,24 +1400,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000080FFFFFFFFFFFFFF7F"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "sign-bit",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1440,14 +1440,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1461,24 +1461,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "int64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "int64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "minus-one-and-minus-two",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1501,14 +1501,14 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0001080F01030F"
+        "hex": "0F000F01"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1522,24 +1522,24 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0001080F01030F"
+        "hex": "0F000F01"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00010F"
+        "hex": "0F00"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1562,14 +1562,14 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000"
+        "hex": "00000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1583,24 +1583,24 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "0000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "uint8",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "00000000"
       },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1623,14 +1623,14 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF"
+        "hex": "FFFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1644,24 +1644,24 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "uint8",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "uint8",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1684,14 +1684,14 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF0000FFFF000000"
+        "hex": "FF00FF00"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1705,24 +1705,24 @@
         "dtype": "uint8",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF0000FFFF000000"
+        "hex": "FF00FF00"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FF000000"
+        "hex": "FF00"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1745,14 +1745,14 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000010008000F00010003000F00"
+        "hex": "0F0000000F000100"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1766,24 +1766,24 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000010008000F00010003000F00"
+        "hex": "0F0000000F000100"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000001000F00"
+        "hex": "0F000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1806,14 +1806,14 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000"
+        "hex": "0000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1827,24 +1827,24 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "00000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "uint16",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "0000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1867,14 +1867,14 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "hex": "FFFFFFFFFFFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1888,24 +1888,24 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "uint16",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFFFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "uint16",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1928,14 +1928,14 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000000FFFFFFFF000000000000"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1949,24 +1949,24 @@
         "dtype": "uint16",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF00000000FFFFFFFF000000000000"
+        "hex": "FFFF0000FFFF0000"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFF000000000000"
+        "hex": "FFFF0000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -1989,14 +1989,14 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+        "hex": "0F000000000000000F00000001000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2010,24 +2010,24 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F0000000000000001000000080000000F00000001000000030000000F000000"
+        "hex": "0F000000000000000F00000001000000"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000000000000010000000F000000"
+        "hex": "0F00000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2050,14 +2050,14 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
+        "hex": "00000000000000000000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2071,24 +2071,24 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "uint32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "00000000000000000000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2111,14 +2111,14 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2132,24 +2132,24 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "uint32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "uint32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2172,14 +2172,14 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2193,24 +2193,24 @@
         "dtype": "uint32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000"
+        "hex": "FFFFFFFF00000000FFFFFFFF00000000"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFF000000000000000000000000"
+        "hex": "FFFFFFFF00000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2233,14 +2233,14 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+        "hex": "0F0000000000000000000000000000000F000000000000000100000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2254,24 +2254,24 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F000000000000000000000000000000010000000000000008000000000000000F00000000000000010000000000000003000000000000000F00000000000000"
+        "hex": "0F0000000000000000000000000000000F000000000000000100000000000000"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0F00000000000000000000000000000001000000000000000F00000000000000"
+        "hex": "0F000000000000000000000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "lanes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2294,14 +2294,14 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2315,24 +2315,24 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-      },
-      "expected_tuples": {
-        "dtype": "uint64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "0000000000000000000000000000000000000000000000000000000000000000"
       },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000000"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2355,14 +2355,14 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2376,24 +2376,24 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-      },
-      "expected_tuples": {
-        "dtype": "uint64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
       },
+      "expected_tuples": {
+        "dtype": "uint64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "all-ones",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2416,14 +2416,14 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "2",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },
@@ -2437,24 +2437,24 @@
         "dtype": "uint64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "FFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000"
+        "hex": "FFFFFFFFFFFFFFFF0000000000000000"
       },
       "expected_bucket_count": "1",
-      "column_order": "OR,AND,first,last",
+      "column_order": "OR,AND",
       "bitfield_pattern": "extremes",
       "expected_bucket_count_rule": "ceil(N / branching_factor)"
     },

@@ -58,7 +58,7 @@ DTYPES = FLOATS + SIGNED + UNSIGNED
 #: block (512/256), a ragged block (700/256), and a single-bucket fold (64/64).
 GRID = [(8, 2), (16, 4), (512, 256), (700, 256), (10, 3), (64, 64)]
 
-COLUMN_ORDER = "min,max,first,last"
+COLUMN_ORDER = "min,max"
 BUCKET_COUNT_RULE = "ceil(N / branching_factor)"
 
 _LCG_A = 6364136223846793005
@@ -139,18 +139,18 @@ def gen_numeric() -> Vector:
     vec = Vector(
         id="set3-build-level-numeric", set_=SET, kind="fixture",
         asserts=(
-            "build_level in numeric mode produces [min, max, first, last] per bucket "
-            "in that column order, over all ten dtypes, for both from_raw=1 (raw "
-            "samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] "
-            "positions, and folds the ragged tail rather than dropping it."),
+            "build_level in numeric mode produces [min, max] per bucket in that column "
+            "order, over all ten dtypes, for both from_raw=1 (raw samples) and "
+            "from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, "
+            "and folds the ragged tail rather than dropping it."),
         source=FOLD_SOURCE,
-        contract=("All four columns share a type, so a swapped pair is invisible in the "
-                  "data; the order is pinned because nothing else can recover it."),
+        contract=("Both columns share a type and nothing in the bytes says which is "
+                  "which; the order is pinned because only the format can say it."),
         requires=["feature:positions"] + [f"dtype:{d}" for d in DTYPES],
-        notes=("⟢ Column order is [min, max, first, last], NOT the first/last/min/max "
-               "ordering the format is often described with. Getting this backwards is "
-               "silent: all four are the same dtype and a swapped pair only shows on "
-               "data where min != first."),
+        notes=("⟢ Column order is [min, max]. A stored numeric bucket carries a third "
+               "column, its representative, which is not a fold — it is chosen from the "
+               "raw samples at every level — and is pinned by set5-representative, "
+               "not here."),
     )
     for dtype in DTYPES:
         for n, bf in GRID:
@@ -228,9 +228,9 @@ def gen_nan_matrix() -> Vector:
     vec = Vector(
         id="set3-build-level-nan-matrix", set_=SET, kind="fixture",
         asserts=(
-            "NaN is skipped in min and max; an all-NaN bucket yields four NaNs and "
-            "positions [0, 0]; first and last are the LITERAL first and last elements "
-            "and may therefore be NaN even when min and max are finite — and every NaN "
+            "NaN is skipped in min and max, each column on its own; a column that is "
+            "all NaN yields its first entry, at position 0, so an all-NaN bucket of raw "
+            "samples is two copies of its first NaN at positions [0, 0] — and every NaN "
             "that came from an input element keeps that element's bit pattern."),
         source=FOLD_SOURCE,
         contract=("NaN handling is the whole of a bucket's behaviour on invalid data, "
@@ -273,8 +273,7 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/min-column-all-nan",
-        np.array([[N_A, 1.0, 10.0, 20.0], [N_B, 5.0, 11.0, 21.0],
-                  [N_C, 2.0, 12.0, 22.0], [N_A, 3.0, 13.0, 23.0]],
+        np.array([[N_A, 1.0], [N_B, 5.0], [N_C, 2.0], [N_A, 3.0]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "the min column is entirely NaN and the max column is not. The "
@@ -284,8 +283,7 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/max-column-all-nan",
-        np.array([[3.0, N_A, 10.0, 20.0], [1.0, N_B, 11.0, 21.0],
-                  [2.0, N_C, 12.0, 22.0], [4.0, N_A, 13.0, 23.0]],
+        np.array([[3.0, N_A], [1.0, N_B], [2.0, N_C], [4.0, N_A]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "the same rule mirrored: the max column is entirely NaN and the "
@@ -294,8 +292,7 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/one-half-nan-tuple",
-        np.array([[3.0, 4.0, 10.0, 20.0], [N_A, 7.0, 11.0, 21.0],
-                  [2.0, 5.0, 12.0, 22.0], [6.0, 1.0, 13.0, 23.0]],
+        np.array([[3.0, 4.0], [N_A, 7.0], [2.0, 5.0], [6.0, 1.0]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "one child has a NaN min and a valid max. Its min is skipped and "
@@ -304,8 +301,7 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "nan-payload-preserved/tuples-wholly-nan",
-        np.array([[N_A, N_B, N_A, N_B], [N_C, N_C, N_C, N_C],
-                  [N_C, N_C, N_C, N_C], [N_C, N_C, N_C, N_C]],
+        np.array([[N_A, N_B], [N_C, N_C], [N_C, N_C], [N_C, N_C]],
                  dtype=np.float64), 4, 0,
         extra={"nan_payload_is_preserved": True,
                "note": (
@@ -372,7 +368,7 @@ def _bitfield_case(vec: Vector, name: str, arr, bf: int, from_raw: int,
         input=array_ref(arr),
         expected_tuples=array_ref(tuples),
         expected_bucket_count=i64(tuples.shape[0]),
-        column_order="OR,AND,first,last",
+        column_order="OR,AND",
         bitfield_pattern=pattern,
         expected_bucket_count_rule=BUCKET_COUNT_RULE,
     )
@@ -383,7 +379,7 @@ def gen_bitfield() -> Vector:
     vec = Vector(
         id="set3-build-level-bitfield", set_=SET, kind="fixture",
         asserts=(
-            "Bitfield mode produces [OR, AND, first, last] per bucket, is permitted on "
+            "Bitfield mode produces [OR, AND] per bucket, is permitted on "
             "the eight integer dtypes and refused on the two float dtypes, operates on "
             "the two's-complement bit pattern including the sign bit for signed dtypes, "
             "and does not accept a request for positions."),
@@ -456,8 +452,8 @@ def gen_edges() -> Vector:
         id="set3-build-level-edges", set_=SET, kind="fixture",
         asserts=(
             "build_level refuses an empty input and a branching factor below 2 rather "
-            "than returning an empty level, and a single-bucket fold of a bucket "
-            "shorter than the branching factor is the identity on values."),
+            "than returning an empty level, and folds a run shorter than the "
+            "branching factor into one bucket over exactly the elements it has."),
         source=FOLD_SOURCE,
         contract=("The fold refuses an empty input and a branching factor below two "
                   "rather than returning something plausible."),
@@ -482,8 +478,7 @@ def gen_edges() -> Vector:
     for n in (1, 2, 3):
         arr = np.arange(7.5, 7.5 + n, dtype="float64")
         _numeric_case(vec, f"n{n}-shorter-than-bf4", arr, 4, 1, extra={
-            "note": ("one bucket, ragged: min/max/first/last all come from the same "
-                     "short run"),
+            "note": "one bucket, ragged: min and max both come from the same short run",
         })
     return vec
 

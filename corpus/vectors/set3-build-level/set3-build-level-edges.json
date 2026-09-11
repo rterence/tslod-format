@@ -2,7 +2,7 @@
   "id": "set3-build-level-edges",
   "set": "set3-build-level",
   "kind": "fixture",
-  "asserts": "build_level refuses an empty input and a branching factor below 2 rather than returning an empty level, and a single-bucket fold of a bucket shorter than the branching factor is the identity on values.",
+  "asserts": "build_level refuses an empty input and a branching factor below 2 rather than returning an empty level, and folds a run shorter than the branching factor into one bucket over exactly the elements it has.",
   "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
   "contract": "The fold refuses an empty input and a branching factor below two rather than returning something plausible.",
   "requires": [],
@@ -79,15 +79,15 @@
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E400000000000001E400000000000001E400000000000001E40"
+        "hex": "0000000000001E400000000000001E40"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
-      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "column_order": "min,max",
+      "note": "one bucket, ragged: min and max both come from the same short run",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -122,15 +122,15 @@
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E4000000000000021400000000000001E400000000000002140"
+        "hex": "0000000000001E400000000000002140"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
-      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "column_order": "min,max",
+      "note": "one bucket, ragged: min and max both come from the same short run",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 2,
@@ -165,15 +165,15 @@
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E4000000000000023400000000000001E400000000000002340"
+        "hex": "0000000000001E400000000000002340"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
-      "note": "one bucket, ragged: min/max/first/last all come from the same short run",
+      "column_order": "min,max",
+      "note": "one bucket, ragged: min and max both come from the same short run",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 3,

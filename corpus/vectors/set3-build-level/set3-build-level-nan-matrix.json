@@ -2,7 +2,7 @@
   "id": "set3-build-level-nan-matrix",
   "set": "set3-build-level",
   "kind": "fixture",
-  "asserts": "NaN is skipped in min and max; an all-NaN bucket yields four NaNs and positions [0, 0]; first and last are the LITERAL first and last elements and may therefore be NaN even when min and max are finite \u2014 and every NaN that came from an input element keeps that element's bit pattern.",
+  "asserts": "NaN is skipped in min and max, each column on its own; a column that is all NaN yields its first entry, at position 0, so an all-NaN bucket of raw samples is two copies of its first NaN at positions [0, 0] \u2014 and every NaN that came from an input element keeps that element's bit pattern.",
   "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
   "contract": "NaN handling is the whole of a bucket's behaviour on invalid data, and numeric equality cannot test it because NaN is equal to nothing.",
   "requires": [
@@ -32,14 +32,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000803F00000040000010410000C07F0000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "some-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -64,24 +64,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000803F00000040000010410000C07F0000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00001041000040400000C040"
+        "hex": "0000803F00001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "some-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -116,14 +116,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000C07F0000C07F0000C07F0000C07F00000040000010410000A0400000C040"
+        "hex": "0000C07F0000C07F0000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "all-nan-bucket",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -148,24 +148,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000C07F0000C07F0000C07F0000C07F00000040000010410000A0400000C040"
+        "hex": "0000C07F0000C07F0000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000040000010410000C07F0000C040"
+        "hex": "0000004000001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "all-nan-bucket",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -200,14 +200,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F"
+        "hex": "0000C07F0000C07F0000C07F0000C07F"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "every-bucket-all-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -232,24 +232,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F0000C07F"
-      },
-      "expected_tuples": {
-        "dtype": "float32",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "0000C07F0000C07F0000C07F0000C07F"
       },
+      "expected_tuples": {
+        "dtype": "float32",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000C07F0000C07F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "every-bucket-all-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -284,14 +284,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000080400000C07F0000803F00000040000010410000C07F0000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-is-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -316,24 +316,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000080400000C07F0000803F00000040000010410000C07F0000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000010410000C07F0000C040"
+        "hex": "0000803F00001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-is-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -368,14 +368,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000C07F00000040000010410000A0400000C07F"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "last-is-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -400,24 +400,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000C07F00000040000010410000A0400000C07F"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00001041000040400000C07F"
+        "hex": "0000803F00001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "last-is-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -452,14 +452,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000080400000C07F0000C07F00000040000010410000C07F0000C07F"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-and-last-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -484,24 +484,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000080400000C07F0000C07F00000040000010410000C07F0000C07F"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F000010410000C07F0000C07F"
+        "hex": "0000803F00001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-and-last-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -536,14 +536,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000803F00000040000010410000A0400000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "no-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -568,24 +568,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00008040000040400000803F00000040000010410000A0400000C040"
+        "hex": "0000803F000080400000004000001041"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000803F00001041000040400000C040"
+        "hex": "0000803F00001041"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "no-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -620,14 +620,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000008000000080000000800000008000000080000000800000C07F0000C07F"
+        "hex": "00000080000000800000008000000080"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-negative-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -652,24 +652,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000008000000080000000800000008000000080000000800000C07F0000C07F"
+        "hex": "00000080000000800000008000000080"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000008000000080000000800000C07F"
+        "hex": "0000008000000080"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-negative-zero",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -704,14 +704,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080FF0000807F0000807F0000803F000080FF0000807F0000C07F00000040"
+        "hex": "000080FF0000807F000080FF0000807F"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-infinities",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -736,24 +736,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080FF0000807F0000807F0000803F000080FF0000807F0000C07F00000040"
+        "hex": "000080FF0000807F000080FF0000807F"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080FF0000807F0000807F00000040"
+        "hex": "000080FF0000807F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-infinities",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -788,14 +788,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F03F00000000000000400000000000002240000000000000F87F0000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "some-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -820,24 +820,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F03F00000000000000400000000000002240000000000000F87F0000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F000000000000224000000000000008400000000000001840"
+        "hex": "000000000000F03F0000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "some-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -872,14 +872,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F0000000000000040000000000000224000000000000014400000000000001840"
+        "hex": "000000000000F87F000000000000F87F00000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "all-nan-bucket",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -904,24 +904,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F0000000000000040000000000000224000000000000014400000000000001840"
+        "hex": "000000000000F87F000000000000F87F00000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000400000000000002240000000000000F87F0000000000001840"
+        "hex": "00000000000000400000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "all-nan-bucket",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -956,14 +956,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F"
+        "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "every-bucket-all-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -988,24 +988,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
-        ],
-        "order": "C",
-        "byte_order": "little",
-        "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F000000000000F87F"
-      },
-      "expected_tuples": {
-        "dtype": "float64",
-        "shape": [
-          1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
         "hex": "000000000000F87F000000000000F87F000000000000F87F000000000000F87F"
       },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          2
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "000000000000F87F000000000000F87F"
+      },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "every-bucket-all-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1040,14 +1040,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000001040000000000000F87F000000000000F03F00000000000000400000000000002240000000000000F87F0000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-is-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1072,24 +1072,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000001040000000000000F87F000000000000F03F00000000000000400000000000002240000000000000F87F0000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000002240000000000000F87F0000000000001840"
+        "hex": "000000000000F03F0000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-is-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1124,14 +1124,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F87F000000000000004000000000000022400000000000001440000000000000F87F"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "last-is-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1156,24 +1156,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F87F000000000000004000000000000022400000000000001440000000000000F87F"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000022400000000000000840000000000000F87F"
+        "hex": "000000000000F03F0000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "last-is-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1208,14 +1208,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000001040000000000000F87F000000000000F87F00000000000000400000000000002240000000000000F87F000000000000F87F"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-and-last-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1240,24 +1240,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000001040000000000000F87F000000000000F87F00000000000000400000000000002240000000000000F87F000000000000F87F"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F0000000000002240000000000000F87F000000000000F87F"
+        "hex": "000000000000F03F0000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "first-and-last-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1292,14 +1292,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F03F0000000000000040000000000000224000000000000014400000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "no-nan",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1324,24 +1324,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F00000000000010400000000000000840000000000000F03F0000000000000040000000000000224000000000000014400000000000001840"
+        "hex": "000000000000F03F000000000000104000000000000000400000000000002240"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03F000000000000224000000000000008400000000000001840"
+        "hex": "000000000000F03F0000000000002240"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "no-nan",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1376,14 +1376,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000008000000000000000800000000000000080000000000000008000000000000000800000000000000080000000000000F87F000000000000F87F"
+        "hex": "0000000000000080000000000000008000000000000000800000000000000080"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-negative-zero",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1408,24 +1408,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000008000000000000000800000000000000080000000000000008000000000000000800000000000000080000000000000F87F000000000000F87F"
+        "hex": "0000000000000080000000000000008000000000000000800000000000000080"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000008000000000000000800000000000000080000000000000F87F"
+        "hex": "00000000000000800000000000000080"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-negative-zero",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1460,14 +1460,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0FF000000000000F07F000000000000F07F000000000000F03F000000000000F0FF000000000000F07F000000000000F87F0000000000000040"
+        "hex": "000000000000F0FF000000000000F07F000000000000F0FF000000000000F07F"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-infinities",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1492,24 +1492,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0FF000000000000F07F000000000000F07F000000000000F03F000000000000F0FF000000000000F07F000000000000F87F0000000000000040"
+        "hex": "000000000000F0FF000000000000F07F000000000000F0FF000000000000F07F"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0FF000000000000F07F000000000000F07F0000000000000040"
+        "hex": "000000000000F0FF000000000000F07F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_pattern": "nan-with-infinities",
       "note": "from_raw=0 over a level that already contains NaN \u2014 the class a hand-written fold and a vectorised one were measured to diverge on",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1535,24 +1535,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBC0A000000F87F000000000000F03F00000000000024400000000000003440563412000000F87F000000000000144000000000000026400000000000003540EFBE00000000F87F000000000000004000000000000028400000000000003640DEBC0A000000F87F00000000000008400000000000002A400000000000003740"
+        "hex": "DEBC0A000000F87F000000000000F03F563412000000F87F0000000000001440EFBE00000000F87F0000000000000040DEBC0A000000F87F0000000000000840"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBC0A000000F87F000000000000144000000000000024400000000000003740"
+        "hex": "DEBC0A000000F87F0000000000001440"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "note": "the min column is entirely NaN and the max column is not. The bucket's max is still 5.0 at index 1: an all-NaN min column says nothing about the max column, and a fold that lets one gate the other returns the FIRST child's max here instead of the largest",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1577,24 +1577,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000840DEBC0A000000F87F00000000000024400000000000003440000000000000F03F563412000000F87F000000000000264000000000000035400000000000000040EFBE00000000F87F000000000000284000000000000036400000000000001040DEBC0A000000F87F0000000000002A400000000000003740"
+        "hex": "0000000000000840DEBC0A000000F87F000000000000F03F563412000000F87F0000000000000040EFBE00000000F87F0000000000001040DEBC0A000000F87F"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F03FDEBC0A000000F87F00000000000024400000000000003740"
+        "hex": "000000000000F03FDEBC0A000000F87F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "note": "the same rule mirrored: the max column is entirely NaN and the min is not, so min is 1.0 at index 1 while max falls back to the first child's max with position 0",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1619,24 +1619,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000840000000000000104000000000000024400000000000003440DEBC0A000000F87F0000000000001C400000000000002640000000000000354000000000000000400000000000001440000000000000284000000000000036400000000000001840000000000000F03F0000000000002A400000000000003740"
+        "hex": "00000000000008400000000000001040DEBC0A000000F87F0000000000001C40000000000000004000000000000014400000000000001840000000000000F03F"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000400000000000001C4000000000000024400000000000003740"
+        "hex": "00000000000000400000000000001C40"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "note": "one child has a NaN min and a valid max. Its min is skipped and its max still competes and wins, which is what per-column means at the granularity of a single child",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
@@ -1661,24 +1661,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBC0A000000F87F563412000000F87FDEBC0A000000F87F563412000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87F"
+        "hex": "DEBC0A000000F87F563412000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87FEFBE00000000F87F"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBC0A000000F87F563412000000F87FDEBC0A000000F87FEFBE00000000F87F"
+        "hex": "DEBC0A000000F87F563412000000F87F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_payload_is_preserved": true,
       "note": "both columns are wholly NaN, so each falls back to its own first child \u2014 and the bytes that come back are that child's, 0x7FF800000000ABCDE for min and 0x7FF800000123456 for max, NOT the canonical 0x7FF8000000000000 a manufactured NaN would carry. Different payloads in the two columns, so a fold that returns one for both fails",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1713,14 +1713,14 @@
         "dtype": "float32",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBCCA7FDEBCCA7FDEBCCA7F0000C07F"
+        "hex": "DEBCCA7FDEBCCA7F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_payload_is_preserved": true,
       "note": "the raw path, which runs on every sample and is therefore the one that matters most. A bucket of samples that are all NaN folds to the FIRST sample's NaN, payload and all, at positions [0, 0]. A disconnected sensor for a few seconds produces a run longer than the branching factor, so this bucket is ordinary rather than contrived",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
@@ -1755,14 +1755,14 @@
         "dtype": "float64",
         "shape": [
           1,
-          4
+          2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "DEBC0A000000F87FDEBC0A000000F87FDEBC0A000000F87F000000000000F87F"
+        "hex": "DEBC0A000000F87FDEBC0A000000F87F"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max,first,last",
+      "column_order": "min,max",
       "nan_payload_is_preserved": true,
       "note": "the raw path, which runs on every sample and is therefore the one that matters most. A bucket of samples that are all NaN folds to the FIRST sample's NaN, payload and all, at positions [0, 0]. A disconnected sensor for a few seconds produces a run longer than the branching factor, so this bucket is ordinary rather than contrived",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",

@@ -19,7 +19,7 @@
     {
       "name": "v1_p2_with_moments.tslod",
       "file": "v1-format/files/v1_p2_with_moments.tslod",
-      "file_size_bytes": "8329",
+      "file_size_bytes": "8344",
       "block_count": 36,
       "format_version": 1,
       "compression_id": 2,
@@ -34,8 +34,8 @@
       },
       "stream_count_per_numeric_level_block": 3,
       "decoded_stream_count": 44,
-      "decoded_bytes": "35216",
-      "decoded_sha256": "76ef9f2f89c7f53db8015722dc751cf5a29eb69ec4a16738c267c672aa2a79a6",
+      "decoded_bytes": "35352",
+      "decoded_sha256": "25cb0a3c5a58ccb8bbb535840737c1cacc7405d57f140f4ae81a15bb3dc849ba",
       "every_crc_verifies": true,
       "blocks": [
         {
@@ -304,20 +304,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                2
+                3
               ],
               "recipe": "0x02",
-              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
+              "sha256": "c1d2fc44bddf513c2800d62d210f3ba367b63eb88205d6a72377764b7f944a07"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                4
+                3
               ],
               "recipe": "0x03",
-              "sha256": "15598055ebb70bb56e71bde1eba33ce7d873658205f71b6fb014aed65e09d7f4"
+              "sha256": "02316bd570f596ea7da6281b602deb14c1b923174ca395a597fe8be8b99ab7d6"
             },
             {
               "kind": "moments",
@@ -341,20 +341,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                2
+                3
               ],
               "recipe": "0x02",
-              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
+              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                4
+                3
               ],
               "recipe": "0x03",
-              "sha256": "dba2825369f5d9b62692d226c00b239e279a6913006f053ba89fcefeeb43eef7"
+              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
             },
             {
               "kind": "moments",
@@ -634,20 +634,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                2
+                3
               ],
               "recipe": "0x02",
-              "sha256": "b9bee80b7e35d1595d8cf1b16fa370653639402d643565a5286fccc8c3c91b8d"
+              "sha256": "59a2bf99897da363daae8ac2a6b594ad92ed82cc0aec9180e26fad10e0fbb34d"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 16,
-                4
+                3
               ],
               "recipe": "0x03",
-              "sha256": "4b7195dd40119255138bf86b5c8a61e2db02b08214180effcb8519d62a5922b0"
+              "sha256": "18f8f0140b9153dfb9437ce9347a7a5a9a6c07bcf9e0b3d2c4c4dc310d97aa2c"
             },
             {
               "kind": "moments",
@@ -671,20 +671,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                2
+                3
               ],
               "recipe": "0x02",
-              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 1,
-                4
+                3
               ],
               "recipe": "0x03",
-              "sha256": "cd8a0a96483892898066bd0e44d61a3bee0e7fe99b7f7e4ee5628827460dc68d"
+              "sha256": "7396d93213738b83e76a51db4eabe3f052b11e060b3bbcef790ddaee6778f865"
             },
             {
               "kind": "moments",
@@ -704,7 +704,7 @@
     {
       "name": "v1_p2_no_moments.tslod",
       "file": "v1-format/files/v1_p2_no_moments.tslod",
-      "file_size_bytes": "5178",
+      "file_size_bytes": "5176",
       "block_count": 36,
       "format_version": 1,
       "compression_id": 2,
@@ -718,8 +718,8 @@
       },
       "stream_count_per_numeric_level_block": 2,
       "decoded_stream_count": 40,
-      "decoded_bytes": "33856",
-      "decoded_sha256": "7e522d8bd7c2388a46c26e289039518108d0503688b4c86541e8915e3f7df20d",
+      "decoded_bytes": "33992",
+      "decoded_sha256": "ced2d860148c2f7d4a898c108cd155f0cbe1c0bfc9387a42e2a15cf69872ff40",
       "every_crc_verifies": true,
       "blocks": [
         {
@@ -988,20 +988,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                2
+                3
               ],
               "recipe": "0x01",
-              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
+              "sha256": "c1d2fc44bddf513c2800d62d210f3ba367b63eb88205d6a72377764b7f944a07"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "15598055ebb70bb56e71bde1eba33ce7d873658205f71b6fb014aed65e09d7f4"
+              "sha256": "02316bd570f596ea7da6281b602deb14c1b923174ca395a597fe8be8b99ab7d6"
             }
           ]
         },
@@ -1015,20 +1015,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                2
+                3
               ],
               "recipe": "0x01",
-              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
+              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "dba2825369f5d9b62692d226c00b239e279a6913006f053ba89fcefeeb43eef7"
+              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
             }
           ]
         },
@@ -1298,20 +1298,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                2
+                3
               ],
               "recipe": "0x01",
-              "sha256": "b9bee80b7e35d1595d8cf1b16fa370653639402d643565a5286fccc8c3c91b8d"
+              "sha256": "59a2bf99897da363daae8ac2a6b594ad92ed82cc0aec9180e26fad10e0fbb34d"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 16,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "4b7195dd40119255138bf86b5c8a61e2db02b08214180effcb8519d62a5922b0"
+              "sha256": "18f8f0140b9153dfb9437ce9347a7a5a9a6c07bcf9e0b3d2c4c4dc310d97aa2c"
             }
           ]
         },
@@ -1325,20 +1325,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                2
+                3
               ],
               "recipe": "0x01",
-              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 1,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "cd8a0a96483892898066bd0e44d61a3bee0e7fe99b7f7e4ee5628827460dc68d"
+              "sha256": "7396d93213738b83e76a51db4eabe3f052b11e060b3bbcef790ddaee6778f865"
             }
           ]
         }
@@ -1348,7 +1348,7 @@
     {
       "name": "v1_p2_active_with_moments.tslod",
       "file": "v1-format/files/v1_p2_active_with_moments.tslod",
-      "file_size_bytes": "1956",
+      "file_size_bytes": "1976",
       "block_count": 10,
       "format_version": 1,
       "compression_id": 2,
@@ -1364,7 +1364,7 @@
       "stream_count_per_numeric_level_block": 3,
       "decoded_stream_count": 14,
       "decoded_bytes": "17176",
-      "decoded_sha256": "d321ccc94ad0fe4ff9dffe1139f9c966b0b747225a3a0877c5a2763ef63892f5",
+      "decoded_sha256": "58b8717e65de04dbeff67a74f469634052ce28b497dfe5e31e9f548a0bf97d81",
       "every_crc_verifies": true,
       "blocks": [
         {
@@ -1505,20 +1505,20 @@
               "dtype": "int64",
               "shape": [
                 8,
-                2
+                3
               ],
               "recipe": "0x03",
-              "sha256": "2b3f958f836255607de27a2da5110cf3e90c5ba72c12de5a382304aee1b31525"
+              "sha256": "f81f72a72fad7307c187953821a52a7bd5c594fb25b31832c78e93fe04e29e91"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 8,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "ff69d5c34c16c3f41ad9ca06c9841163b77902d62a966929a01fbe11d4f46123"
+              "sha256": "d9dd48fa541181d79467aa8d958de529c887951a271886223e082f0b8c641065"
             },
             {
               "kind": "moments",
@@ -1542,20 +1542,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                2
+                3
               ],
               "recipe": "0x03",
-              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
+              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 1,
-                4
+                3
               ],
               "recipe": "0x02",
-              "sha256": "570e47bcc2e5ece953d98be82d0b5f41f513d0cfbd9a74e823377f0ac1c76bf8"
+              "sha256": "97edaa6c659f7fc0611740fa41acfbac8f004acebfc644f8a82327cb5e4893eb"
             },
             {
               "kind": "moments",

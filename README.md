@@ -66,12 +66,12 @@ contract between implementations rather than one implementation's private detail
 [1, 7, 1, 3]   [2, 8, 2, 9]
 ```
 
-**Expected output** — one summary per bucket, as `[min, max, first, last]`, plus the index within
-the bucket where the min and max were found:
+**Expected output** — one summary per bucket, as `[min, max]`, plus the index within the bucket
+where the min and max were found:
 
 ```
-bucket 0:  [1, 7, 1, 3]   min at index 0, max at index 1
-bucket 1:  [2, 9, 2, 9]   min at index 0, max at index 3
+bucket 0:  [1, 7]   min at index 0, max at index 1
+bucket 1:  [2, 9]   min at index 0, max at index 3
 ```
 
 The value `1` appears at index 0 and index 2 of bucket 0, and `2` appears twice in bucket 1. The
