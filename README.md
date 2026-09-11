@@ -14,14 +14,16 @@ samples; each bucket at level 2 summarises `branching_factor` level-1 buckets, a
 samples is about 3,800 buckets at that level instead of a billion values. A reader that needs a
 coarser or finer answer moves up or down a level rather than reading more raw samples.
 
-Each numeric bucket stores nine numbers about the samples underneath it:
+Each numeric bucket stores eight numbers about the samples underneath it:
 
 | field | meaning |
 |---|---|
 | `min`, `max` | the smallest and largest sample in the bucket — the true extremes of its span, not an approximation of them |
-| `first`, `last` | the first and last sample in the bucket, in time order — the values at each end of its span |
+| `rep` | the sample that draws the bucket's shape, chosen by a rule every writer follows, so two files of the same data draw the same picture |
 | `count` | how many samples were valid; NaN is not counted |
 | `mean`, `M2`, `M3`, `M4` | running moments, giving mean, variance, σ, RMS and kurtosis for any range at any level without reading the raw samples |
+
+`min`, `max` and `rep` are each a real sample, stored with the time it was taken.
 
 A file also stores a checksum for every block, so a reader detects damaged data before using it; one
 exact rule for the timestamp of every sample; optional per-stream compression; and support for both

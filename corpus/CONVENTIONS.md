@@ -156,8 +156,8 @@ Anything longer than a few dozen elements is a sidecar file, never inline JSON:
 ```
 
 - Raw little-endian, C-contiguous, row-major, no header, no padding.
-- `shape` is row-major. A `(N, 4)` tuple array stores the four values of bucket 0, then the four of
-  bucket 1 — **never planar**.
+- `shape` is row-major. A `(N, 3)` tuple array stores the three values of bucket 0, then the three
+  of bucket 1 — **never planar**.
 - The `.bin` is hashed in the manifest, so a corrupted sidecar is a CI failure and not a silent
   pass.
 
@@ -182,6 +182,7 @@ vectors your implementation is ready for.
 | `feature:streaming` | it opens `file_state = active` files |
 | `feature:crc` | it checks the per-block CRC |
 | `feature:moments` | it reads or writes the `(count, mean, M2, M3, M4)` moment stream |
+| `feature:representative` | it reads the representative column and its position |
 | `feature:read-rejection` | it parses a whole file and refuses a malformed one |
 
 `check_corpus.py` skips for one reason only — an optional third-party codec is not installed — and
