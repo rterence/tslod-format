@@ -107,15 +107,32 @@ with the ceiling of *N* / `branching_factor` until a single bucket remains, coun
 channel in a sealed file stores that number and no other, and a reader refuses one that does not
 (`num-levels-mismatch`, under **Rejection**).
 
-A numeric bucket is `[min, max, rep]` **in that column order**. `min` and `max` are the bucket's
-extremes, folded by the rules that follow, and they serve every range statistic and search. `rep` is
-its **representative**, one of its own raw samples, chosen to draw the bucket's shape by the rule
-under **The representative** below. A bucket stores no `first` or `last` sample. A field stays in
-the format only while it has a purpose a reader can name: an edge sample's purpose was the drawn
-shape, and a sample chosen for the bucket's shape serves that instead. That an edge could hold a NaN
-where `min` and `max` skip it said less than the moment stream's `count`, the number of non-NaN
-elements, which tells a reader how many of a bucket's samples are missing and not merely whether one
-at its edge was.
+A numeric bucket is `[min, max, first, mid, last]` **in that column order**. `min` and `max` are the
+bucket's extremes, and they serve every range statistic and search. `first` and `last` are the
+bucket's first and last samples, which give continuity at the joins between drawn buckets. `mid` is a
+sample at the bucket's centre, and because its position is fixed by the bucket's geometry rather than
+by the data, every channel of a group names the same sample there — which is what lets two channels
+be paired against each other. Each of the five is a sample as stored: it may itself be NaN, and it
+keeps the bits it was written with.
+
+⛔ **Every column of a stored row folds from the row below it.** A level can therefore be rebuilt,
+extended or repaired from the level below without reading a raw sample: `min` and `max` fold from
+their children's `min` and `max` columns by the rules that follow, `first` is the first child's
+`first`, `last` is the last child's `last`, the moments merge under the order **Bucket statistics**
+fixes, and `mid` is the first field of child ⌊k/2⌋ of the bucket's k existing children. A column with
+no such rule could be recovered only by reading the raw samples again, which is the one thing the
+pyramid exists to avoid, so no such column is stored.
+
+⛔ **`mid` is the first field of child ⌊k/2⌋ of the bucket's k existing children**, and never "the
+sample at the bucket's middle index". At level 1 a child is one raw sample, so `mid` is raw sample
+⌊n/2⌋ of the n samples the bucket holds. Where the bucket is full and `branching_factor` is even it
+is exactly the bucket's middle raw sample, at index `BF^L / 2` from the bucket's start. The two part
+company on a ragged bucket above level 1 — three children holding 256, 256 and 100 samples hold 612
+samples, whose middle index is 306, while the rule gives child 1's `first`, index 256 — and an odd
+branching factor above level 1 parts from it the same way, naming the child just below the centre.
+Where they differ the child rule is the rule, because it is what makes the column fold from the row
+below. Two channels of one group whose lengths differ may hold a different k in their last buckets
+and so name different samples there; a reader pairs them over the span both cover, as above.
 
 ⛔ **`min` and `max` are resolved independently, one column each.** The bucket's `min` is the
 minimum over its children's `min` column with NaN skipped; if that whole column is NaN, it is the
@@ -131,13 +148,12 @@ different rule from the moments', where an all-NaN bucket's four moments are the
 because nothing was carried through — there, the value is manufactured; here, it is copied.
 
 The comparison is strict `<` and `>`, so on a tie the **first**
-occurrence wins — and that choice is what decides the stored `min_ts` and `max_ts`, two of a
-bucket's three position timestamps, which is why the tie-break vector checks positions and not only
-values. The third, `rep_ts`, is decided by the representative's own tie-break below. A bitfield
-bucket is `[OR, AND]` on the two's-complement bit pattern including the sign bit, and is defined only
-for integer dtypes (`set3-build-level-*`). It has no representative, because a bit mask has no shape
-to represent, and no edge samples, because once the fold's OR and AND are stored no reader of the
-format has a use for them.
+occurrence wins — and that choice is what decides the stored `min_ts` and `max_ts`, which is why the
+tie-break vector checks positions and not only values. `first`, `mid` and `last` are named by the
+geometry instead, so no comparison decides them. A bitfield bucket is `[OR, AND]` on the
+two's-complement bit pattern including the sign bit, and is defined only for integer dtypes
+(`set3-build-level-*`). It carries no `first`, `mid` or `last`: a mask has no shape to draw and no
+join to make continuous, so its two folded columns are the whole of it.
 
 The fold is defined for a non-empty input and a `branching_factor` of **two or more** — a caller
 asking for one bucket per element is asking for its input back, not for a fold — and positions are
@@ -145,81 +161,12 @@ defined in numeric mode only, which is why a bitfield block carries no position 
 is named by its **class**, stated in these terms; the exception type an implementation raises is its
 own language's business and no part of the format.
 
-### The representative
-
-Every bucket of a numeric channel at every level *L* ≥ 1 carries one **representative**: one of the
-raw samples the bucket covers, stored as `rep` in the values stream's third column, with its time as
-`rep_ts` in the third column of the position or timestamp stream. It is what a reader draws for the
-bucket's shape, and it is chosen by rule rather than at a writer's discretion: **two conforming
-writers given identical raw samples store identical representatives**. A reader draws the stored
-sample, so two files that disagreed about it would draw different pictures of the same data, and a
-field left to a writer's choice would break byte-identical regeneration for every file carrying it.
-
-⛔ **The representative is chosen from the channel's raw samples at every level, never from the
-level below's representatives.** Bucket *j* at level *L* chooses among exactly the raw samples it
-covers, `[j·BF^L, (j+1)·BF^L)` anchored at sample 0 as above, and a ragged last bucket among the
-samples that exist. It is not a fold: which sample best represents a bucket depends on the bucket's
-neighbours at its own level, so it need not be one that was chosen for any of its children.
-
-The rule, for one level *L* ≥ 1 of one channel:
-
-1. **Coordinates.** Raw sample *i* has two float64 coordinates. `x_i` is, at fixed rate, the sample
-   index *i*, and at variable rate its stored timestamp minus the group's `start_timestamp`, an exact
-   `i64` difference. `y_i` is its value. Each is converted to float64 by IEEE-754 rounding to
-   nearest, ties to even. For a value that conversion is exact in every dtype but the two 64-bit
-   integer types, whose values may round beyond 2⁵³ in magnitude, and an index or a timestamp
-   difference rounds the same way beyond 2⁵³.
-2. **Anchors.** Every bucket of the level has an anchor `(ax, ay)`: the float64 sum of `x_i` and the
-   float64 sum of `y_i` over the bucket's samples whose `y_i` is not NaN, each accumulated left to
-   right in ascending index, divided by the number of those samples. A bucket with no such sample is
-   **invalid**, and both halves of its anchor are NaN.
-3. **The edges.** The level's first bucket takes the channel's first sample and its last bucket the
-   channel's last sample, unconditionally, NaN or not; a level holding one bucket takes sample 0. The
-   pass therefore runs over the whole channel at every level, never block by block, and at every
-   level the edges agree.
-4. **The triangle.** Every other bucket takes, among its samples whose `y_i` is not NaN, the sample
-   that maximises
-
-   ```
-   |(pax − nax) × (y_i − pay) − (pax − x_i) × (nay − pay)|
-   ```
-
-   evaluated in float64 in exactly that association, where `(pax, pay)` is the previous bucket's
-   anchor and `(nax, nay)` the next bucket's. The search keeps a running maximum seeded at −1 and
-   replaces it only on an area **strictly** greater, so of two equal areas the first wins; on a
-   constant series of integers every area is exactly zero and that tie-break alone decides. A NaN
-   area never wins. If no area wins — which is what an invalid neighbour's NaN anchor produces — the
-   bucket takes its first sample whose `y_i` is not NaN, and a bucket with no such sample takes its
-   first sample as stored.
-5. **What is stored.** `rep` is the chosen sample's value in the channel's dtype, bit for bit —
-   never `y_i` — and a NaN keeps its payload exactly as it does in `min` and `max`. `rep_ts` is that
-   sample's time by the one rule every stored time follows (**Time**): at fixed rate
-   `start_timestamp + round_half_even(i × 10⁹ / rate)` evaluated as an exact rational, and at
-   variable rate its stored timestamp. A rounded floating-point approximation of that rule is not
-   the rule.
-
-The choices a plausible reimplementation makes differently are the ones stated: the strict
-comparison, the NaN rules, the edges and the pass over the whole channel, the raw samples at every
-level, and `x_i` at variable rate. Each changes which sample is stored, and for each
-`set5-representative-rule` carries a case that an implementation making the other choice fails.
-`set5-representative-stored` states what one golden channel stores at levels 1 and 2.
-
-**What this corpus can check, and what it cannot.** The rule is normative, and it is a rule about
-what a *writer* stores, while this corpus tests *readers*. It can check that a reader decodes the
-stored representative to the stated bytes, that an implementation's own selection returns what a
-stated case expects, and, in CI, that this repository's generators regenerate every file byte for
-byte. It cannot check that some other writer stored the sample the rule names: a writer that stores
-the wrong representative passes every vector here. The moment stream's fold order is a rule of the
-same kind. Checking writers is a later addition, built from stated inputs and per-stream hashes and
-never from expected file bytes, since two conforming writers may lay out and encode the same streams
-differently.
-
 How a reader turns stored points into drawn ones — which of a bucket's points it emits, whether it
-drops a representative that coincides with an extreme, what it does with a series no longer than its
-bucket count or with no valid sample, and how it combines stored buckets when it draws fewer than it
-read — is the reader's own, because a read-side rule is the format's only when it computes a
-quantity the format names, and choosing among stored values names none. The moment fold's range
-order is the one read-side rule stated here, because a merged moment is such a quantity.
+drops one that coincides with another, what it does with a series no longer than its bucket count or
+with no valid sample, and how it combines stored buckets when it draws fewer than it read — is the
+reader's own, because a read-side rule is the format's only when it computes a quantity the format
+names, and choosing among stored values names none. The moment fold's range order, under **Bucket
+statistics**, is the one read-side rule stated here, because a merged moment is such a quantity.
 
 ## Bucket statistics
 
@@ -275,19 +222,32 @@ block kind: timestamps, then values, then moments.
 | timing | level | aggregation | streams |
 |---|---|---|---|
 | fixed | 0 | either | values `(N,)` |
-| fixed | ≥ 1 | numeric | positions `(N,3)` i64 `[min_ts, max_ts, rep_ts]`, values `(N,3)` `[min, max, rep]`, moments `(N,5)`† |
+| fixed | ≥ 1 | numeric | positions `(N,2)` i64 `[min_ts, max_ts]`, values `(N,5)` `[min, max, first, mid, last]`, moments `(N,5)`† |
 | fixed | ≥ 1 | bitfield | values `(N,2)` `[OR, AND]` |
 | variable | 0 | either | timestamps `(N,)` i64, values `(N,)` |
-| variable | ≥ 1 | numeric | timestamps `(N,3)` i64 `[min_ts, max_ts, rep_ts]`, values `(N,3)` `[min, max, rep]`, moments `(N,5)`† |
+| variable | ≥ 1 | numeric | timestamps `(N,5)` i64 `[min_ts, max_ts, first_ts, mid_ts, last_ts]`, values `(N,5)` `[min, max, first, mid, last]`, moments `(N,5)`† |
 | variable | ≥ 1 | bitfield | timestamps `(N,)` i64 `[first]`, values `(N,2)` `[OR, AND]` |
 
 † **Whether the moment stream is present is `features` bit 0, and nothing else.** It is a property
 of the file, not of a block: either every numeric value block at level ≥ 1 carries the stream or
 none does. `v1_no_moment_stream.tslod` is a file written without it and with the bit clear.
 
-A numeric bucket's three timestamps are in the same column order at both rates. The one timestamp a
-variable-rate bitfield bucket carries is the time of its first sample, which places the bucket when
-it is drawn; at fixed rate the geometry places it.
+A numeric bucket stores two timestamps at fixed rate and five at variable rate, and a column that
+appears at both rates sits in the same place in both. At fixed rate `first`, `mid` and `last` need no
+stamp: the geometry gives their raw indices and **Time** gives the time of an index. At variable rate
+every stamp is stored, each the stamp of the sample its own column names, looked up and never
+computed. The one timestamp a variable-rate bitfield bucket carries is the time of its first sample,
+which places the bucket when it is drawn; at fixed rate the geometry places it.
+
+⚠ **Two streams of the same decoded size are told apart by their order alone.** On an 8-byte dtype a
+five-column value row decodes to exactly as many bytes as the five-column moment stream, and at
+variable rate as the five-column timestamp stream too, so a block whose streams were written in the
+wrong order is not caught by the size rule below. No reader rule changes: stream order is fixed by
+block kind, as above, and whether a moment stream is there is `features` bit 0 and nothing else. What
+pins the order is the conformance set, which records every stream's kind, shape and the SHA-256 of
+its decoded bytes in block order — `v1_all_ten_dtypes.tslod`, whose `ch_float64` channel has its
+values and moments at one size, and `v1_both_timing_modes.tslod`, whose variable-rate `var_num`
+channel has all three at that size. A swapped pair fails both.
 
 At profile 0 the framing is arithmetic, so a reader can check the bit rather than merely trust it.
 `uncompressed_size` counts the **values** stream's decoded bytes and nothing else, so under the
@@ -314,17 +274,18 @@ format's.
 ⛔ **Every stream decodes to exactly the size its shape implies.** A block's `sample_count` is its
 row count at its own level — raw samples at level 0, buckets above it — and the table above gives
 each stream its columns. The size is therefore `sample_count × columns × the dtype's width`:
-positions `N×3` i64, variable-rate timestamp tuples `N×3` i64, values `N×1` at level 0 and above it
-`N×3` numeric and `N×2` bitfield, moments `N×5` f64. A stream that decodes to any other length makes
+positions `N×2` i64, variable-rate timestamp tuples `N×5` i64, values `N×1` at level 0 and above it
+`N×5` numeric and `N×2` bitfield, moments `N×5` f64. A stream that decodes to any other length makes
 the file malformed (`decoded-size-mismatch`).
 
-This rule is also what refuses a file written to the shape version 1 had before buckets carried a
-representative — four-column values `[min, max, first, last]` and `[OR, AND, first, last]`,
-two-column positions, four-column variable-rate timestamps — and no class of its own is needed. Such
-a file's values stream above level 0 decodes to `N×4` where `N×3` or `N×2` is implied, and since
-`sample_count` is at least 1 the two cannot coincide, so every such block is refused as
+This rule is also what refuses a file written to either shape version 1 carried before this row —
+four-column values `[min, max, first, last]` with two-column positions, and three-column values
+`[min, max, rep]` with three-column positions — and no class of its own is needed. Above level 0 a
+numeric values stream in those shapes decodes to `N×4` or `N×3` where `N×5` is implied, and with
+`sample_count` at least 1 no two of the three sizes can coincide; a bitfield values stream is two
+columns as it already was, and four in the oldest shape. Every such block is therefore refused as
 `decoded-size-mismatch`, by a reader that compares at step 1 and by one that compares at step 5
-alike. A file with no block above level 0 holds no bucket and reads the same under both shapes.
+alike. A file with no block above level 0 holds no bucket and reads the same under all three.
 
 For the values stream that size is also what the index entry's `uncompressed_size` states, so
 `uncompressed_size` must agree with the shape as well as with the decoded bytes — three numbers that
@@ -332,8 +293,8 @@ have to be one number. At profile 0 the shape is knowable before anything is dec
 check is arithmetic; at profile 2 the decoded length is knowable only after decoding, and comparing
 it is the only check a reader has on a block's size.
 
-Every payload is the array's bytes, little-endian, **row-major** — the three values of bucket 0,
-then the three of bucket 1, never planar (`v1-block-framing`).
+Every payload is the array's bytes, little-endian, **row-major** — the five values of bucket 0, then
+the five of bucket 1, never planar (`v1-block-framing`).
 
 ### The order a reader checks in
 
@@ -406,8 +367,10 @@ start_timestamp + round_half_even(i × 10⁹ / rate)
 ```
 
 evaluated as an exact rational — **one rule**. A writer stores every block's `start_timestamp` and
-every position timestamp — `min_ts`, `max_ts` and `rep_ts` alike — by that rule; a reader treats
-stored values as data and never recomputes them (`v1-time-axis`).
+every position timestamp — `min_ts` and `max_ts` — by that rule; a reader treats stored values as
+data and never recomputes them (`v1-time-axis`). It is also the rule a reader evaluates for the
+`first`, `mid` and `last` of a fixed-rate bucket, whose times are not stored because the geometry
+already names their raw indices.
 
 A group may carry a tick timebase, converting with the same round-half-even convention over exact
 integers:
