@@ -14,16 +14,19 @@ samples; each bucket at level 2 summarises `branching_factor` level-1 buckets, a
 samples is about 3,800 buckets at that level instead of a billion values. A reader that needs a
 coarser or finer answer moves up or down a level rather than reading more raw samples.
 
-Each numeric bucket stores eight numbers about the samples underneath it:
+Each numeric bucket stores ten numbers about the samples underneath it:
 
 | field | meaning |
 |---|---|
 | `min`, `max` | the smallest and largest sample in the bucket — the true extremes of its span, not an approximation of them |
-| `rep` | the sample that draws the bucket's shape, chosen by a rule every writer follows, so two files of the same data draw the same picture |
+| `first`, `last` | the first and last sample in the bucket, in time order, which join one drawn bucket to the next |
+| `mid` | the sample at the bucket's centre, in a position the bucket's geometry fixes, so every channel of a group names the same one and two channels can be paired against each other |
 | `count` | how many samples were valid; NaN is not counted |
 | `mean`, `M2`, `M3`, `M4` | running moments, giving mean, variance, σ, RMS and kurtosis for any range at any level without reading the raw samples |
 
-`min`, `max` and `rep` are each a real sample, stored with the time it was taken.
+Each of the five values is a real sample rather than an interpolation. A fixed-rate bucket stores the
+times of `min` and `max`, and a reader derives the other three from the bucket's geometry; a
+variable-rate bucket stores all five times.
 
 A file also stores a checksum for every block, so a reader detects damaged data before using it; one
 exact rule for the timestamp of every sample; optional per-stream compression; and support for both
@@ -36,7 +39,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,322 test cases across 25 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,323 test cases across 25 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -65,12 +68,12 @@ contract between implementations rather than one implementation's private detail
 [1, 7, 1, 3]   [2, 8, 2, 9]
 ```
 
-**Expected output** — one summary per bucket, as `[min, max]`, plus the index within the bucket
-where the min and max were found:
+**Expected output** — one summary per bucket, as `[min, max, first, mid, last]`, plus the index
+within the bucket where the min and max were found:
 
 ```
-bucket 0:  [1, 7]   min at index 0, max at index 1
-bucket 1:  [2, 9]   min at index 0, max at index 3
+bucket 0:  [1, 7, 1, 1, 3]   min at index 0, max at index 1
+bucket 1:  [2, 9, 2, 2, 9]   min at index 0, max at index 3
 ```
 
 The value `1` appears at index 0 and index 2 of bucket 0, and `2` appears twice in bucket 1. The
@@ -124,13 +127,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 25 vectors, 1322 cases
+corpus: 25 vectors, 1323 cases
 
 skipped, because an optional codec is not installed:
     44 cases need pcodec — pip install pcodec
     106 cases need zstandard — pip install zstandard
 
-passed 1172  failed 0  skipped 150
+passed 1173  failed 0  skipped 150
 RESULT: PASS, with codec cases skipped
 ```
 

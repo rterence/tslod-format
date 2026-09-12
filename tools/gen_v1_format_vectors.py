@@ -191,12 +191,15 @@ def gen_profile0_set() -> Vector:
          {"timing_modes": [0, 1], "aggregation_modes": [0, 1],
           "stream_shapes": {
               "fixed/L0": "values (N,)",
-              "fixed/L>=1 numeric": ("positions (N,3) i64 [min_ts,max_ts,rep_ts], "
-                                     "tuples (N,3) [min,max,rep], moments (N,5)"),
+              "fixed/L>=1 numeric": ("positions (N,2) i64 [min_ts,max_ts], "
+                                     "tuples (N,5) [min,max,first,mid,last], "
+                                     "moments (N,5)"),
               "fixed/L>=1 bitfield": "tuples (N,2) [OR,AND]",
               "variable/L0": "timestamps (N,) i64, values (N,)",
-              "variable/L>=1 numeric": ("timestamps (N,3) i64 [min_ts,max_ts,rep_ts], "
-                                        "tuples (N,3) [min,max,rep], moments (N,5)"),
+              "variable/L>=1 numeric": ("timestamps (N,5) i64 "
+                                        "[min_ts,max_ts,first_ts,mid_ts,last_ts], "
+                                        "tuples (N,5) [min,max,first,mid,last], "
+                                        "moments (N,5)"),
               "variable/L>=1 bitfield": "timestamps (N,) i64 [first], tuples (N,2) [OR,AND]"}},
          "all six rows of the stream table in one file — which streams a block has "
          "is fixed by its KIND, and this is the file that proves each shape exists")
@@ -360,10 +363,10 @@ def _stream_kinds(spec, ci: int, level: int, blk: dict) -> list:
     """(name, dtype, columns) per stream of this block, in wire order.
 
     The leading stream is POSITIONS on a fixed-rate numeric level >= 1 block —
-    `[min_ts, max_ts, rep_ts]` per bucket — and TIMESTAMPS everywhere else it
-    appears, the variable-rate numeric one in the same three columns. Both
-    having three, the group's timing mode is what tells them apart. A value
-    bucket is one column at level 0 and above it three numeric, two bitfield.
+    `[min_ts, max_ts]` per bucket — and TIMESTAMPS everywhere else it appears,
+    the variable-rate numeric one carrying five stamps in the values' column
+    order. The group's timing mode is what tells the two names apart. A value
+    bucket is one column at level 0 and above it five numeric, two bitfield.
     """
     ch = spec.channels[ci]
     timing = spec.groups[ch.group_id].timing_mode
@@ -371,7 +374,7 @@ def _stream_kinds(spec, ci: int, level: int, blk: dict) -> list:
     tsc = blk.get("ts_columns") or 0
     if tsc:
         kinds.append(("positions" if timing == 0 else "timestamps", "int64", tsc))
-    value_columns = 1 if level == 0 else (3 if ch.aggregation_mode == 0 else 2)
+    value_columns = 1 if level == 0 else (5 if ch.aggregation_mode == 0 else 2)
     kinds.append(("values", np.dtype(ch.data.dtype).name, value_columns))
     if level >= 1 and ch.aggregation_mode == 0 and spec.moments:
         kinds.append(("moments", "float64", 5))
@@ -616,13 +619,13 @@ def gen_block_framing() -> Vector:
                 "ever earns its place it is a RECIPE the reader can see, not a rule it "
                 "must know")
 
-    # two-stream: fixed-rate level >= 1 numeric — positions then tuples, each
-    # [min, max, rep] and its three times
+    # two-stream: fixed-rate level >= 1 numeric — positions [min_ts, max_ts],
+    # then tuples [min, max, first, mid, last]
     bucket_start = ts + np.arange(4, dtype=np.int64) * 256_000_000
     positions = np.ascontiguousarray(
-        np.column_stack([bucket_start, bucket_start + 1_000, bucket_start + 500]))
+        np.column_stack([bucket_start, bucket_start + 1_000]))
     tuples = np.ascontiguousarray(
-        np.arange(12, dtype=np.float32).reshape(4, 3))
+        np.arange(20, dtype=np.float32).reshape(4, 5))
     ts_stream = bytes([0x00]) + positions.tobytes()
     block3 = struct.pack("<I", len(ts_stream)) + ts_stream + bytes([0x00]) + tuples.tobytes()
     # three-stream: fixed-rate level >= 1 numeric, WITH the moment stream
@@ -664,11 +667,11 @@ def gen_block_framing() -> Vector:
            block_hex=block3.hex().upper(),
            block_length=len(block3),
            ts_len=len(ts_stream),
-           ts_columns=3, ts_column_meaning="[min_ts, max_ts, rep_ts]",
+           ts_columns=2, ts_column_meaning="[min_ts, max_ts]",
            expected_positions=array_ref(positions),
            expected_tuples=array_ref(tuples),
            row_major_not_planar=True,
-           note="the three values of bucket 0, then the three of bucket 1 — NEVER planar "
+           note="the five values of bucket 0, then the five of bucket 1 — NEVER planar "
                 ". A planar reader gets four plausible-looking arrays of the "
                 "wrong thing")
     return v
@@ -1045,7 +1048,8 @@ def gen_v1_negatives() -> Vector:
     case("v1-aggregation-mode-unknown", C("aggregation_mode"), "B", 2,
          "channel_entry.aggregation_mode",
          "aggregation_mode is 0 numeric or 1 bitfield, and it decides how many "
-         "columns a bucket has and what they MEAN — min/max/rep against OR/AND. "
+         "columns a bucket has and what they MEAN — min/max/first/mid/last "
+         "against OR/AND. "
          "A reader that defaults an unknown value reads every bucket in the "
          "channel as the wrong thing",
          rejection_class="aggregation-mode-unknown")

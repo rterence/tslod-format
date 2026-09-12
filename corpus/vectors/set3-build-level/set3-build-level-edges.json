@@ -7,7 +7,7 @@
   "contract": "The fold refuses an empty input and a branching factor below two rather than returning something plausible.",
   "requires": [],
   "notes": "`k == 1` is NOT handled here: the fold is defined for a branching factor of 2 or more, and a caller that wants one bucket per element is asking for the input back rather than for a fold.",
-  "case_count": 6,
+  "case_count": 7,
   "cases": [
     {
       "name": "branching-factor-0-refused",
@@ -79,15 +79,15 @@
         "dtype": "float64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E400000000000001E40"
+        "hex": "0000000000001E400000000000001E400000000000001E400000000000001E400000000000001E40"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
-      "note": "one bucket, ragged: min and max both come from the same short run",
+      "column_order": "min,max,first,mid,last",
+      "note": "one bucket, ragged: min, max, first and last all come from the same short run, and mid is its element n//2",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -122,15 +122,15 @@
         "dtype": "float64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E400000000000002140"
+        "hex": "0000000000001E4000000000000021400000000000001E4000000000000021400000000000002140"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
-      "note": "one bucket, ragged: min and max both come from the same short run",
+      "column_order": "min,max,first,mid,last",
+      "note": "one bucket, ragged: min, max, first and last all come from the same short run, and mid is its element n//2",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 2,
@@ -165,15 +165,60 @@
         "dtype": "float64",
         "shape": [
           1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "0000000000001E4000000000000023400000000000001E4000000000000021400000000000002340"
+      },
+      "expected_bucket_count": "1",
+      "column_order": "min,max,first,mid,last",
+      "note": "one bucket, ragged: min, max, first and last all come from the same short run, and mid is its element n//2",
+      "expected_bucket_count_rule": "ceil(N / branching_factor)",
+      "has_ragged_tail": true,
+      "tail_length": 3,
+      "expected_positions": {
+        "dtype": "int64",
+        "shape": [
+          1,
           2
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000001E400000000000002340"
+        "hex": "00000000000000000200000000000000"
+      },
+      "positions_are_bucket_relative": true
+    },
+    {
+      "name": "ragged-children/k3-mid-is-child-1-first",
+      "branching_factor": 4,
+      "from_raw": 0,
+      "aggregation_mode": 0,
+      "positions_requested": true,
+      "input": {
+        "dtype": "float64",
+        "shape": [
+          3,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000000E40000000000000000000000000000004400000000000000E400000000000001440000000000080214000000000000014400000000000001E40000000000080214000000000000024400000000000802640000000000000244000000000008026400000000000802640"
+      },
+      "expected_tuples": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          5
+        ],
+        "order": "C",
+        "byte_order": "little",
+        "hex": "00000000000000000000000000802640000000000000000000000000000014400000000000802640"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
-      "note": "one bucket, ragged: min and max both come from the same short run",
+      "column_order": "min,max,first,mid,last",
+      "child_count": 3,
+      "note": "a level of three buckets folded into one, so k is 3 and mid is child 1's first field: raw sample 4, value 5.0. The sample at the middle index of the ten raw samples is index 5, value 6.25, and a fold that reached for it would store a value no child's row holds \u2014 which is what makes mid a merge rule rather than an index",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 3,

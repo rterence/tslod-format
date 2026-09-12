@@ -17,7 +17,7 @@
     {
       "name": "v1_all_ten_dtypes.tslod",
       "file": "v1-format/files/v1_all_ten_dtypes.tslod",
-      "file_size_bytes": "52490",
+      "file_size_bytes": "52510",
       "block_count": 60,
       "format_version": 1,
       "compression_id": 0,
@@ -102,20 +102,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "dd1bf14c968cbc1f1a8f5566933628bdd7c3a711b07425154ec9bbd4dd6bac01"
+              "sha256": "76b5c59700caaadd11230ff5bfecc582ec599fb44eb4b28e9e9386b6cf8e7c63"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "543652c26be18c8d8af61a63c40f123abe65c27dbf190f6c1675b2f309846bb7"
+              "sha256": "8330afa17f9c39acdd0a6d5bf220c935fc89c525adcadade83c1430d44dd0523"
             },
             {
               "kind": "moments",
@@ -139,20 +139,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "86b9c9f0582fd1248f8c8949e02b6182607e7dd0339ad1684be0e36893b44d06"
             },
             {
               "kind": "moments",
@@ -240,20 +240,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "6026f9d46fe3b8c2ac39c2b2c7c08aec93d1c1943d3f89e9823f3e4cafe5a6fd"
+              "sha256": "12964a51bb290fc798370209e299d2d971e81d8b74b26b9304975912d5379708"
             },
             {
               "kind": "values",
               "dtype": "float64",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "ca54fc61395e1d6939eaa6158793a8636b87443036015ba6497b914d693e5582"
+              "sha256": "3c74e467afdd7b79c513b8f91cd89754b7fd0f0f79d35594e9196dfee72a0d3c"
             },
             {
               "kind": "moments",
@@ -277,20 +277,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "df9e66347e62e55372c680710ae7f488e922838ecc75a044d7448a0518f17a55"
+              "sha256": "abe5ed0e7dbe11e62d1b67efbfcf825ee54cd02b884caf53bb8d185dec2b1a5a"
             },
             {
               "kind": "values",
               "dtype": "float64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "07087536910d809d39977cc914f3fb11047d8467173b35cbe98f9c3cd0ba14fe"
+              "sha256": "7fc332fa0ac9de72257cfc765c768c78133e1d6c5ed45dd868fcb3088f9fa95b"
             },
             {
               "kind": "moments",
@@ -378,20 +378,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "d74d73842045720802652cfa07d924b176b9483a43dde6fb795b0085f38844fa"
+              "sha256": "01009048aa6689d69a7fd5c45bd4fde027aea7a3a8db7df17f076c691e40d541"
             },
             {
               "kind": "values",
               "dtype": "int8",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "d19daaa19a0b8aa39e236dba7abd909d27d62aad27c83ff031b9d476ebd7e0b2"
+              "sha256": "45e6d20469718374c8e79a082e3df317efdfc8ae452f794fd4f783a49000a5c3"
             },
             {
               "kind": "moments",
@@ -415,20 +415,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int8",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "decc3b82f915577a4e440dc4a121dc070c14b91fb29c3c885a43ff6cf52d5c22"
+              "sha256": "d3b40d7e00f928ea7079cc8067d6f7fceee73dce46e4dc7c716f35443ee420a1"
             },
             {
               "kind": "moments",
@@ -516,20 +516,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "278381d995b55c49d51f9a080e8e6e5d85b6882392a9624ca7c0786dd194a903"
+              "sha256": "ab7318c68a144b69888f52892ab5113482717a9e58041ff3b6b981dc2f6e7cb0"
             },
             {
               "kind": "values",
               "dtype": "int16",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "0837cdefa068e9a147e31891c57eb834f30dc8cfe88ddbd30c946ce19da6e858"
+              "sha256": "d72e1745a4f01b1ca31b193a83626c98d6a708ed7d3e88de0910bb2898e75759"
             },
             {
               "kind": "moments",
@@ -553,20 +553,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int16",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b578498585da58d2389a3138115b9a3efc29c17f03b268a87f7f7ba5b05c92bd"
+              "sha256": "50af8bdecad47ad43e909e856bb6eef02afb94331d1ce483eaa111212a08bf4e"
             },
             {
               "kind": "moments",
@@ -654,20 +654,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "09bd2d1625029332aa359596016351567c0885d2a0c1111f93db9ecbfdf90e63"
+              "sha256": "0a6686fb67d59b88bbbbf369753f488c287a2ea53c26027ada5376a904acc7e7"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "6670b9d836ad7b7e8d86fba0873095a2ade0be9ceabedd907ae2952468852249"
+              "sha256": "bf82631c7a07bc8dc5850b04560f8a50cd445966ca18931350234bb05723b6cf"
             },
             {
               "kind": "moments",
@@ -691,20 +691,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "7396d93213738b83e76a51db4eabe3f052b11e060b3bbcef790ddaee6778f865"
+              "sha256": "765d3c487f43137ad39011add3bd21b3e8aae3990b33fa9a6be64a09a598c0b9"
             },
             {
               "kind": "moments",
@@ -792,20 +792,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "98244b8926aa7c492a01aa304430b99b5abafdd116a6a94df7c8e153b7c905f9"
+              "sha256": "730b06b887113367cd7bc550c6ff4fea12c2aec06deffa83a36c7557ea35721f"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "43ab3f7bf8863a5f749f3e07403006dd07010fd17ca625ba537a0936f7907688"
+              "sha256": "8ffd4f41b1488b537903ebcd5619361ccca062d4607f940cf0f4f8e718d27be1"
             },
             {
               "kind": "moments",
@@ -829,20 +829,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "97edaa6c659f7fc0611740fa41acfbac8f004acebfc644f8a82327cb5e4893eb"
+              "sha256": "3b5a83a6d611c9790352b1eb9808489d0a184c6297465e6376b67d2b76391252"
             },
             {
               "kind": "moments",
@@ -930,20 +930,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "46fb851e37def8acc98bc3a747b8f0fddece9794d73bfcee739a5ed90627a513"
+              "sha256": "478059aafec3c6162dcaf161ab52b25080dba5b3e859b9e83ff78cfbb6190883"
             },
             {
               "kind": "values",
               "dtype": "uint8",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "aebeba79f33d753b00defcdafa4c43af33c674efe273b0647a0895ba5870bf97"
+              "sha256": "5fc39c32973327f027270685d5997b6939b38db83c3056a89c8847a7952897dd"
             },
             {
               "kind": "moments",
@@ -967,20 +967,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "uint8",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "2c8d07cd986f58eb210bd800133d6645c7340c59865377c8ea431cebca0b3113"
+              "sha256": "e746ce6fb1616d12c8b4b75bd98d24c601f34de24fb32356271f8f9bb418e6ad"
             },
             {
               "kind": "moments",
@@ -1068,20 +1068,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "3797d169d72e64347d640de214e3a337b91b425177a48ae8715b8357bc0ce99f"
+              "sha256": "d9485543892315f9b2c8194c413812b75162d023361153709479542aa27addce"
             },
             {
               "kind": "values",
               "dtype": "uint16",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "2513d2638c41010b2ba2582cc996eb3e3b588131287978a98e4bf2d36e2d6cd6"
+              "sha256": "c31e2f5de85f2e07624217282afb512b5f596a5f2aaac903e0b8f1b48f5e1271"
             },
             {
               "kind": "moments",
@@ -1105,20 +1105,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "uint16",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "2ac99bb2904d92c5ab8927c24694d8fd70bce8bb55450204103d124dc9d7265c"
+              "sha256": "ca37933aa27075545d8ea0975e4b045978595913ef5993f6ca923b8c38c05b59"
             },
             {
               "kind": "moments",
@@ -1206,20 +1206,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5594e4098cf83d20b37f2763478d2067d38b3960055798a64503728e73008d84"
+              "sha256": "fe425e13ab27e2353a3060f52bafdfe410f9ba4444ba12f226dd1e9dbfa914f0"
             },
             {
               "kind": "values",
               "dtype": "uint32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "e9badfefdd03b14e47ecc809b83a3e01105b2950563980a257423ba4f838eaa2"
+              "sha256": "0d48c052add4ce2a5151786ba5f61e6299607f8cc25ddb9afd4cfe6d810d112e"
             },
             {
               "kind": "moments",
@@ -1243,20 +1243,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "uint32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "8af5bb32e48fb1b46c61a7328c11ba67f4149fb318fbf55ab557940d9d17d2d9"
+              "sha256": "a8259d3b8bbdebf0389617e74d5f5536b28e3d0a1c131a52c27e278f3ee8caf8"
             },
             {
               "kind": "moments",
@@ -1344,20 +1344,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "9ffd025909555a7c3caf611da454ff4ab2d0216056df7af3c6ae887e9ab6fbde"
+              "sha256": "e2276006cb7f81ad791ed03015be333f57d528a463cbf9dcdfcd622f16701429"
             },
             {
               "kind": "values",
               "dtype": "uint64",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "5376e18375d75f8124daa2f270cfc1b136ad355f13689e70fe54b6f794cb85c8"
+              "sha256": "ff14fc8153d06c62a2cd74d117227122d2c169a4dfb9ea83f372d8d7f41d3390"
             },
             {
               "kind": "moments",
@@ -1381,20 +1381,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "uint64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "6232749f35aab1b1cfb519e9f6849386b85eb96a6d316b9ff60e0da8c0fa3e67"
+              "sha256": "ddb2cd12ce194d7528261bd95a44501d18b0e60614384f381668ff66c0f12b06"
             },
             {
               "kind": "moments",
@@ -1425,7 +1425,7 @@
     {
       "name": "v1_both_timing_modes.tslod",
       "file": "v1-format/files/v1_both_timing_modes.tslod",
-      "file_size_bytes": "35084",
+      "file_size_bytes": "35244",
       "block_count": 24,
       "format_version": 1,
       "compression_id": 0,
@@ -1510,20 +1510,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "dd1bf14c968cbc1f1a8f5566933628bdd7c3a711b07425154ec9bbd4dd6bac01"
+              "sha256": "76b5c59700caaadd11230ff5bfecc582ec599fb44eb4b28e9e9386b6cf8e7c63"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "543652c26be18c8d8af61a63c40f123abe65c27dbf190f6c1675b2f309846bb7"
+              "sha256": "8330afa17f9c39acdd0a6d5bf220c935fc89c525adcadade83c1430d44dd0523"
             },
             {
               "kind": "moments",
@@ -1547,20 +1547,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "86b9c9f0582fd1248f8c8949e02b6182607e7dd0339ad1684be0e36893b44d06"
             },
             {
               "kind": "moments",
@@ -1782,20 +1782,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "9372db8db06fe98bade52d2aa12e32c94b4bec3336c07491ee7015de9e111315"
+              "sha256": "8abb20e3303f984cce1910d764565218a8352dee6a5926adde092bd1a343b84e"
             },
             {
               "kind": "values",
               "dtype": "float64",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "95412af91cb7b9b5068e8e978f602bac47158c69fce16f66d6b03d392aef7f69"
+              "sha256": "090a6124bbfba98c876ea61c76db58fbf04d5088b6969b268815187887fe92b8"
             },
             {
               "kind": "moments",
@@ -1819,20 +1819,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "aab8ab6f14f757b1af14541bd736def548bf8ef1e38e2215e78234b0f976036f"
+              "sha256": "b6927649f8049a1d7b0f1ef2d8bad0640f5ecce881e7d87dd363afbb3fa996ae"
             },
             {
               "kind": "values",
               "dtype": "float64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "2d77bc48f72305c5eb47e2e2dd85897989c0e51c5b5e01cb5cdd0e14dde4faaa"
+              "sha256": "ad5c970bfe4cda2d409873caaf7968e855a68c8b4b8397a4c16d0abb0316e727"
             },
             {
               "kind": "moments",
@@ -2009,10 +2009,10 @@
       ],
       "stream_shapes": {
         "fixed/L0": "values (N,)",
-        "fixed/L>=1 numeric": "positions (N,3) i64 [min_ts,max_ts,rep_ts], tuples (N,3) [min,max,rep], moments (N,5)",
+        "fixed/L>=1 numeric": "positions (N,2) i64 [min_ts,max_ts], tuples (N,5) [min,max,first,mid,last], moments (N,5)",
         "fixed/L>=1 bitfield": "tuples (N,2) [OR,AND]",
         "variable/L0": "timestamps (N,) i64, values (N,)",
-        "variable/L>=1 numeric": "timestamps (N,3) i64 [min_ts,max_ts,rep_ts], tuples (N,3) [min,max,rep], moments (N,5)",
+        "variable/L>=1 numeric": "timestamps (N,5) i64 [min_ts,max_ts,first_ts,mid_ts,last_ts], tuples (N,5) [min,max,first,mid,last], moments (N,5)",
         "variable/L>=1 bitfield": "timestamps (N,) i64 [first], tuples (N,2) [OR,AND]"
       }
     },
@@ -2120,20 +2120,20 @@
               "dtype": "int64",
               "shape": [
                 5,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "204e8944ae787aa2a1b83066d12c8afcdd35e58ea23a85d8f6214c7bbf33fa66"
+              "sha256": "a670b92360a7eee0062c924193c83a15a6581d0ce35c49a246e193c7d1973fa3"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 5,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "cb087a38a77dcf0dba3e3e4f05a393c7f0ae89c9579d48572c90cd4a9ae8727b"
+              "sha256": "d0375e8e75c16e13b065c9b64cf56deb27274e73da904910f2ceabd925a44c6b"
             },
             {
               "kind": "moments",
@@ -2157,20 +2157,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "adb71c00ccff98bba50c8e9732bd35960d9991cbfe0939e27beffea50aa4943c"
             },
             {
               "kind": "moments",
@@ -2307,7 +2307,7 @@
     {
       "name": "v1_group_unequal_lengths.tslod",
       "file": "v1-format/files/v1_group_unequal_lengths.tslod",
-      "file_size_bytes": "25451",
+      "file_size_bytes": "25483",
       "block_count": 23,
       "format_version": 1,
       "compression_id": 0,
@@ -2584,20 +2584,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "c1d2fc44bddf513c2800d62d210f3ba367b63eb88205d6a72377764b7f944a07"
+              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "02316bd570f596ea7da6281b602deb14c1b923174ca395a597fe8be8b99ab7d6"
+              "sha256": "83a65de34cd1e6c30cddce639d0ff8633dc19477f1c6b4c3b0ab2fce65637549"
             },
             {
               "kind": "moments",
@@ -2621,20 +2621,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "958f426c4a9ede540a4cb8d81bc393be29e2ac2392f323affff04b2278703349"
             },
             {
               "kind": "moments",
@@ -2706,20 +2706,20 @@
               "dtype": "int64",
               "shape": [
                 3,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "89a87fda21f10987636d602db9bf4330f6e9d35e82defa88492b9a8ff1d3b279"
+              "sha256": "3f9c5fb8ccf927ddbb1303287b113dd5a37e8ac5e44309bc2ec919b3a4fac382"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 3,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "ad53ce2dae80f8588617af82f9111306da2df035e6ce94e7ed0256510d394cd6"
+              "sha256": "74d280e9ccf48c2ddf79d002e9770000745aa9e0397a05bbd010c8b162617e4f"
             },
             {
               "kind": "moments",
@@ -2743,20 +2743,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "97edaa6c659f7fc0611740fa41acfbac8f004acebfc644f8a82327cb5e4893eb"
+              "sha256": "fbcbef06e4f48b9a5daf75a57e7b8ffc29ec33939be652eef02abad30e280583"
             },
             {
               "kind": "moments",
@@ -2796,7 +2796,7 @@
     {
       "name": "v1_enums_and_units.tslod",
       "file": "v1-format/files/v1_enums_and_units.tslod",
-      "file_size_bytes": "13364",
+      "file_size_bytes": "13344",
       "block_count": 18,
       "format_version": 1,
       "compression_id": 0,
@@ -2881,20 +2881,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "dd1bf14c968cbc1f1a8f5566933628bdd7c3a711b07425154ec9bbd4dd6bac01"
+              "sha256": "76b5c59700caaadd11230ff5bfecc582ec599fb44eb4b28e9e9386b6cf8e7c63"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "543652c26be18c8d8af61a63c40f123abe65c27dbf190f6c1675b2f309846bb7"
+              "sha256": "8330afa17f9c39acdd0a6d5bf220c935fc89c525adcadade83c1430d44dd0523"
             },
             {
               "kind": "moments",
@@ -2918,20 +2918,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "86b9c9f0582fd1248f8c8949e02b6182607e7dd0339ad1684be0e36893b44d06"
             },
             {
               "kind": "moments",
@@ -3019,20 +3019,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "60cfaa69b2531e07e333e34a80a5984763697b27f729697adf4d321b4517bd01"
+              "sha256": "422478603ab2d3da672c8a96635c17d8a1b78996795361c2bfffcf14f616fa53"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "60c28a8aa84e9664d473958e01c91f7c2058a39358f77941386f944231741398"
+              "sha256": "a2f3abad36ebc7074725175879a56fc93cee92630098e31dd989890a7a840217"
             },
             {
               "kind": "moments",
@@ -3056,20 +3056,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "922f78788cff6262504fb5ad215bcae2c447667875f20117b5df10c178b70acf"
+              "sha256": "97eecae645712ba6f983c00469f77abfbc88c36f73db648b39ec110e69c4b87f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "ed5fad86ee9c17e8c76fc1d856a50c628d749c8a5e8c489d49151d96981876de"
+              "sha256": "bd3c8462d31ea53cc75c54f50935716dc8f32b8ee9895e42e1a5cf65580b122e"
             },
             {
               "kind": "moments",
@@ -3157,20 +3157,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7c6000334a8497e7a60745e80ec83c044b82da5d4ef87982ad995b024cb3a7c7"
+              "sha256": "6094477a3c2971dda75fce5f75d62dddf3aa9c9693c9be40a9123799655cbd79"
             },
             {
               "kind": "values",
               "dtype": "int16",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "d341450ca397ee5adc427171e3f23f60848808c1c7babbab086580f41df76273"
+              "sha256": "b8915f47b5a06457408fdb9c752404389b7609c5dd4a00800ee35cad372fb269"
             },
             {
               "kind": "moments",
@@ -3194,20 +3194,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "7a6703f7c19116a179e3e24de83b053aee38d329332dceb251f249df9177cdcc"
+              "sha256": "442c59f56d9c97a08affe49097f611ad9dacd98314dbd7a2cf4a8b6bc891906d"
             },
             {
               "kind": "values",
               "dtype": "int16",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b578498585da58d2389a3138115b9a3efc29c17f03b268a87f7f7ba5b05c92bd"
+              "sha256": "ae6d22c7a9191fc82881954f2193f5266dcc5d5eb38459785f27d45764334807"
             },
             {
               "kind": "moments",
@@ -3323,20 +3323,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "dd1bf14c968cbc1f1a8f5566933628bdd7c3a711b07425154ec9bbd4dd6bac01"
+              "sha256": "76b5c59700caaadd11230ff5bfecc582ec599fb44eb4b28e9e9386b6cf8e7c63"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "543652c26be18c8d8af61a63c40f123abe65c27dbf190f6c1675b2f309846bb7"
+              "sha256": "8330afa17f9c39acdd0a6d5bf220c935fc89c525adcadade83c1430d44dd0523"
             },
             {
               "kind": "moments",
@@ -3360,20 +3360,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "86b9c9f0582fd1248f8c8949e02b6182607e7dd0339ad1684be0e36893b44d06"
             },
             {
               "kind": "moments",
@@ -3671,20 +3671,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "c1d2fc44bddf513c2800d62d210f3ba367b63eb88205d6a72377764b7f944a07"
+              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "02316bd570f596ea7da6281b602deb14c1b923174ca395a597fe8be8b99ab7d6"
+              "sha256": "83a65de34cd1e6c30cddce639d0ff8633dc19477f1c6b4c3b0ab2fce65637549"
             }
           ]
         },
@@ -3698,20 +3698,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "958f426c4a9ede540a4cb8d81bc393be29e2ac2392f323affff04b2278703349"
             }
           ]
         }
@@ -4254,20 +4254,20 @@
               "dtype": "int64",
               "shape": [
                 32,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "1db74bcfeb9c0a5f4d90af85b51a063cf89788e8da5b709add925ab46bae303b"
+              "sha256": "31dbe908eab1e14f8b572f1ca540e63ba14dcd852a5377ce94b4ef4894e348cf"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 32,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b2e182416d0c456f33dc3a7ecbb36d1c8e3d7ce1b359777ecdebbf851e6eb6da"
+              "sha256": "409156441e69078acb6353f90e12240cdb19c54681a12f496e869bb4d3a51a88"
             },
             {
               "kind": "moments",
@@ -4291,20 +4291,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "d0ac2ae3f113dcf930bc374aedf271624406c3a322ea9adb1dd597b4c8956404"
             },
             {
               "kind": "moments",
@@ -4601,20 +4601,20 @@
               "dtype": "int64",
               "shape": [
                 32,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "1db74bcfeb9c0a5f4d90af85b51a063cf89788e8da5b709add925ab46bae303b"
+              "sha256": "31dbe908eab1e14f8b572f1ca540e63ba14dcd852a5377ce94b4ef4894e348cf"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 32,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b2e182416d0c456f33dc3a7ecbb36d1c8e3d7ce1b359777ecdebbf851e6eb6da"
+              "sha256": "409156441e69078acb6353f90e12240cdb19c54681a12f496e869bb4d3a51a88"
             },
             {
               "kind": "moments",
@@ -4638,20 +4638,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "d0ac2ae3f113dcf930bc374aedf271624406c3a322ea9adb1dd597b4c8956404"
             },
             {
               "kind": "moments",
@@ -4820,20 +4820,20 @@
               "dtype": "int64",
               "shape": [
                 32,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "1db74bcfeb9c0a5f4d90af85b51a063cf89788e8da5b709add925ab46bae303b"
+              "sha256": "31dbe908eab1e14f8b572f1ca540e63ba14dcd852a5377ce94b4ef4894e348cf"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 32,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b2e182416d0c456f33dc3a7ecbb36d1c8e3d7ce1b359777ecdebbf851e6eb6da"
+              "sha256": "409156441e69078acb6353f90e12240cdb19c54681a12f496e869bb4d3a51a88"
             },
             {
               "kind": "moments",
@@ -4857,20 +4857,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "d0ac2ae3f113dcf930bc374aedf271624406c3a322ea9adb1dd597b4c8956404"
             },
             {
               "kind": "moments",
@@ -4902,7 +4902,7 @@
       "note": "BF=2; no file that exists uses anything but 256",
       "decoded_stream_count": 8192,
       "decoded_bytes": "327604",
-      "decoded_sha256": "21f75484a1a67e7b2318c69169cd51bebc1b56c0a23e26ef7db7b09c43237465",
+      "decoded_sha256": "4a8a1bffa9bb1746b8111511add1f9bb3bc1d7e5951790f9cce51c12c0a89b98",
       "num_levels": 13
     },
     {
@@ -9025,20 +9025,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "1ef7483b995ddf2ab9afe2478a901819be285b039fa5224379c0289c34ba8c59"
+              "sha256": "5e33b24e80dcbebd9eaa0cfa7369bd5365f0da0b1526b27be77cad7fa2a1d903"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "e991e77f8290ca00873ba5c5d210716fb3b1588f32250751b8a00693f250ed14"
+              "sha256": "91b084a7b4cc0ebdae32f1b4188a96ea1299f401c30f1ef0aec70504a1a0bae0"
             },
             {
               "kind": "moments",
@@ -9062,20 +9062,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "67cba51b03b23621784e74b945346a38d2bb4f9cb00f4667bfd8be6ad6186428"
+              "sha256": "494d89482b7874a251bea7a5095b7d53eb0478a6200bd69db72a719f4023314f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "66da52843219bf03a4af5a96df19fac11b5613ffd9852e7bcd886c1ff1d01242"
+              "sha256": "ec57c0998cafbf0ad738ea94531d0fcd26b04d42e2512915dce044a3535c6888"
             },
             {
               "kind": "moments",
@@ -9099,20 +9099,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "bf93ac8da1ec79d6293d975b32874fab08a533ecd6fa487bca3782d9695bd9c2"
+              "sha256": "4940fd814353869b2cff5d9d8849e53ee25db34ce2d9793797ebffbc58378901"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "4c82cd3e4949c5a3984a1396cb0099d095ce69233b1c34d87e2a9f0ea6089bbf"
+              "sha256": "70b7abef5fd43936cceb356266ef073a6bb55310880f5b411d42366c301be28a"
             },
             {
               "kind": "moments",
@@ -9136,20 +9136,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "6a17c418cdd9840b133a82961161fc091fa0749b1fe5aa2a4993aec9711407a6"
+              "sha256": "b068078ab5e2f6c010b3aed269287ffbdae1ec8a6b37c12817ec8c9be8ec7008"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "ad21e2179167e84d6090f0b36291ff8f2eec00bb3e6e100518ce255258dcb76f"
+              "sha256": "9b2f905c8cafe6512a47f250559426b0a67ac2ac039964023ff0c51e974f602f"
             },
             {
               "kind": "moments",
@@ -9173,20 +9173,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "a0f2f520828a5ca4c6a3dbc67d5e6663dfb4856a854594ecf8419bfdb18903ff"
+              "sha256": "2d50b866de8b007ae63f61a5c21bf7726622fc40e1b3ea542ec2e290fe78ca3a"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "cfce443cd09d4e51aec81760ee437bf390f4b2ce55c7cd210d872b86daf40714"
+              "sha256": "da2102588e611722b45556b116a7f763669d3ba275a2c108b0a5d18b843a11e4"
             },
             {
               "kind": "moments",
@@ -9210,20 +9210,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "0d583ef0db290fcfaa2358a8bff38f35d5fd7b3010490ce8556a153ae24db638"
+              "sha256": "c75581112c2b896eb59f961352504d8ce990f5d082e34031d88cdc19bd51e292"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "49793ed20a27d66b1bf973de4e18564c827d5711fe6dd235d49bd94df8d0d9b0"
+              "sha256": "897ef1d3047a4a6fc2b42c0772aa69be58d6f0488ad17c29d8de879a7bc0adf2"
             },
             {
               "kind": "moments",
@@ -9247,20 +9247,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "ffe355be86f1bc6d6abbefd776dfe795615569ad7a7bd6f79a08f1d582e82a86"
+              "sha256": "ca1be17686d22131b68854c09e269086bb32416a269f954297889d19aa8d06bc"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "5e5d66d3d496e7a506bbb797b81c9d0983d98c07198cf25a876cda93166a3be8"
+              "sha256": "74c297a630171369db78b7b004dbebead4e5f9f4a307f1ef9b4a1593e8dd9af8"
             },
             {
               "kind": "moments",
@@ -9284,20 +9284,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "38c8073c98d8b2b6dc351a18b761bc66ff70aeae36d2d3012651a43a7eafd1dd"
+              "sha256": "9711ade10d99b7e558b28d8747664fd003ad69d0395765d6704ec5b943d9491f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "c29262cd3a40e7e8ae59d02fb2242611b9d40018a44f6144dcd546e372635900"
+              "sha256": "d994a541c3fa504943723552a0e8d94714db211143209952e04df84276ee0a5d"
             },
             {
               "kind": "moments",
@@ -9321,20 +9321,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "3804b1b6cb37a9a21d9ca7969ace6eeaf8d3683d8ef78b278acd66a1e017de2c"
+              "sha256": "64c2bbd38038041e0887b8142547073716bea774cfe44001463ffd9608c76a57"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "08d5d8b2f91a9b7e93a2aff99b4b9e236e50b08e2e4770da3c318982deb1d990"
+              "sha256": "309b502669ccb35a87246312a122b7716ca7b40d9cbbb4046d032d98e9b0922c"
             },
             {
               "kind": "moments",
@@ -9358,20 +9358,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "fe49a3301a17259aef528ffb40b1fc95ca4b57040a8c5a968b209be3d9badba6"
+              "sha256": "b5ef48bf6f54cdd5325ca3509c1777675b1aa3bea65fb044f62763e59167cf8f"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "34c2e3888c5075df612f6d4c396f8f636974e0793e049a02358743b53346d79c"
+              "sha256": "cb3e07d87ded0ff6e22c21b017dabe2444a8f179cd82a79e537630228eb5f45f"
             },
             {
               "kind": "moments",
@@ -9395,20 +9395,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "bfe791f68a47372a496b1494843d62c42e920a35a74f224d7349806a9d1adc9e"
+              "sha256": "e2b04eeccb725ac127e6c71fd70f5ee565221acbc61d661b724f80df66986604"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "abefd8978f8e3b1a1f1359760cec27d22bef69dbd15e06b6d04a359710eaea15"
+              "sha256": "24a4954c487cb080081adf42cfa25de7ffae7eacf9d791574edf6298b540fa46"
             },
             {
               "kind": "moments",
@@ -9432,20 +9432,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "f52cd2dfc1b756a5f235f132c3a556a4d16c9d1ef196fb4de214432813615be8"
+              "sha256": "3c3aa246c70de8e4766cb33b6c2f57bbec81534d5de09b38716e13e22adcfc75"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "c547e896d5242d7f4a3b856ecfbd50f9e1c653754e0b55f4390363dd70a7e513"
+              "sha256": "ebecc80d90bbfc0e964f7f772da2c4a68377425963860bac7f3a9d034c609b86"
             },
             {
               "kind": "moments",
@@ -9469,20 +9469,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "6758a81d1f0f0c56e5370472d50b892eab082cb0152fcdfbab715cba5f703dbb"
+              "sha256": "49f51d1eabe336cb2e0800486281a1cb0f5af413f270796d2a5ed2e275319bb1"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "b5899b65cfc8ab4012f6a3e1af8519d24d7529f08913d166675d2324e6fead54"
+              "sha256": "c5e16687a212c71e0e7f2aa76c9a81c13cabba57b2ee3a94b44f30580b20c59a"
             },
             {
               "kind": "moments",
@@ -9506,20 +9506,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "c00a7bc36e5690bea24ac80930a65f2da8f5ae67f17c23fa1d8812de28f2d971"
+              "sha256": "237e1aee4fc781fcafbddd2b8da8d362ff6ef9e8f32add09df6434e665a27920"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "cecaaee2c5748b06b7575d917176deeb3a59597253b4ecffb3cdfc5ae0c60860"
+              "sha256": "7b20546c825f6e62bbecfc6a9f8324df03338ee3813e21ca14f2cb02247b597b"
             },
             {
               "kind": "moments",
@@ -9543,20 +9543,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "153109e830a68deeae7b1b265e01b6b10f055c7b61ef38d8ed54ac85a5ee54d4"
+              "sha256": "986ae438a3ef376b288a44035c122175aa6036958d8cee896422940fac88fa10"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "8d688936219cb5d4ee60217984a0417e223c41f014099e326601d7598f778883"
+              "sha256": "4d08e7d528cabfd3169da0d60d93981477bf2ffcd0a3a8a70d2487885cd7009a"
             },
             {
               "kind": "moments",
@@ -9580,20 +9580,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "9eb5eda9224c4b87d3450466658473d30f74c8fad38953b70a58a71624c55594"
+              "sha256": "afe48095cd95cf048d2801f7e0ae4fdfca69307605b376b1343b37db2e479d51"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "7ac6071daba9d550de231b5e490c3cead0f426ab1487b99d1825ccf72c62ad9c"
+              "sha256": "875f2e2f11add68e6b7006ec308f2ccbd3d45eff4de62f796b2f871a7cd9f6db"
             },
             {
               "kind": "moments",
@@ -9617,20 +9617,20 @@
               "dtype": "int64",
               "shape": [
                 16,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "c1d2fc44bddf513c2800d62d210f3ba367b63eb88205d6a72377764b7f944a07"
+              "sha256": "3f69027e7c008766b5cfb0003117eeaa0ba2620bbbc287b0de3bc24ab5b7b985"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 16,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "02316bd570f596ea7da6281b602deb14c1b923174ca395a597fe8be8b99ab7d6"
+              "sha256": "83a65de34cd1e6c30cddce639d0ff8633dc19477f1c6b4c3b0ab2fce65637549"
             },
             {
               "kind": "moments",
@@ -9654,20 +9654,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "958f426c4a9ede540a4cb8d81bc393be29e2ac2392f323affff04b2278703349"
             },
             {
               "kind": "moments",
@@ -9772,20 +9772,20 @@
               "dtype": "int64",
               "shape": [
                 4,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "81ccd9c2f5b89703576d9521b076618ca9333b16de0e9d5b1a3f1d8bbc902a03"
+              "sha256": "b5f9ee6ad1c26eeaca7c13368a06e081b8170b0ff9f643c404e21526e4e7b440"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 4,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "dcaf334b5bce735bd3e1a3421d413ac9c09873c4a39ffc90f0195914dde38c70"
+              "sha256": "6f536e50b9a79ae49797fb5e58075c2043d5210de74bef707936223989648c15"
             },
             {
               "kind": "moments",
@@ -9809,20 +9809,20 @@
               "dtype": "int64",
               "shape": [
                 1,
-                3
+                2
               ],
               "recipe": "0x00",
-              "sha256": "5dbd3598dd0bd60972c265df00c81e0bca6b3dd389c9f7fe5aabfc0118b7990f"
+              "sha256": "c498e6bbc779c798571d86c4cf262060373a5d6f5fe36c0db13eb94082d3c432"
             },
             {
               "kind": "values",
               "dtype": "float32",
               "shape": [
                 1,
-                3
+                5
               ],
               "recipe": "0x00",
-              "sha256": "070a6659fb4a2c50100d5148183b3c5276cd8bcbf65c83fb440d07ffc2aef3d3"
+              "sha256": "958f426c4a9ede540a4cb8d81bc393be29e2ac2392f323affff04b2278703349"
             },
             {
               "kind": "moments",

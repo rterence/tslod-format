@@ -2,9 +2,9 @@
   "id": "set3-build-level-numeric",
   "set": "set3-build-level",
   "kind": "fixture",
-  "asserts": "build_level in numeric mode produces [min, max] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
+  "asserts": "build_level in numeric mode produces [min, max, first, mid, last] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
   "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
-  "contract": "Both columns share a type and nothing in the bytes says which is which; the order is pinned because only the format can say it.",
+  "contract": "All five columns share a type and nothing in the bytes says which is which; the order is pinned because only the format can say it.",
   "requires": [
     "feature:positions",
     "dtype:float32",
@@ -18,7 +18,7 @@
     "dtype:uint32",
     "dtype:uint64"
   ],
-  "notes": "\u27e2 Column order is [min, max]. Both columns carry the same dtype, so a swapped pair shows only on data where the two differ.",
+  "notes": "\u27e2 Column order is [min, max, first, mid, last]. Every column folds from the row below \u2014 first from the first child's first, last from the last child's last, and mid from the FIRST field of child k//2 of the k children a bucket has \u2014 so the from_raw=0 cases are where those merge rules are under test. At level 1 a child is one raw sample, so mid is element k//2 of the bucket.",
   "case_count": 110,
   "cases": [
     {
@@ -40,14 +40,14 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000080BF0000803F0486FD432FAD5C44CD9430C442D00F44"
+        "hex": "0000000000000000000000000000008000000080000080BF0000803F0000803F000080BF000080BF0486FD432FAD5C440486FD432FAD5C442FAD5C44CD9430C442D00F44CD9430C442D00F4442D00F44"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -71,24 +71,24 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000080BF0000803F0486FD432FAD5C44CD9430C442D00F44"
+        "hex": "0000000000000000000000000000008000000080000080BF0000803F0000803F000080BF000080BF0486FD432FAD5C440486FD432FAD5C442FAD5C44CD9430C442D00F44CD9430C442D00F4442D00F44"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080BF0000803FCD9430C42FAD5C44"
+        "hex": "000080BF0000803F000000000000803F000080BFCD9430C42FAD5C440486FD43CD9430C442D00F44"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -121,14 +121,14 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080BF0000803F4AD43DC4711D1F44F68804C429DCF242F6183BC48BE45744"
+        "hex": "000080BF0000803F000000000000803F000080BF4AD43DC4711D1F444240A9C3711D1F444AD43DC4F68804C429DCF242F68804C4DD243F42DF9FE4C3F6183BC48BE45744F6183BC412031A4368C121C4"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -152,24 +152,24 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080BF0000803F4AD43DC4711D1F44F68804C429DCF242F6183BC48BE45744"
+        "hex": "000080BF0000803F000000000000803F000080BF4AD43DC4711D1F444240A9C3711D1F444AD43DC4F68804C429DCF242F68804C4DD243F42DF9FE4C3F6183BC48BE45744F6183BC412031A4368C121C4"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "4AD43DC4711D1F44F6183BC48BE45744"
+        "hex": "4AD43DC4711D1F44000000004240A9C34AD43DC4F6183BC48BE45744F68804C4F6183BC468C121C4"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -202,14 +202,14 @@
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "9E7778C4FC917944C5E072C4C36D7944"
+        "hex": "9E7778C4FC917944000000008145804337B15444C5E072C4C36D79445869D9C37358C5C3B6E36EC4"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -233,24 +233,24 @@
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "9E7778C4FC917944C5E072C4C36D7944"
+        "hex": "9E7778C4FC917944000000008145804337B15444C5E072C4C36D79445869D9C37358C5C3B6E36EC4"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "9E7778C4FC917944"
+        "hex": "9E7778C4FC917944000000005869D9C3B6E36EC4"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -283,14 +283,14 @@
         "dtype": "float32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "2DCA79C49E577644A46077C4AA997744AC7C75C410207944"
+        "hex": "2DCA79C49E5776440000000085EB04C2FE7C0344A46077C4AA997744C7CB5942C5E0E942BCE41D44AC7C75C4102079444A6CF443647BC9C2606D44C4"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -316,24 +316,24 @@
         "dtype": "float32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "2DCA79C49E577644A46077C4AA997744AC7C75C410207944"
+        "hex": "2DCA79C49E5776440000000085EB04C2FE7C0344A46077C4AA997744C7CB5942C5E0E942BCE41D44AC7C75C4102079444A6CF443647BC9C2606D44C4"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "2DCA79C4AA997744AC7C75C410207944"
+        "hex": "2DCA79C4AA99774400000000C7CB5942BCE41D44AC7C75C4102079444A6CF4434A6CF443606D44C4"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -368,14 +368,14 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000803F000080BF29BC78447B8456C468391F443506524435065244"
+        "hex": "000000000000803F00000000000000800000803F000080BF29BC7844000080BF29BC7844C9DE50447B8456C468391F444A8C39C47B8456C468391F443506524435065244350652443506524435065244"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -401,24 +401,24 @@
         "dtype": "float32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000803F000080BF29BC78447B8456C468391F443506524435065244"
+        "hex": "000000000000803F00000000000000800000803F000080BF29BC7844000080BF29BC7844C9DE50447B8456C468391F444A8C39C47B8456C468391F443506524435065244350652443506524435065244"
       },
       "expected_tuples": {
         "dtype": "float32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000080BF29BC78447B8456C435065244"
+        "hex": "000080BF29BC784400000000000080BFC9DE50447B8456C4350652444A8C39C43506524435065244"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -451,14 +451,14 @@
         "dtype": "float32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "66A672C40CBA6844"
+        "hex": "66A672C40CBA6844000000005453C5437B0467C4"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -491,14 +491,14 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000F0BF000000000000F03F986E1283C0B07F40CEF753E3A5958B409A999999991286C078E9263108FA8140"
+        "hex": "00000000000000000000000000000000000000000000000000000000000000800000000000000080000000000000F0BF000000000000F03F000000000000F03F000000000000F0BF000000000000F0BF986E1283C0B07F40CEF753E3A5958B40986E1283C0B07F40CEF753E3A5958B40CEF753E3A5958B409A999999991286C078E9263108FA81409A999999991286C078E9263108FA814078E9263108FA8140"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -522,24 +522,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000000000000000000000000000000000000000F0BF000000000000F03F986E1283C0B07F40CEF753E3A5958B409A999999991286C078E9263108FA8140"
+        "hex": "00000000000000000000000000000000000000000000000000000000000000800000000000000080000000000000F0BF000000000000F03F000000000000F03F000000000000F0BF000000000000F0BF986E1283C0B07F40CEF753E3A5958B40986E1283C0B07F40CEF753E3A5958B40CEF753E3A5958B409A999999991286C078E9263108FA81409A999999991286C078E9263108FA814078E9263108FA8140"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0BF000000000000F03F9A999999991286C0CEF753E3A5958B40"
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F03F000000000000F0BF9A999999991286C0CEF753E3A5958B40986E1283C0B07F409A999999991286C078E9263108FA8140"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -572,14 +572,14 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0BF000000000000F03FA8C64B3789BA87C048E17A14AEE3834085EB51B81E9180C0F051B81E855B5E4085EB51B81E6387C020B0726891FC8A40"
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F03F000000000000F0BFA8C64B3789BA87C048E17A14AEE3834078E92631082875C048E17A14AEE38340A8C64B3789BA87C085EB51B81E9180C0F051B81E855B5E4085EB51B81E9180C00054E3A59BE44740448B6CE7FB937CC085EB51B81E6387C020B0726891FC8A4085EB51B81E6387C0A8F1D24D624063401804560E2D3884C0"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -603,24 +603,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0BF000000000000F03FA8C64B3789BA87C048E17A14AEE3834085EB51B81E9180C0F051B81E855B5E4085EB51B81E6387C020B0726891FC8A40"
+        "hex": "000000000000F0BF000000000000F03F0000000000000000000000000000F03F000000000000F0BFA8C64B3789BA87C048E17A14AEE3834078E92631082875C048E17A14AEE38340A8C64B3789BA87C085EB51B81E9180C0F051B81E855B5E4085EB51B81E9180C00054E3A59BE44740448B6CE7FB937CC085EB51B81E6387C020B0726891FC8A4085EB51B81E6387C0A8F1D24D624063401804560E2D3884C0"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "A8C64B3789BA87C048E17A14AEE3834085EB51B81E6387C020B0726891FC8A40"
+        "hex": "A8C64B3789BA87C048E17A14AEE38340000000000000000078E92631082875C0A8C64B3789BA87C085EB51B81E6387C020B0726891FC8A4085EB51B81E9180C085EB51B81E6387C01804560E2D3884C0"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -653,14 +653,14 @@
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "CBA145B6F30E8FC06891ED7C3F328F406ABC7493185C8EC01E85EB51B82D8F40"
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F400000000000000000A49BC420B0087040FED478E926968A406ABC7493185C8EC01E85EB51B82D8F40BA490C022B2D7BC0941804560EAB78C05839B4C876DC8DC0"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -684,24 +684,24 @@
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "CBA145B6F30E8FC06891ED7C3F328F406ABC7493185C8EC01E85EB51B82D8F40"
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F400000000000000000A49BC420B0087040FED478E926968A406ABC7493185C8EC01E85EB51B82D8F40BA490C022B2D7BC0941804560EAB78C05839B4C876DC8DC0"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "CBA145B6F30E8FC06891ED7C3F328F40"
+        "hex": "CBA145B6F30E8FC06891ED7C3F328F400000000000000000BA490C022B2D7BC05839B4C876DC8DC0"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -734,14 +734,14 @@
         "dtype": "float64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "83C0CAA145398FC0CAA145B6F3CA8E40AE47E17A14EC8EC092ED7C3F35F38E40DD24068195AF8EC05EBA490C02248F40"
+        "hex": "83C0CAA145398FC0CAA145B6F3CA8E400000000000000000400AD7A3709D40C0B4C876BE9F6F8040AE47E17A14EC8EC092ED7C3F35F38E40C0F3FDD478394B4070BC7493183C5D403CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E408095438B6C2F59C0EA263108AC8D88C0"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -767,24 +767,24 @@
         "dtype": "float64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "83C0CAA145398FC0CAA145B6F3CA8E40AE47E17A14EC8EC092ED7C3F35F38E40DD24068195AF8EC05EBA490C02248F40"
+        "hex": "83C0CAA145398FC0CAA145B6F3CA8E400000000000000000400AD7A3709D40C0B4C876BE9F6F8040AE47E17A14EC8EC092ED7C3F35F38E40C0F3FDD478394B4070BC7493183C5D403CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E408095438B6C2F59C0EA263108AC8D88C0"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "83C0CAA145398FC092ED7C3F35F38E40DD24068195AF8EC05EBA490C02248F40"
+        "hex": "83C0CAA145398FC092ED7C3F35F38E400000000000000000C0F3FDD478394B403CDF4F8D97BC8340DD24068195AF8EC05EBA490C02248F40A8C64B37898D7E40A8C64B37898D7E40EA263108AC8D88C0"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -819,14 +819,14 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000000000000F03F000000000000F0BFEC51B81E85178F40C2F5285C8FD08AC01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40"
+        "hex": "0000000000000000000000000000F03F00000000000000000000000000000080000000000000F03F000000000000F0BFEC51B81E85178F40000000000000F0BFEC51B81E85178F40022B8716D91B8A40C2F5285C8FD08AC01804560E2DE78340A8C64B37893187C0C2F5285C8FD08AC01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -852,24 +852,24 @@
         "dtype": "float64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000000000000000F03F000000000000F0BFEC51B81E85178F40C2F5285C8FD08AC01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40"
+        "hex": "0000000000000000000000000000F03F00000000000000000000000000000080000000000000F03F000000000000F0BFEC51B81E85178F40000000000000F0BFEC51B81E85178F40022B8716D91B8A40C2F5285C8FD08AC01804560E2DE78340A8C64B37893187C0C2F5285C8FD08AC01804560E2DE78340B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40B29DEFA7C6408A40"
       },
       "expected_tuples": {
         "dtype": "float64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "000000000000F0BFEC51B81E85178F40C2F5285C8FD08AC0B29DEFA7C6408A40"
+        "hex": "000000000000F0BFEC51B81E85178F400000000000000000000000000000F0BF022B8716D91B8A40C2F5285C8FD08AC0B29DEFA7C6408A40A8C64B37893187C0B29DEFA7C6408A40B29DEFA7C6408A40"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -902,14 +902,14 @@
         "dtype": "float64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "CDCCCCCCCC548EC0C64B378941178D40"
+        "hex": "CDCCCCCCCC548EC0C64B378941178D40000000000000000024DBF97E6AAA7840C2F5285C8FE08CC0"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -942,14 +942,14 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FFF00EA710B2C"
+        "hex": "807F807F7FFF0000FFFFEA71EA71710B2C2C0B0B"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -973,24 +973,24 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FFF00EA710B2C"
+        "hex": "807F807F7FFF0000FFFFEA71EA71710B2C2C0B0B"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FEA71"
+        "hex": "807F8000FFEA71EA2C0B"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1023,14 +1023,14 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FA56EA95FD604"
+        "hex": "807F8000FFA56EDC6EA5A95F5002A9D60404D6ED"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1054,24 +1054,24 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FA56EA95FD604"
+        "hex": "807F8000FFA56EDC6EA5A95F5002A9D60404D6ED"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FA95F"
+        "hex": "807F80DCA5A95F5004ED"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1104,14 +1104,14 @@
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F807F"
+        "hex": "807F8084A9807F0484A9"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1135,24 +1135,24 @@
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F807F"
+        "hex": "807F8084A9807F0484A9"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F"
+        "hex": "807F8004A9"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1185,14 +1185,14 @@
         "dtype": "int8",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F807F807E"
+        "hex": "807F80B82D807F38B82D807E38F6A9"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -1218,24 +1218,24 @@
         "dtype": "int8",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F807F807E"
+        "hex": "807F80B82D807F38B82D807E38F6A9"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F807E"
+        "hex": "807F80382D807E3838A9"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -1270,14 +1270,14 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FC8FF8177FCFC"
+        "hex": "807F807F00C8FFFFFDC88177773A81FCFCFCFCFC"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -1303,24 +1303,24 @@
         "dtype": "int8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807FC8FF8177FCFC"
+        "hex": "807F807F00C8FFFFFDC88177773A81FCFCFCFCFC"
       },
       "expected_tuples": {
         "dtype": "int8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F8177"
+        "hex": "807F80FFC8817777FCFC"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1353,14 +1353,14 @@
         "dtype": "int8",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "807F"
+        "hex": "807F80A4E9"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1393,14 +1393,14 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FFFFF000071D1EAF52C610B6A"
+        "hex": "0080FF7F0080FF7FFF7FFFFF00000000FFFFFFFF71D1EAF5EAF571D171D12C610B6A2C610B6A0B6A"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1424,24 +1424,24 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FFFFF000071D1EAF52C610B6A"
+        "hex": "0080FF7F0080FF7FFF7FFFFF00000000FFFFFFFF71D1EAF5EAF571D171D12C610B6A2C610B6A0B6A"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F71D10B6A"
+        "hex": "0080FF7F00800000FFFF71D10B6AEAF52C610B6A"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1474,14 +1474,14 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FFBA66E60A9805FFAED92D60A"
+        "hex": "0080FF7F00800000FFFFFBA66E60DC276E60A506A9805FFA508702A5A980ED92D60A04F6D60AED92"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1505,24 +1505,24 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FFBA66E60A9805FFAED92D60A"
+        "hex": "0080FF7F00800000FFFFFBA66E60DC276E60A506A9805FFA508702A5A980ED92D60A04F6D60AED92"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FA980D60A"
+        "hex": "0080FF7F0080DC27A506A980D60A508704F6ED92"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1555,14 +1555,14 @@
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F6F82D27F"
+        "hex": "0080FF7F008084BFA9E46F82D27F048A8454A9ED"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1586,24 +1586,24 @@
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F6F82D27F"
+        "hex": "0080FF7F008084BFA9E46F82D27F048A8454A9ED"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F"
+        "hex": "0080FF7F0080048AA9ED"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1636,14 +1636,14 @@
         "dtype": "int16",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F6F81DB7FA783AA7E"
+        "hex": "0080FF7F0080B8782D2B6F81DB7F386BB85D2DC4A783AA7E3850F64BA944"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -1669,24 +1669,24 @@
         "dtype": "int16",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F6F81DB7FA783AA7E"
+        "hex": "0080FF7F0080B8782D2B6F81DB7F386BB85D2DC4A783AA7E3850F64BA944"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FA783AA7E"
+        "hex": "0080FF7F0080386B2DC4A783AA7E38503850A944"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -1721,14 +1721,14 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FC89DFD4181C17775FC83FC83"
+        "hex": "0080FF7F0080FF7F0000C89DFD41FFFFFD41C89D81C1777577753A3081C1FC83FC83FC83FC83FC83"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -1754,24 +1754,24 @@
         "dtype": "int16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FC89DFD4181C17775FC83FC83"
+        "hex": "0080FF7F0080FF7F0000C89DFD41FFFFFD41C89D81C1777577753A3081C1FC83FC83FC83FC83FC83"
       },
       "expected_tuples": {
         "dtype": "int16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7FFC837775"
+        "hex": "0080FF7F0080FFFFC89DFC8377757775FC83FC83"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1804,14 +1804,14 @@
         "dtype": "int16",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0080FF7F"
+        "hex": "0080FF7F0080A474E936"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1844,14 +1844,14 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FFFFFFFFF00000000EAF57E8C71D1E93E0B6A32392C612D78"
+        "hex": "00000080FFFFFF7F00000080FFFFFF7FFFFFFF7FFFFFFFFF0000000000000000FFFFFFFFFFFFFFFFEAF57E8C71D1E93EEAF57E8C71D1E93E71D1E93E0B6A32392C612D782C612D780B6A32390B6A3239"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1875,24 +1875,24 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FFFFFFFFF00000000EAF57E8C71D1E93E0B6A32392C612D78"
+        "hex": "00000080FFFFFF7F00000080FFFFFF7FFFFFFF7FFFFFFFFF0000000000000000FFFFFFFFFFFFFFFFEAF57E8C71D1E93EEAF57E8C71D1E93E71D1E93E0B6A32392C612D782C612D780B6A32390B6A3239"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FEAF57E8C2C612D78"
+        "hex": "00000080FFFFFF7F0000008000000000FFFFFFFFEAF57E8C2C612D78EAF57E8C2C612D780B6A3239"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1925,14 +1925,14 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FFBA639C5DC277D5602A59BBD5087FD5803BC79B304F60374"
+        "hex": "00000080FFFFFF7F0000008000000000FFFFFFFFFBA639C5DC277D56DC277D566E6077F0A506403D02A59BBD5087FD585087FD5802A59BBDA980C92403BC79B304F6037404F60374D60AD239ED92412B"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -1956,24 +1956,24 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FFBA639C5DC277D5602A59BBD5087FD5803BC79B304F60374"
+        "hex": "00000080FFFFFF7F0000008000000000FFFFFFFFFBA639C5DC277D56DC277D566E6077F0A506403D02A59BBD5087FD585087FD5802A59BBDA980C92403BC79B304F6037404F60374D60AD239ED92412B"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F03BC79B304F60374"
+        "hex": "00000080FFFFFF7F00000080DC277D56A506403D03BC79B304F603745087FD5804F60374ED92412B"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2006,14 +2006,14 @@
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F6AD0E480A9EDF87E"
+        "hex": "00000080FFFFFF7F0000008084BF2023A9E43EE56AD0E480A9EDF87E048A42B98454B141A9EDF87E"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2037,24 +2037,24 @@
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F6AD0E480A9EDF87E"
+        "hex": "00000080FFFFFF7F0000008084BF2023A9E43EE56AD0E480A9EDF87E048A42B98454B141A9EDF87E"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F"
+        "hex": "00000080FFFFFF7F00000080048A42B9A9EDF87E"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2087,14 +2087,14 @@
         "dtype": "int32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FD9EA2F803FA1377F2885908069624E7E"
+        "hex": "00000080FFFFFF7F00000080B878F0432D2BCD4FD9EA2F803FA1377F386B1444B85D556E2DC4FE272885908069624E7E3850B3ECF64BE269A9443833"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -2120,24 +2120,24 @@
         "dtype": "int32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FD9EA2F803FA1377F2885908069624E7E"
+        "hex": "00000080FFFFFF7F00000080B878F0432D2BCD4FD9EA2F803FA1377F386B1444B85D556E2DC4FE272885908069624E7E3850B3ECF64BE269A9443833"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F2885908069624E7E"
+        "hex": "00000080FFFFFF7F00000080386B14442DC4FE272885908069624E7E3850B3EC3850B3ECA9443833"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -2172,14 +2172,14 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FC89D45A1FD4149657775520F81C1A144FC83EA32FC83EA32"
+        "hex": "00000080FFFFFF7F00000080FFFFFF7F00000000C89D45A1FD414965FFFFFFFFFD414965C89D45A17775520F81C1A1447775520F3A306F4381C1A144FC83EA32FC83EA32FC83EA32FC83EA32FC83EA32"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -2205,24 +2205,24 @@
         "dtype": "int32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7FC89D45A1FD4149657775520F81C1A144FC83EA32FC83EA32"
+        "hex": "00000080FFFFFF7F00000080FFFFFF7F00000000C89D45A1FD414965FFFFFFFFFD414965C89D45A17775520F81C1A1447775520F3A306F4381C1A144FC83EA32FC83EA32FC83EA32FC83EA32FC83EA32"
       },
       "expected_tuples": {
         "dtype": "int32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F7775520F81C1A144"
+        "hex": "00000080FFFFFF7F00000080FFFFFFFFC89D45A17775520F81C1A1447775520FFC83EA32FC83EA32"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2255,14 +2255,14 @@
         "dtype": "int32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000080FFFFFF7F"
+        "hex": "00000080FFFFFF7F00000080A474CB1DE936F914"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2295,14 +2295,14 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000071D1E93ED5C6EFC1EAF57E8CCA9F952F0B6A32399BB140D22C612D7852C6142F"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F71D1E93ED5C6EFC171D1E93ED5C6EFC10B6A32399BB140D22C612D7852C6142F2C612D7852C6142F0B6A32399BB140D20B6A32399BB140D2"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2326,24 +2326,24 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF000000000000000071D1E93ED5C6EFC1EAF57E8CCA9F952F0B6A32399BB140D22C612D7852C6142F"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7FFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFF00000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F71D1E93ED5C6EFC171D1E93ED5C6EFC10B6A32399BB140D22C612D7852C6142F2C612D7852C6142F0B6A32399BB140D20B6A32399BB140D2"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F71D1E93ED5C6EFC1EAF57E8CCA9F952F"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000800000000000000000FFFFFFFFFFFFFFFF71D1E93ED5C6EFC1EAF57E8CCA9F952FEAF57E8CCA9F952F2C612D7852C6142F0B6A32399BB140D2"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2376,14 +2376,14 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFBA639C50AD54AAFDC277D5607149E6F5FFAA8E379E285DC02A59BBD3DFDD536ED92412BF734988803BC79B33FE4F062"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000800000000000000000FFFFFFFFFFFFFFFFFBA639C50AD54AAFDC277D5607149E6FDC277D5607149E6F6E6077F07AC463F1A506403DD833AC3B5FFAA8E379E285DC02A59BBD3DFDD5365087FD5822F6D8FA02A59BBD3DFDD536A980C924571AC22CED92412BF734988803BC79B33FE4F06204F603743F455FC4D60AD239EDB680D4ED92412BF7349888"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2407,24 +2407,24 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFBA639C50AD54AAFDC277D5607149E6F5FFAA8E379E285DC02A59BBD3DFDD536ED92412BF734988803BC79B33FE4F062"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F00000000000000800000000000000000FFFFFFFFFFFFFFFFFBA639C50AD54AAFDC277D5607149E6FDC277D5607149E6F6E6077F07AC463F1A506403DD833AC3B5FFAA8E379E285DC02A59BBD3DFDD5365087FD5822F6D8FA02A59BBD3DFDD536A980C924571AC22CED92412BF734988803BC79B33FE4F06204F603743F455FC4D60AD239EDB680D4ED92412BF7349888"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FED92412BF734988803BC79B33FE4F062"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080DC277D5607149E6FA506403DD833AC3BED92412BF734988803BC79B33FE4F0625087FD5822F6D8FA04F603743F455FC4ED92412BF7349888"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2457,14 +2457,14 @@
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F93DD4145E0495380706EF6F2C53FCF7E"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F000000000000008084BF2023E715173CA9E43EE538FF71A093DD4145E0495380706EF6F2C53FCF7E048A42B96BF150F58454B141F60652ADA9EDF87ED38B2C68"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2488,24 +2488,24 @@
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F93DD4145E0495380706EF6F2C53FCF7E"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F000000000000008084BF2023E715173CA9E43EE538FF71A093DD4145E0495380706EF6F2C53FCF7E048A42B96BF150F58454B141F60652ADA9EDF87ED38B2C68"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080048A42B96BF150F5A9EDF87ED38B2C68"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2538,14 +2538,14 @@
         "dtype": "int64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F423FE97A0A131A800A4CFD1A8D325B7FEFB179CE4407B9824989BC58C38B3E7D"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080B878F043CC031DF72D2BCD4F4D83FD7F423FE97A0A131A800A4CFD1A8D325B7F386B1444D1C0DD6CB85D556ED56B69212DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B56F64BE269A005219EA944383399F7A861"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -2571,24 +2571,24 @@
         "dtype": "int64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F423FE97A0A131A800A4CFD1A8D325B7FEFB179CE4407B9824989BC58C38B3E7D"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080B878F043CC031DF72D2BCD4F4D83FD7F423FE97A0A131A800A4CFD1A8D325B7F386B1444D1C0DD6CB85D556ED56B69212DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B56F64BE269A005219EA944383399F7A861"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FEFB179CE4407B9824989BC58C38B3E7D"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080386B1444D1C0DD6C2DC4FE27E4ECCC1FEFB179CE4407B9824989BC58C38B3E7D3850B3ECDF983B563850B3ECDF983B56A944383399F7A861"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -2623,14 +2623,14 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7F0000000000000000FD414965F0B6C0EBC89D45A1B3567671FFFFFFFFFFFFFFFFFD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -2656,24 +2656,24 @@
         "dtype": "int64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7FFD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFF7F0000000000000000FD414965F0B6C0EBC89D45A1B3567671FFFFFFFFFFFFFFFFFD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_tuples": {
         "dtype": "int64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F3A306F439C2F42AAFC83EA32DDEB8425"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080FFFFFFFFFFFFFFFFC89D45A1B35676713A306F439C2F42AAFC83EA32DDEB84257775520F98BA2AE5FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2706,14 +2706,14 @@
         "dtype": "int64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000080FFFFFFFFFFFFFF7F"
+        "hex": "0000000000000080FFFFFFFFFFFFFF7F0000000000000080A474CB1D329E366EE936F9140DE3FB84"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2746,14 +2746,14 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF000171EA0B2C"
+        "hex": "00FF00FFFF000100010171EAEA71710B2C2C0B0B"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2777,24 +2777,24 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF000171EA0B2C"
+        "hex": "00FF00FFFF000100010171EAEA71710B2C2C0B0B"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF0BEA"
+        "hex": "00FF0000010BEAEA2C0B"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2827,14 +2827,14 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF6EFB02A903ED"
+        "hex": "00FF0000016EFBDC6EA502A95002A903ED04D6ED"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2858,24 +2858,24 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF6EFB02A903ED"
+        "hex": "00FF0000016EFBDC6EA502A95002A903ED04D6ED"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF02ED"
+        "hex": "00FF00DCA502ED5004ED"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2908,14 +2908,14 @@
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF00FF"
+        "hex": "00FF0084A900FF0484A9"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2939,24 +2939,24 @@
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF00FF"
+        "hex": "00FF0084A900FF0484A9"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF"
+        "hex": "00FF0004A9"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -2989,14 +2989,14 @@
         "dtype": "uint8",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF00FF00FF"
+        "hex": "00FF00B82D00FF38B82D00FF38F6A9"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -3022,24 +3022,24 @@
         "dtype": "uint8",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF00FF00FF"
+        "hex": "00FF00B82D00FF38B82D00FF38F6A9"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF00FF"
+        "hex": "00FF00382D00FF3838A9"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -3074,14 +3074,14 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF01FD3A81FCFC"
+        "hex": "00FF00FF0001FD01FDC83A81773A81FCFCFCFCFC"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -3107,24 +3107,24 @@
         "dtype": "uint8",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF01FD3A81FCFC"
+        "hex": "00FF00FF0001FD01FDC83A81773A81FCFCFCFCFC"
       },
       "expected_tuples": {
         "dtype": "uint8",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF3AFC"
+        "hex": "00FF0001C83AFC77FCFC"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3157,14 +3157,14 @@
         "dtype": "uint8",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00FF"
+        "hex": "00FF00A4E9"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3197,14 +3197,14 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF0000010071D1EAF52C610B6A"
+        "hex": "0000FFFF0000FFFFFFFF0000010000000100010071D1EAF5EAF571D171D12C610B6A2C610B6A0B6A"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3228,24 +3228,24 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF0000010071D1EAF52C610B6A"
+        "hex": "0000FFFF0000FFFFFFFF0000010000000100010071D1EAF5EAF571D171D12C610B6A2C610B6A0B6A"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF2C61EAF5"
+        "hex": "0000FFFF0000000001002C61EAF5EAF52C610B6A"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3278,14 +3278,14 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFFA506FBA6A9805FFAD60A04F6"
+        "hex": "0000FFFF000000000100A506FBA6DC276E60A506A9805FFA508702A5A980D60A04F604F6D60AED92"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3309,24 +3309,24 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFFA506FBA6A9805FFAD60A04F6"
+        "hex": "0000FFFF000000000100A506FBA6DC276E60A506A9805FFA508702A5A980D60A04F604F6D60AED92"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFFD60A5FFA"
+        "hex": "0000FFFF0000DC27A506D60A5FFA508704F6ED92"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3359,14 +3359,14 @@
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFFC50145FE"
+        "hex": "0000FFFF000084BFA9E4C50145FE048A8454A9ED"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3390,24 +3390,24 @@
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFFC50145FE"
+        "hex": "0000FFFF000084BFA9E4C50145FE048A8454A9ED"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF"
+        "hex": "0000FFFF0000048AA9ED"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3440,14 +3440,14 @@
         "dtype": "uint16",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF4900EDFD1E007AFF"
+        "hex": "0000FFFF0000B8782D2B4900EDFD386BB85D2DC41E007AFF3850F64BA944"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -3473,24 +3473,24 @@
         "dtype": "uint16",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF4900EDFD1E007AFF"
+        "hex": "0000FFFF0000B8782D2B4900EDFD386BB85D2DC41E007AFF3850F64BA944"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF1E007AFF"
+        "hex": "0000FFFF0000386B2DC41E007AFF38503850A944"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -3525,14 +3525,14 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF0100C89D3A3081C1FC83FC83"
+        "hex": "0000FFFF0000FFFF00000100C89D0100FD41C89D3A3081C177753A3081C1FC83FC83FC83FC83FC83"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -3558,24 +3558,24 @@
         "dtype": "uint16",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF0100C89D3A3081C1FC83FC83"
+        "hex": "0000FFFF0000FFFF00000100C89D0100FD41C89D3A3081C177753A3081C1FC83FC83FC83FC83FC83"
       },
       "expected_tuples": {
         "dtype": "uint16",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF3A3081C1"
+        "hex": "0000FFFF00000100C89D3A3081C17775FC83FC83"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3608,14 +3608,14 @@
         "dtype": "uint16",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000FFFF"
+        "hex": "0000FFFF0000A474E936"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3648,14 +3648,14 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF000000000100000071D1E93EEAF57E8C0B6A32392C612D78"
+        "hex": "00000000FFFFFFFF00000000FFFFFFFFFFFFFFFF000000000100000000000000010000000100000071D1E93EEAF57E8CEAF57E8C71D1E93E71D1E93E0B6A32392C612D782C612D780B6A32390B6A3239"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3679,24 +3679,24 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF000000000100000071D1E93EEAF57E8C0B6A32392C612D78"
+        "hex": "00000000FFFFFFFF00000000FFFFFFFFFFFFFFFF000000000100000000000000010000000100000071D1E93EEAF57E8CEAF57E8C71D1E93E71D1E93E0B6A32392C612D782C612D780B6A32390B6A3239"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF0B6A3239EAF57E8C"
+        "hex": "00000000FFFFFFFF0000000000000000010000000B6A3239EAF57E8CEAF57E8C2C612D780B6A3239"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3729,14 +3729,14 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFFA506403D6E6077F0A980C9245FFAA8E3ED92412B03BC79B3"
+        "hex": "00000000FFFFFFFF000000000000000001000000A506403D6E6077F0DC277D566E6077F0A506403DA980C9245FFAA8E35087FD5802A59BBDA980C924ED92412B03BC79B304F60374D60AD239ED92412B"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3760,24 +3760,24 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFFA506403D6E6077F0A980C9245FFAA8E3ED92412B03BC79B3"
+        "hex": "00000000FFFFFFFF000000000000000001000000A506403D6E6077F0DC277D566E6077F0A506403DA980C9245FFAA8E35087FD5802A59BBDA980C924ED92412B03BC79B304F60374D60AD239ED92412B"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFFA980C9245FFAA8E3"
+        "hex": "00000000FFFFFFFF00000000DC277D56A506403DA980C9245FFAA8E35087FD5804F60374ED92412B"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3810,14 +3810,14 @@
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFFD56FFA03DFCE5FFF"
+        "hex": "00000000FFFFFFFF0000000084BF2023A9E43EE5D56FFA03DFCE5FFF048A42B98454B141A9EDF87E"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3841,24 +3841,24 @@
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFFD56FFA03DFCE5FFF"
+        "hex": "00000000FFFFFFFF0000000084BF2023A9E43EE5D56FFA03DFCE5FFF048A42B98454B141A9EDF87E"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF"
+        "hex": "00000000FFFFFFFF00000000048A42B9A9EDF87E"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -3891,14 +3891,14 @@
         "dtype": "uint32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF0E9F99008F353CFF78298D00AA7EB3FF"
+        "hex": "00000000FFFFFFFF00000000B878F0432D2BCD4F0E9F99008F353CFF386B1444B85D556E2DC4FE2778298D00AA7EB3FF3850B3ECF64BE269A9443833"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -3924,24 +3924,24 @@
         "dtype": "uint32",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF0E9F99008F353CFF78298D00AA7EB3FF"
+        "hex": "00000000FFFFFFFF00000000B878F0432D2BCD4F0E9F99008F353CFF386B1444B85D556E2DC4FE2778298D00AA7EB3FF3850B3ECF64BE269A9443833"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF78298D00AA7EB3FF"
+        "hex": "00000000FFFFFFFF00000000386B14442DC4FE2778298D00AA7EB3FF3850B3EC3850B3ECA9443833"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -3976,14 +3976,14 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF01000000C89D45A17775520F81C1A144FC83EA32FC83EA32"
+        "hex": "00000000FFFFFFFF00000000FFFFFFFF0000000001000000C89D45A101000000FD414965C89D45A17775520F81C1A1447775520F3A306F4381C1A144FC83EA32FC83EA32FC83EA32FC83EA32FC83EA32"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -4009,24 +4009,24 @@
         "dtype": "uint32",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF01000000C89D45A17775520F81C1A144FC83EA32FC83EA32"
+        "hex": "00000000FFFFFFFF00000000FFFFFFFF0000000001000000C89D45A101000000FD414965C89D45A17775520F81C1A1447775520F3A306F4381C1A144FC83EA32FC83EA32FC83EA32FC83EA32FC83EA32"
       },
       "expected_tuples": {
         "dtype": "uint32",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF7775520F81C1A144"
+        "hex": "00000000FFFFFFFF0000000001000000C89D45A17775520F81C1A1447775520FFC83EA32FC83EA32"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4059,14 +4059,14 @@
         "dtype": "uint32",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "00000000FFFFFFFF"
+        "hex": "00000000FFFFFFFF00000000A474CB1DE936F914"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4099,14 +4099,14 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D2"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000100000000000000000000000000000001000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC1EAF57E8CCA9F952F71D1E93ED5C6EFC171D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D22C612D7852C6142F0B6A32399BB140D20B6A32399BB140D2"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4130,24 +4130,24 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D2"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000100000000000000000000000000000001000000000000000100000000000000EAF57E8CCA9F952F71D1E93ED5C6EFC1EAF57E8CCA9F952F71D1E93ED5C6EFC171D1E93ED5C6EFC12C612D7852C6142F0B6A32399BB140D22C612D7852C6142F0B6A32399BB140D20B6A32399BB140D2"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF2C612D7852C6142F0B6A32399BB140D2"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000000000000000000001000000000000002C612D7852C6142F0B6A32399BB140D2EAF57E8CCA9F952F2C612D7852C6142F0B6A32399BB140D2"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4180,14 +4180,14 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFFA506403DD833AC3B6E6077F07AC463F1A980C924571AC22C5087FD5822F6D8FA03BC79B33FE4F062D60AD239EDB680D4"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000000000000100000000000000A506403DD833AC3B6E6077F07AC463F1DC277D5607149E6F6E6077F07AC463F1A506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FA02A59BBD3DFDD536A980C924571AC22C03BC79B33FE4F062D60AD239EDB680D404F603743F455FC4D60AD239EDB680D4ED92412BF7349888"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4211,24 +4211,24 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFFA506403DD833AC3B6E6077F07AC463F1A980C924571AC22C5087FD5822F6D8FA03BC79B33FE4F062D60AD239EDB680D4"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000000000000000000000100000000000000A506403DD833AC3B6E6077F07AC463F1DC277D5607149E6F6E6077F07AC463F1A506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FA02A59BBD3DFDD536A980C924571AC22C03BC79B33FE4F062D60AD239EDB680D404F603743F455FC4D60AD239EDB680D4ED92412BF7349888"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFFA980C924571AC22C5087FD5822F6D8FA"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000DC277D5607149E6FA506403DD833AC3BA980C924571AC22C5087FD5822F6D8FA5087FD5822F6D8FA04F603743F455FC4ED92412BF7349888"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4261,14 +4261,14 @@
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF5A48A83C01BD6900F3EF948167F46DFD"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000084BF2023E715173CA9E43EE538FF71A05A48A83C01BD6900F3EF948167F46DFD048A42B96BF150F58454B141F60652ADA9EDF87ED38B2C68"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4292,24 +4292,24 @@
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF5A48A83C01BD6900F3EF948167F46DFD"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF000000000000000084BF2023E715173CA9E43EE538FF71A05A48A83C01BD6900F3EF948167F46DFD048A42B96BF150F58454B141F60652ADA9EDF87ED38B2C68"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000048A42B96BF150F5A9EDF87ED38B2C68"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4342,14 +4342,14 @@
         "dtype": "uint64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF456C6BED25B0C100763DC85D9197DBFFD173D4C7AC0A95053F42EEFADCA5F6FB"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000B878F043CC031DF72D2BCD4F4D83FD7F456C6BED25B0C100763DC85D9197DBFF386B1444D1C0DD6CB85D556ED56B69212DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B56F64BE269A005219EA944383399F7A861"
       },
       "expected_bucket_count": "3",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 188,
@@ -4375,24 +4375,24 @@
         "dtype": "uint64",
         "shape": [
           3,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF456C6BED25B0C100763DC85D9197DBFFD173D4C7AC0A95053F42EEFADCA5F6FB"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000B878F043CC031DF72D2BCD4F4D83FD7F456C6BED25B0C100763DC85D9197DBFF386B1444D1C0DD6CB85D556ED56B69212DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B56F64BE269A005219EA944383399F7A861"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFFD173D4C7AC0A95053F42EEFADCA5F6FB"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000386B1444D1C0DD6C2DC4FE27E4ECCC1FD173D4C7AC0A95053F42EEFADCA5F6FB3850B3ECDF983B563850B3ECDF983B56A944383399F7A861"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -4427,14 +4427,14 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF0100000000000000FD414965F0B6C0EB3A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000FD414965F0B6C0EB0100000000000000FD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_bucket_count": "4",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "has_ragged_tail": true,
       "tail_length": 1,
@@ -4460,24 +4460,24 @@
         "dtype": "uint64",
         "shape": [
           4,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF0100000000000000FD414965F0B6C0EB3A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000FD414965F0B6C0EB0100000000000000FD414965F0B6C0EBC89D45A1B35676713A306F439C2F42AA81C1A144A5631BF87775520F98BA2AE53A306F439C2F42AA81C1A144A5631BF8FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_tuples": {
         "dtype": "uint64",
         "shape": [
           2,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFFFC83EA32DDEB842581C1A144A5631BF8"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF00000000000000000100000000000000C89D45A1B3567671FC83EA32DDEB842581C1A144A5631BF87775520F98BA2AE5FC83EA32DDEB8425FC83EA32DDEB8425"
       },
       "expected_bucket_count": "2",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",
@@ -4510,14 +4510,14 @@
         "dtype": "uint64",
         "shape": [
           1,
-          2
+          5
         ],
         "order": "C",
         "byte_order": "little",
-        "hex": "0000000000000000FFFFFFFFFFFFFFFF"
+        "hex": "0000000000000000FFFFFFFFFFFFFFFF0000000000000000A474CB1D329E366EE936F9140DE3FB84"
       },
       "expected_bucket_count": "1",
-      "column_order": "min,max",
+      "column_order": "min,max,first,mid,last",
       "expected_bucket_count_rule": "ceil(N / branching_factor)",
       "expected_positions": {
         "dtype": "int64",

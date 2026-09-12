@@ -7,24 +7,30 @@ one a reader has to get right.
 
 ## What is specified, and therefore what this implements
 
-* Numeric mode produces `[min, max]` in that column order.
+* Numeric mode produces `[min, max, first, mid, last]` in that column order.
+* Every column folds from the row below, which is what lets a level be rebuilt
+  from the level below without reading a raw sample:
+  - `min` and `max` over the children's `min` and `max` columns;
+  - `first` is the first child's `first` and `last` the last child's `last`;
+  - `mid` is the **first field of child ⌊k/2⌋** of the bucket's `k` existing
+    children — never the sample at the bucket's middle index. At level 1 a child
+    is one raw sample, so `mid` is element `⌊k/2⌋` of the bucket.
 * NaN is skipped in `min` and `max`, each column on its own. A column that is
   all NaN yields its first entry, at position 0 — that entry's own NaN, payload
-  and all — so an all-NaN bucket of raw samples is two copies of its first.
+  and all. `first`, `mid` and `last` are copied from the child the rule names
+  and may be NaN while `min` and `max` are finite.
 * The comparison is strict `<` and `>`, so on a tie the **first** occurrence
-  wins and its bucket-relative index is what the positions carry.
+  wins and its bucket-relative index is what the positions carry. `first`, `mid`
+  and `last` are named by the geometry, so no comparison decides them.
 * Bitfield mode produces `[OR, AND]`, on the two's-complement bit pattern
-  including the sign bit, and is defined only for integer dtypes.
-* The ragged tail is folded, not dropped: the final bucket is short and is
-  computed over exactly the elements it has.
-* `from_raw=0` folds an `(N, 2)` level: `min` over the children's `min` column
-  and `max` over their `max` column, or OR over the OR column and AND over the
-  AND column. Positions index the child, not the raw sample — chaining to a raw
-  index is the caller's job (`_tslod_build.build_pyramid`).
-
-A stored numeric bucket has a third column, its representative, and it is not
-here because it is not a fold: it is chosen from the raw samples at every level
-by `_representative.py`, and the builder stores it beside these two.
+  including the sign bit, and is defined only for integer dtypes. A mask bucket
+  carries no `first`, `mid` or `last`.
+* The ragged tail is folded, not dropped: the final bucket is short, is computed
+  over exactly the elements it has, and its `k` is that count — which is what
+  makes its `mid` a different child from a full bucket's.
+* `from_raw=0` folds an `(N, 5)` level. Positions index the child, not the raw
+  sample — chaining to a raw index is the caller's job
+  (`_tslod_build.build_pyramid`).
 """
 
 from __future__ import annotations
@@ -33,11 +39,17 @@ import numpy as np
 
 
 def _numeric_group(block: np.ndarray, from_raw: bool):
-    """Fold one bucket. `block` is `(k,)` raw or `(k, 2)` tuples."""
+    """Fold one bucket. `block` is `(k,)` raw or `(k, 5)` tuples."""
+    k = block.shape[0]
     if from_raw:
         mins = maxs = block
+        # A child is one raw sample, so its "first field" is the sample itself.
+        first, mid, last = block[0], block[k // 2], block[k - 1]
     else:
         mins, maxs = block[:, 0], block[:, 1]
+        # mid is the FIRST field of child k // 2 — column 2, not column 3. The
+        # child's own mid describes the child's centre, not this bucket's.
+        first, mid, last = block[0, 2], block[k // 2, 2], block[k - 1, 4]
 
     if np.issubdtype(block.dtype, np.floating):
         nan_min = np.isnan(mins)
@@ -64,7 +76,7 @@ def _numeric_group(block: np.ndarray, from_raw: bool):
     else:
         i_min = int(np.argmin(mins))
         i_max = int(np.argmax(maxs))
-    return mins[i_min], maxs[i_max], i_min, i_max
+    return mins[i_min], maxs[i_max], first, mid, last, i_min, i_max
 
 
 def build_level(values: np.ndarray, branching_factor: int, from_raw: int,
@@ -84,7 +96,7 @@ def build_level(values: np.ndarray, branching_factor: int, from_raw: int,
 
     n = arr.shape[0]
     n_out = -(-n // bf)
-    out = np.empty((n_out, 2), dtype=arr.dtype)
+    out = np.empty((n_out, 2 if aggregation_mode == 1 else 5), dtype=arr.dtype)
     pos = np.empty((n_out, 2), dtype=np.int64)
 
     for b in range(n_out):
@@ -97,8 +109,9 @@ def build_level(values: np.ndarray, branching_factor: int, from_raw: int,
             out[b] = (np.bitwise_or.reduce(lanes_or), np.bitwise_and.reduce(lanes_and))
             pos[b] = (0, 0)
         else:
-            mn, mx, i_min, i_max = _numeric_group(block, bool(from_raw))
-            out[b] = (mn, mx)
+            mn, mx, first, mid, last, i_min, i_max = _numeric_group(
+                block, bool(from_raw))
+            out[b] = (mn, mx, first, mid, last)
             pos[b] = (i_min, i_max)
 
     return (out, pos) if positions else out

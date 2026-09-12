@@ -58,7 +58,7 @@ DTYPES = FLOATS + SIGNED + UNSIGNED
 #: block (512/256), a ragged block (700/256), and a single-bucket fold (64/64).
 GRID = [(8, 2), (16, 4), (512, 256), (700, 256), (10, 3), (64, 64)]
 
-COLUMN_ORDER = "min,max"
+COLUMN_ORDER = "min,max,first,mid,last"
 BUCKET_COUNT_RULE = "ceil(N / branching_factor)"
 
 _LCG_A = 6364136223846793005
@@ -139,16 +139,20 @@ def gen_numeric() -> Vector:
     vec = Vector(
         id="set3-build-level-numeric", set_=SET, kind="fixture",
         asserts=(
-            "build_level in numeric mode produces [min, max] per bucket in that column "
-            "order, over all ten dtypes, for both from_raw=1 (raw samples) and "
-            "from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, "
-            "and folds the ragged tail rather than dropping it."),
+            "build_level in numeric mode produces [min, max, first, mid, last] per "
+            "bucket in that column order, over all ten dtypes, for both from_raw=1 (raw "
+            "samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] "
+            "positions, and folds the ragged tail rather than dropping it."),
         source=FOLD_SOURCE,
-        contract=("Both columns share a type and nothing in the bytes says which is "
+        contract=("All five columns share a type and nothing in the bytes says which is "
                   "which; the order is pinned because only the format can say it."),
         requires=["feature:positions"] + [f"dtype:{d}" for d in DTYPES],
-        notes=("⟢ Column order is [min, max]. Both columns carry the same dtype, so a "
-               "swapped pair shows only on data where the two differ."),
+        notes=("⟢ Column order is [min, max, first, mid, last]. Every column folds from "
+               "the row below — first from the first child's first, last from the last "
+               "child's last, and mid from the FIRST field of child k//2 of the k "
+               "children a bucket has — so the from_raw=0 cases are where those merge "
+               "rules are under test. At level 1 a child is one raw sample, so mid is "
+               "element k//2 of the bucket."),
     )
     for dtype in DTYPES:
         for n, bf in GRID:
@@ -227,9 +231,10 @@ def gen_nan_matrix() -> Vector:
         id="set3-build-level-nan-matrix", set_=SET, kind="fixture",
         asserts=(
             "NaN is skipped in min and max, each column on its own; a column that is "
-            "all NaN yields its first entry, at position 0, so an all-NaN bucket of raw "
-            "samples is two copies of its first NaN at positions [0, 0] — and every NaN "
-            "that came from an input element keeps that element's bit pattern."),
+            "all NaN yields its first entry, at position 0; first, mid and last are "
+            "copied from the children the rule names and may therefore be NaN while min "
+            "and max are finite — and every NaN that came from an input element keeps "
+            "that element's bit pattern."),
         source=FOLD_SOURCE,
         contract=("NaN handling is the whole of a bucket's behaviour on invalid data, "
                   "and numeric equality cannot test it because NaN is equal to nothing."),
@@ -271,7 +276,8 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/min-column-all-nan",
-        np.array([[N_A, 1.0], [N_B, 5.0], [N_C, 2.0], [N_A, 3.0]],
+        np.array([[N_A, 1.0, 10.0, 15.0, 20.0], [N_B, 5.0, 11.0, 16.0, 21.0],
+                  [N_C, 2.0, 12.0, 17.0, 22.0], [N_A, 3.0, 13.0, 18.0, 23.0]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "the min column is entirely NaN and the max column is not. The "
@@ -281,7 +287,8 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/max-column-all-nan",
-        np.array([[3.0, N_A], [1.0, N_B], [2.0, N_C], [4.0, N_A]],
+        np.array([[3.0, N_A, 10.0, 15.0, 20.0], [1.0, N_B, 11.0, 16.0, 21.0],
+                  [2.0, N_C, 12.0, 17.0, 22.0], [4.0, N_A, 13.0, 18.0, 23.0]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "the same rule mirrored: the max column is entirely NaN and the "
@@ -290,7 +297,8 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "columns-independent/one-half-nan-tuple",
-        np.array([[3.0, 4.0], [N_A, 7.0], [2.0, 5.0], [6.0, 1.0]],
+        np.array([[3.0, 4.0, 10.0, 15.0, 20.0], [N_A, 7.0, 11.0, 16.0, 21.0],
+                  [2.0, 5.0, 12.0, 17.0, 22.0], [6.0, 1.0, 13.0, 18.0, 23.0]],
                  dtype=np.float64), 4, 0,
         extra={"note": (
             "one child has a NaN min and a valid max. Its min is skipped and "
@@ -299,16 +307,19 @@ def gen_nan_matrix() -> Vector:
 
     _numeric_case(
         vec, "nan-payload-preserved/tuples-wholly-nan",
-        np.array([[N_A, N_B], [N_C, N_C], [N_C, N_C], [N_C, N_C]],
+        np.array([[N_A, N_B, N_A, N_B, N_A], [N_C, N_C, N_C, N_C, N_C],
+                  [N_C, N_C, N_C, N_C, N_C], [N_C, N_C, N_C, N_C, N_C]],
                  dtype=np.float64), 4, 0,
         extra={"nan_payload_is_preserved": True,
                "note": (
-                   "both columns are wholly NaN, so each falls back to its own "
-                   "first child — and the bytes that come back are that "
-                   "child's, 0x7FF800000000ABCDE for min and 0x7FF8000001234"
-                   "56 for max, NOT the canonical 0x7FF8000000000000 a "
-                   "manufactured NaN would carry. Different payloads in the "
-                   "two columns, so a fold that returns one for both fails")})
+                   "every column is wholly NaN. min and max each fall back to "
+                   "their own first child — and the bytes that come back are "
+                   "that child's, 0x7FF800000000ABCDE for min and 0x7FF8000001"
+                   "23456 for max, NOT the canonical 0x7FF8000000000000 a "
+                   "manufactured NaN would carry. first is the first child's "
+                   "first and mid the FIRST field of child 2, which carries a "
+                   "third payload again, so a fold that returns one NaN for "
+                   "every column fails")})
 
     for dtype, width in (("float32", 4), ("float64", 8)):
         first = _nan(width, 0x0ABCDE if width == 8 else 0x0ABCDE)
@@ -476,8 +487,27 @@ def gen_edges() -> Vector:
     for n in (1, 2, 3):
         arr = np.arange(7.5, 7.5 + n, dtype="float64")
         _numeric_case(vec, f"n{n}-shorter-than-bf4", arr, 4, 1, extra={
-            "note": "one bucket, ragged: min and max both come from the same short run",
+            "note": ("one bucket, ragged: min, max, first and last all come from the "
+                     "same short run, and mid is its element n//2"),
         })
+
+    # mid is the first field of child k//2, never the sample at the bucket's
+    # middle index, and a ragged bucket above level 1 is where the two part.
+    # Ten samples at bf 4 fold to three buckets of 4, 4 and 2; folding those
+    # three with bf 4 gives one bucket whose k is 3, so mid is child 1's FIRST
+    # — raw sample 4, value 5.0 — while the run's middle index is 5.
+    ten = np.ascontiguousarray(np.arange(10, dtype="float64") * 1.25)
+    level1 = _fold.build_level(ten, 4, 1, 0)
+    _numeric_case(vec, "ragged-children/k3-mid-is-child-1-first",
+                  np.ascontiguousarray(level1), 4, 0, extra={
+                      "child_count": 3,
+                      "note": ("a level of three buckets folded into one, so k is 3 and "
+                               "mid is child 1's first field: raw sample 4, value 5.0. "
+                               "The sample at the middle index of the ten raw samples "
+                               "is index 5, value 6.25, and a fold that reached for it "
+                               "would store a value no child's row holds — which is "
+                               "what makes mid a merge rule rather than an index"),
+                  })
     return vec
 
 

@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 25,
-    "cases": 1322,
+    "cases": 1323,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -722,11 +722,11 @@
       "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
       "contract": "The fold refuses an empty input and a branching factor below two rather than returning something plausible.",
       "requires": [],
-      "case_count": 6,
+      "case_count": 7,
       "files": [
         {
           "path": "set3-build-level/set3-build-level-edges.json",
-          "sha256": "2a326deb817267a5e4306765a470a079efc9a9343659297afc9f0e29e2d2ee39"
+          "sha256": "3bb262b3cbb13a8c8404dfa2f3c98456d89cec331d49cdb1486fcb4be4107860"
         }
       ]
     },
@@ -734,7 +734,7 @@
       "id": "set3-build-level-nan-matrix",
       "set": "set3-build-level",
       "kind": "fixture",
-      "asserts": "NaN is skipped in min and max, each column on its own; a column that is all NaN yields its first entry, at position 0, so an all-NaN bucket of raw samples is two copies of its first NaN at positions [0, 0] \u2014 and every NaN that came from an input element keeps that element's bit pattern.",
+      "asserts": "NaN is skipped in min and max, each column on its own; a column that is all NaN yields its first entry, at position 0; first, mid and last are copied from the children the rule names and may therefore be NaN while min and max are finite \u2014 and every NaN that came from an input element keeps that element's bit pattern.",
       "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
       "contract": "NaN handling is the whole of a bucket's behaviour on invalid data, and numeric equality cannot test it because NaN is equal to nothing.",
       "requires": [
@@ -746,7 +746,7 @@
       "files": [
         {
           "path": "set3-build-level/set3-build-level-nan-matrix.json",
-          "sha256": "36b494335c9d017296e7343bf00304489de0a9f361f3af37d14165a085829a4f"
+          "sha256": "69a9887033aafa5c4df9d8a4ed8c9cdf72732f3d91a0a13add74255e8839a6aa"
         }
       ]
     },
@@ -754,9 +754,9 @@
       "id": "set3-build-level-numeric",
       "set": "set3-build-level",
       "kind": "fixture",
-      "asserts": "build_level in numeric mode produces [min, max] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
+      "asserts": "build_level in numeric mode produces [min, max, first, mid, last] per bucket in that column order, over all ten dtypes, for both from_raw=1 (raw samples) and from_raw=0 (tuples), with bucket-relative [min_idx, max_idx] positions, and folds the ragged tail rather than dropping it.",
       "source": "tools/_fold.py \u2014 the specification's fold in numpy; inputs constructed by tools/gen_set3_build_level.py",
-      "contract": "Both columns share a type and nothing in the bytes says which is which; the order is pinned because only the format can say it.",
+      "contract": "All five columns share a type and nothing in the bytes says which is which; the order is pinned because only the format can say it.",
       "requires": [
         "feature:positions",
         "dtype:float32",
@@ -774,7 +774,7 @@
       "files": [
         {
           "path": "set3-build-level/set3-build-level-numeric.json",
-          "sha256": "e35f47aa76f791e1bdc9f2f4fab375d3044cfa2cb86197100eef0420a4c747d8"
+          "sha256": "7854d091a7ddd91330139a1b8f0c7600e71f000df4826030bdf1ed46763f7d92"
         },
         {
           "path": "set3-build-level/raw_float32_bf256_n512_input.bin",
@@ -864,7 +864,7 @@
       "files": [
         {
           "path": "set3-build-level/set3-build-level-tie-break.json",
-          "sha256": "a857b3b4ba5ab75e22df81789e30afd1d83d60a3dab6bbb98917474790a7b652"
+          "sha256": "34422889c75b2b22859f9801762e83dc2609d56a3e624e0c18d8f6f80b971b05"
         }
       ]
     },
@@ -1013,11 +1013,11 @@
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         }
       ]
     },
@@ -1036,7 +1036,7 @@
       "files": [
         {
           "path": "v1-format/v1-block-framing.json",
-          "sha256": "3611a4c9828fe326f8a0b6d8c619045fd16085284760d838647715bbc8c608bb"
+          "sha256": "f5909f213c998361984d33b7268358d6c983f04f7a76536ba0ee08289a93b437"
         }
       ]
     },
@@ -1055,227 +1055,227 @@
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "de90b79effa928aee3c6b58409ef748e8feedecec3002195e163df1e266d5fce"
+          "sha256": "771d19aeae173767b21b9a2008a990ca74c82a3015b877917869b6d1f4258f2d"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_no_moment_stream.tslod",
-          "sha256": "9392897c9b01734c06f1ba0fff00181b398774eb430c8899d657e97b871508cd"
+          "sha256": "f3644e8264bbe6dbfeb590f620bc9eda5409544381378696deb52064b42647d7"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "690aa38d0b40c01e6512a79660a664975d62265f86de228ab99c2630bf8535be"
+          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
         },
         {
           "path": "v1-format/files/v1_p2_with_moments.tslod",
-          "sha256": "21c1b90d860ec8d0f2b10cb195c7f2875a6fbae04c70585cce6f5e3304ab6a4e"
+          "sha256": "36cb575207503098bfb9daec9dae0a4b63001e70f65b974224885f967e237863"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "e9d81f7cf32f9447f06c2c55e1ea304a2565342a3a0164d3d392b0b45fb6ebc5"
+          "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "e9d81f7cf32f9447f06c2c55e1ea304a2565342a3a0164d3d392b0b45fb6ebc5"
+          "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "e9d81f7cf32f9447f06c2c55e1ea304a2565342a3a0164d3d392b0b45fb6ebc5"
+          "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "e9d81f7cf32f9447f06c2c55e1ea304a2565342a3a0164d3d392b0b45fb6ebc5"
+          "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
-          "sha256": "e9d81f7cf32f9447f06c2c55e1ea304a2565342a3a0164d3d392b0b45fb6ebc5"
+          "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         }
       ]
     },
@@ -1296,59 +1296,59 @@
       "files": [
         {
           "path": "v1-format/v1-profile0-conformance-set.json",
-          "sha256": "7dab4fd62f5d6cff6086c2e87e8e23b3eb340b5a008861f598811e2f64bf0ea3"
+          "sha256": "d43add57eb2516e560f7d0920f83b275436747811c01ab52ce9cf1a864f7df52"
         },
         {
           "path": "v1-format/files/v1_all_ten_dtypes.tslod",
-          "sha256": "78aaa9e04281e38219bf15fde90db51abf3dd8521b5cd647b4e1d322f4794db8"
+          "sha256": "399cf218d78f6907ba53b06c4882d2cf36ac265a96aaf0f5a30d9dffb8a21250"
         },
         {
           "path": "v1-format/files/v1_both_timing_modes.tslod",
-          "sha256": "6ffb88100773954408799c470ec223dad1c8acfe9f35acb2fe9d0fdc277ea157"
+          "sha256": "f472b15b3d8cbd59228b3d4c1804a84cf951d0dcf4afdd6fc8483e75b7b0457c"
         },
         {
           "path": "v1-format/files/v1_bitfield_ragged_tail.tslod",
-          "sha256": "ddc240c6e1995aed1ad94de8ae2fdc79b38eaf10af27d4d7c979ffa7a21351b3"
+          "sha256": "5f2e0567d196248dff0f06ae84256d948f0b67eea8456b6f4acb0eeb2e129333"
         },
         {
           "path": "v1-format/files/v1_group_unequal_lengths.tslod",
-          "sha256": "fd0511562cabcaa7c15529b971667a3a49982adbc41f747efeae4b721c94cf55"
+          "sha256": "883e2eb886e10965b881a578ffd64f4f03973e890f6941f57002c20bb6952d86"
         },
         {
           "path": "v1-format/files/v1_enums_and_units.tslod",
-          "sha256": "d79fa18679afae3b194124c873f2939db1389cab31c06a10b47516903be588a4"
+          "sha256": "054cf0f9ca9875675caac84a7995d50c42934e565bcd081953dbcca938a136c8"
         },
         {
           "path": "v1-format/files/v1_active_file_state.tslod",
-          "sha256": "6e4f43383434c6216713a9d75372044e2e97d83f6406fa8b0abacc63625e9267"
+          "sha256": "e19ebf095951da65e4e59345c862cec3e447456e09867f3a763557304c56fa09"
         },
         {
           "path": "v1-format/files/v1_no_moment_stream.tslod",
-          "sha256": "9392897c9b01734c06f1ba0fff00181b398774eb430c8899d657e97b871508cd"
+          "sha256": "f3644e8264bbe6dbfeb590f620bc9eda5409544381378696deb52064b42647d7"
         },
         {
           "path": "v1-format/files/v1_block_samples_256.tslod",
-          "sha256": "8b0f24d91ca7bd913cd72027f4ba5f39e25201f6d9d78d18ff1e85b399a14afa"
+          "sha256": "3c9b3d586132f290cb45d984e2000c5aa265067d2ce9c8249f2fee7a4f1f31ea"
         },
         {
           "path": "v1-format/files/v1_block_samples_512.tslod",
-          "sha256": "7b74410ccde8ee0b05aa49530e5fe8210b5cb39e6fc23e5d0d4b3b4de8ec58da"
+          "sha256": "2fa49c47b0288341323e1e3999f19deac91cfb48cef7bd3e959e402ff15af95a"
         },
         {
           "path": "v1-format/files/v1_block_samples_1024.tslod",
-          "sha256": "bb942151f38a0bac4ee8229481f8186019e6775c299c5e4df2e6b23ff8c169f7"
+          "sha256": "031379a525a83f5ca309a54ee678ddbb38ee9f9711b9829089ce5547b3e14436"
         },
         {
           "path": "v1-format/files/v1_branching_factor_2.tslod",
-          "sha256": "c22586b2cbde2e6ea59d972f039dc4157fadf239865e069518530245fb274395"
+          "sha256": "9cc8277f6e7d5366cdfaa1e9e88b3f9752f72fec111a2a0ed872e6e8999a538e"
         },
         {
           "path": "v1-format/files/v1_branching_factor_16.tslod",
-          "sha256": "d6deff73d8d36bbd8947cf69992ea32434587b65cbfc7660b56d983ba9ee5034"
+          "sha256": "c8e6aee4174b15b006fe2f0abe1b162f700608b88810e1d89f01fd7988a9459a"
         },
         {
           "path": "v1-format/files/v1_branching_factor_1024.tslod",
-          "sha256": "a2567aca50c1af01d43502d7e3c46aff9662de2a85013e330677008e40fdb8ff"
+          "sha256": "aa2f196ef5f903f1171b08d2cdd64fe4bed6c54a1bbe2a20cde9c45b880fecb8"
         }
       ]
     },
@@ -1371,19 +1371,19 @@
       "files": [
         {
           "path": "v1-format/v1-profile2-conformance-set.json",
-          "sha256": "bcdc0c79a17420b140f54f203457140554fc39bc1ca4061d499130ca4d7bc7af"
+          "sha256": "54f6471f3c40ce2408bca4f6fb962330f878df6775e95822142fd30540301630"
         },
         {
           "path": "v1-format/files/v1_p2_with_moments.tslod",
-          "sha256": "21c1b90d860ec8d0f2b10cb195c7f2875a6fbae04c70585cce6f5e3304ab6a4e"
+          "sha256": "36cb575207503098bfb9daec9dae0a4b63001e70f65b974224885f967e237863"
         },
         {
           "path": "v1-format/files/v1_p2_no_moments.tslod",
-          "sha256": "1d467dd5588e89ee30be1743a7533ef7bc5f7585835046893c5ee041f13cc19f"
+          "sha256": "c7592464d097749194594e4d24cafb3406b4169fd1561418478149162474a601"
         },
         {
           "path": "v1-format/files/v1_p2_active_with_moments.tslod",
-          "sha256": "c067370c7c9845cd6ffbf75855ef7512398250d86526ab67cb568d8bb639f8be"
+          "sha256": "15003af625d33528ad97d29bef5b38947032306a344f4d56d77dc52276d53df0"
         }
       ]
     },

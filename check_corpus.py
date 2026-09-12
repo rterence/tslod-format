@@ -177,8 +177,8 @@ def _implied_size(sample_count: int, columns: int, dtype: str) -> int:
 
     `sample_count` is the block's row count at its own level — raw samples at
     level 0, buckets above it — and the column count comes from the block
-    table: positions 3, variable-rate timestamp tuples 3, values 1 at level 0
-    and above it 3 numeric and 2 bitfield, moments 5. Nothing about this needs
+    table: positions 2, variable-rate timestamp tuples 5, values 1 at level 0
+    and above it 5 numeric and 2 bitfield, moments 5. Nothing about this needs
     the stream decoded, so an index entry can be checked against it before any
     payload is touched.
     """
@@ -186,20 +186,25 @@ def _implied_size(sample_count: int, columns: int, dtype: str) -> int:
 
 
 def _value_columns(level: int, aggregation_mode: int) -> int:
-    """A value bucket's columns: the sample at level 0; [min, max, rep] or [OR, AND] above."""
+    """A value bucket's columns: the sample at level 0; above it
+    [min, max, first, mid, last] or [OR, AND]."""
     if level == 0:
         return 1
-    return 3 if aggregation_mode == 0 else 2
+    return 5 if aggregation_mode == 0 else 2
 
 
-def _leading_columns(level: int, aggregation_mode: int) -> int:
+def _leading_columns(level: int, timing_mode: int, aggregation_mode: int) -> int:
     """The leading stream's columns, where there is one.
 
-    [min_ts, max_ts, rep_ts] on a numeric level >= 1 block at either rate;
-    otherwise a single timestamp per row — every raw sample's at level 0 of a
-    variable-rate group, and a variable-rate bitfield bucket's first sample's.
+    On a numeric level >= 1 block, [min_ts, max_ts] at fixed rate and all five
+    stamps at variable rate, where first, mid and last are stored because
+    nothing derives them. Otherwise a single timestamp per row — every raw
+    sample's at level 0 of a variable-rate group, and a variable-rate bitfield
+    bucket's first sample's.
     """
-    return 3 if (level >= 1 and aggregation_mode == 0) else 1
+    if level >= 1 and aggregation_mode == 0:
+        return 2 if timing_mode == 0 else 5
+    return 1
 
 
 def _leading_count(level: int, timing_mode: int, aggregation_mode: int) -> int:
@@ -495,7 +500,8 @@ def open_v1(data: bytes) -> dict:
                 #     last of them, where bit 0 says there is one.
                 kinds = []
                 if leading:
-                    kinds.append(("int64", _leading_columns(lv, aggregation_mode)))
+                    kinds.append(("int64", _leading_columns(lv, timing_mode,
+                                                            aggregation_mode)))
                 kinds.append((ch_dtype, _value_columns(lv, aggregation_mode)))
                 if lv >= 1 and aggregation_mode == 0 and has_moments:
                     kinds.append(("float64", 5))
@@ -743,10 +749,15 @@ def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: boo
     rule. This is a second implementation, written from the specification's
     words, and it shares no code with the first:
 
-    * numeric mode is `[min, max]` in that column order;
+    * numeric mode is `[min, max, first, mid, last]` in that column order;
     * NaN is skipped in min and max, each column on its own; a column that is
       all NaN yields its FIRST entry at position 0, and the NaN that lands there
       is that entry's own, not a manufactured one;
+    * `first` is the first child's `first` and `last` the last child's `last`,
+      each copied as stored and so possibly NaN; `mid` is the FIRST field of
+      child ⌊k/2⌋ of the bucket's k existing children, which at level 1 is
+      element ⌊k/2⌋ of the bucket and above it is that child's `first` column
+      and never its `mid`;
     * comparison is strict, so a repeated extreme resolves to its first
       occurrence and that bucket-relative index is what positions carry;
     * bitfield mode is `[OR, AND]` over the two's-complement bit
@@ -769,7 +780,7 @@ def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: boo
 
     n = arr.shape[0]
     n_out = -(-n // bf)
-    out = np.empty((n_out, 2), dtype=arr.dtype)
+    out = np.empty((n_out, 2 if mode == 1 else 5), dtype=arr.dtype)
     pos = np.empty((n_out, 2), dtype=np.int64)
     width = arr.dtype.itemsize * 8
     mask = (1 << width) - 1
@@ -806,6 +817,15 @@ def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: boo
             pos[b] = (0, 0)
             continue
 
+        # Numeric only, and below the bitfield branch because a mask row has
+        # two columns and no sample to copy: `first` is the first child's
+        # `first`, `last` the last child's `last`, and `mid` the FIRST field of
+        # child k // 2 — column 2, never that child's own mid.
+        if from_raw:
+            first, mid, last = block[0], block[k // 2], block[k - 1]
+        else:
+            first, mid, last = block[0, 2], block[k // 2, 2], block[k - 1, 4]
+
         i_min = i_max = None
         for i in range(k):
             x = lo[i]
@@ -825,7 +845,7 @@ def _ref_build_level(arr, bf: int, from_raw: int, mode: int, want_positions: boo
             i_min = 0
         if i_max is None:
             i_max = 0
-        out[b] = (lo[i_min], hi[i_max])
+        out[b] = (lo[i_min], hi[i_max], first, mid, last)
         pos[b] = (i_min, i_max)
 
     return (out, pos) if want_positions else out
@@ -1286,7 +1306,7 @@ def _walk_streams(data: bytes, has_moments: bool):
                     kinds.append(("timestamps", "int64", 1))
                 elif lv >= 1 and agg == 0:
                     kinds.append(("positions" if tm == 0 else "timestamps", "int64",
-                                  _leading_columns(lv, agg)))
+                                  _leading_columns(lv, tm, agg)))
                 elif lv >= 1 and agg == 1 and tm == 1:
                     kinds.append(("timestamps", "int64", 1))
                 kinds.append(("values", ch_dtype, _value_columns(lv, agg)))

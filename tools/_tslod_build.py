@@ -31,7 +31,6 @@ import numpy as np
 
 import _fold
 import _moments
-import _representative
 
 # ---------------------------------------------------------------------------
 # Layout constants — the record layouts, as the specification states them
@@ -168,28 +167,28 @@ def compute_num_levels(total_samples: int, bf: int) -> int:
     return levels
 
 
-def build_pyramid(raw: np.ndarray, bf: int, agg_mode: int,
-                  timestamps: np.ndarray | None = None, start_timestamp: int = 0):
-    """Return (levels, min_raw_idx, max_raw_idx, rep_raw_idx, moments).
+def build_pyramid(raw: np.ndarray, bf: int, agg_mode: int):
+    """Return (levels, raw_idx, moments).
 
-    `levels[0]` is the raw array; `levels[k]` for k >= 1 is the fold's (N, 2)
-    array, `[min, max]` or `[OR, AND]`. `min_raw_idx[k]` / `max_raw_idx[k]`
-    give, per bucket at level k, the absolute LEVEL-0 index whose value is that
-    bucket's min / max — chained through the parent level's positions from
-    level 2 up, which is the fold's rule and is what makes the stored timestamp
-    the true raw-sample instant rather than a bucket-boundary approximation.
+    `levels[0]` is the raw array; `levels[k]` for k >= 1 is the fold's
+    `(N, 5)` array, `[min, max, first, mid, last]`, or `(N, 2)` `[OR, AND]` in
+    bitfield mode.
 
-    `rep_raw_idx[k]` is every bucket's representative at level k, and it is
-    NOT chained. The representative is chosen from the raw samples at every
-    level, over the whole channel, so each level asks `_representative` afresh
-    with its own bucket span. `timestamps` is the level-0 stamps of a
-    variable-rate channel, whose representative takes the stamp minus
-    `start_timestamp` as its x; at fixed rate it is None and x is the index.
+    `raw_idx[k]` maps each of the five column names to the absolute LEVEL-0
+    index of the sample that column holds, per bucket at level k. `min` and
+    `max` are chained through the parent level's positions from level 2 up,
+    which is what makes their stored timestamp the true raw-sample instant
+    rather than a bucket-boundary approximation. `first`, `mid` and `last` are
+    arithmetic in the bucket's geometry: `first` is the bucket's first sample,
+    `last` its last existing one, and `mid` the first sample of child
+    `k // 2` of its `k` existing children — the child rule, evaluated on
+    indices. The two derivations are required to agree below: the fold takes
+    the values from the children and this takes the indices from the geometry,
+    and a disagreement between them would store a value under the wrong time.
     """
     levels = [raw]
-    min_idx_by_level: dict[int, np.ndarray] = {}
-    max_idx_by_level: dict[int, np.ndarray] = {}
-    rep_idx_by_level: dict[int, np.ndarray] = {}
+    n_raw = len(raw)
+    idx_by_level: dict[int, dict[str, np.ndarray]] = {}
     #: level -> (N, 5) float64 stored moments. : level 1 folds
     #: raw samples left to right; level k folds level k-1's stored tuples. It is
     #: hierarchical by rule, not a re-read of level 0 at each level.
@@ -208,19 +207,36 @@ def build_pyramid(raw: np.ndarray, bf: int, agg_mode: int,
             offsets = np.arange(n_out, dtype=np.int64) * bf
             child_min = offsets + pos[:, 0].astype(np.int64)
             child_max = offsets + pos[:, 1].astype(np.int64)
+            # The children a bucket actually has, which is `bf` for every
+            # bucket but a ragged last one — and k is what names mid's child.
+            counts = np.minimum(offsets + bf, size) - offsets
+            span_below = bf ** level          # raw samples under one child
+            here = {
+                "first": offsets * span_below,
+                "mid": (offsets + counts // 2) * span_below,
+                "last": np.minimum((offsets + counts) * span_below, n_raw) - 1,
+            }
             if level == 0:
-                min_idx_by_level[1] = child_min
-                max_idx_by_level[1] = child_max
+                here["min"], here["max"] = child_min, child_max
                 moments_by_level[1] = _moments.level1_from_raw(current, bf)
             else:
                 moments_by_level[level + 1] = _moments.next_level(
                     moments_by_level[level], bf)
                 # Chain: the child index is a bucket at `level`, whose own
                 # stored raw index is already resolved.
-                min_idx_by_level[level + 1] = min_idx_by_level[level][child_min]
-                max_idx_by_level[level + 1] = max_idx_by_level[level][child_max]
-            rep_idx_by_level[level + 1] = _representative.level_representatives(
-                raw, bf ** (level + 1), timestamps, start_timestamp)
+                here["min"] = idx_by_level[level]["min"][child_min]
+                here["max"] = idx_by_level[level]["max"][child_max]
+            idx_by_level[level + 1] = here
+            # The fold took these five values from the children; the indices
+            # above came from the geometry. They must name the same samples, or
+            # a stored value would be paired with another sample's time.
+            for name, col in (("min", 0), ("max", 1), ("first", 2),
+                              ("mid", 3), ("last", 4)):
+                named = np.ascontiguousarray(raw[here[name]])
+                folded = np.ascontiguousarray(tuples[:, col])
+                assert named.tobytes() == folded.tobytes(), (
+                    f"level {level + 1}: the folded {name} column and the raw "
+                    f"sample its index names disagree")
         else:
             tuples = _fold.build_level(
                 np.ascontiguousarray(current), bf, from_raw, agg_mode)
@@ -228,8 +244,7 @@ def build_pyramid(raw: np.ndarray, bf: int, agg_mode: int,
         current, from_raw = tuples, 0
         level += 1
 
-    return (levels, min_idx_by_level, max_idx_by_level, rep_idx_by_level,
-            moments_by_level)
+    return levels, idx_by_level, moments_by_level
 
 
 # ---------------------------------------------------------------------------
@@ -312,9 +327,7 @@ def build(spec: FileSpec) -> BuildResult:
             per_channel.append({"levels": [], "num_levels": max(num_levels, 1)})
             continue
 
-        levels, min_idx, max_idx, rep_idx, moments = build_pyramid(
-            raw, bf, ch.aggregation_mode,
-            grp.timestamps if grp.timing_mode == 1 else None, grp.start_timestamp)
+        levels, raw_idx, moments = build_pyramid(raw, bf, ch.aggregation_mode)
 
         def t_of_raw(i):
             if grp.timing_mode == 0:
@@ -343,20 +356,20 @@ def build(spec: FileSpec) -> BuildResult:
                         ts_payload, ts_columns = stamps.tobytes(), 1
                     values_payload = chunk.tobytes()
                 elif ch.aggregation_mode == 0:
-                    # [min_ts, max_ts, rep_ts] at both rates: the time of the
-                    # raw sample each value column names, by the one time rule
-                    # at fixed rate and as stored at variable rate. The values
-                    # are [min, max, rep], rep being that raw sample itself, so
-                    # a NaN there keeps its payload.
-                    reps = rep_idx[level][b0:b1]
+                    # Two stamps at fixed rate and five at variable, in the
+                    # values' column order. first, mid and last need none at
+                    # fixed rate: the geometry names their raw indices and the
+                    # time rule gives the time of an index. At variable rate
+                    # every stamp is the stored stamp of the sample its column
+                    # names, looked up and never computed.
+                    named = (("min", "max") if grp.timing_mode == 0 else
+                             ("min", "max", "first", "mid", "last"))
                     cols = np.array(
-                        [[t_of_raw(i) for i in row] for row in
-                         zip(min_idx[level][b0:b1], max_idx[level][b0:b1], reps)],
-                        dtype=np.int64)
+                        [[t_of_raw(raw_idx[level][name][j]) for name in named]
+                         for j in range(b0, b1)], dtype=np.int64)
                     ts_payload = np.ascontiguousarray(cols).tobytes()
-                    ts_columns = 3
-                    values_payload = np.ascontiguousarray(np.column_stack(
-                        [chunk[:, 0], chunk[:, 1], raw[reps]])).tobytes()
+                    ts_columns = len(named)
+                    values_payload = chunk.tobytes()
                 else:
                     if grp.timing_mode == 1:
                         first = np.array([t_of_raw(min(j * span, n_raw - 1))
