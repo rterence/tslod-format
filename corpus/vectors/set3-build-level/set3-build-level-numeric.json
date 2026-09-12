@@ -18,7 +18,7 @@
     "dtype:uint32",
     "dtype:uint64"
   ],
-  "notes": "\u27e2 Column order is [min, max]. A stored numeric bucket carries a third column, its representative, which is not a fold \u2014 it is chosen from the raw samples at every level \u2014 and is pinned by set5-representative, not here.",
+  "notes": "\u27e2 Column order is [min, max]. Both columns carry the same dtype, so a swapped pair shows only on data where the two differ.",
   "case_count": 110,
   "cases": [
     {

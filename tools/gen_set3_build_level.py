@@ -147,10 +147,8 @@ def gen_numeric() -> Vector:
         contract=("Both columns share a type and nothing in the bytes says which is "
                   "which; the order is pinned because only the format can say it."),
         requires=["feature:positions"] + [f"dtype:{d}" for d in DTYPES],
-        notes=("⟢ Column order is [min, max]. A stored numeric bucket carries a third "
-               "column, its representative, which is not a fold — it is chosen from the "
-               "raw samples at every level — and is pinned by set5-representative, "
-               "not here."),
+        notes=("⟢ Column order is [min, max]. Both columns carry the same dtype, so a "
+               "swapped pair shows only on data where the two differ."),
     )
     for dtype in DTYPES:
         for n, bf in GRID:

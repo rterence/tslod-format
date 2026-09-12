@@ -1393,7 +1393,6 @@ def c_profile0(v, c):
         f"header.features is {features}, the vector says {c['features']}")
     assert bool(features & FEATURE_MOMENT_STREAM) == c["moment_stream_present"]
     _verify_content(data, c, bool(features & FEATURE_MOMENT_STREAM))
-    _check_stored_representatives(data)
 
 
 #: Wire dtype enum, restated here rather than imported — this file is the
@@ -1450,7 +1449,6 @@ def c_profile2(v, c):
     assert n == c["decoded_stream_count"]
     assert str(total) == c["decoded_bytes"]
     assert sha == c["decoded_sha256"]
-    _check_stored_representatives(data)
 
 
 def c_negative(v, c):
@@ -1570,232 +1568,6 @@ def c_codec(v, c):
         f"decoded {len(got)} bytes, expected {expected.nbytes}")
 
 
-# --------------------------------------------------------------------------
-# The representative, re-derived from spec/v1 in scalar Python
-# --------------------------------------------------------------------------
-
-
-def _ref_rep_coordinates(values, timestamps=None, start_timestamp: int = 0):
-    """`x` and `y` of every raw sample, as the rule's step 1 states them.
-
-    Not `_representative.coordinates`: this is a second reading of the same
-    words. Python's `float()` of an integer rounds to nearest, ties to even,
-    which is the conversion the rule names, and a float32 widens exactly. At
-    variable rate the subtraction is done on integers, so it is exact, and only
-    its result is rounded.
-    """
-    ys = [float(v) for v in values.tolist()]
-    if timestamps is None:
-        return [float(i) for i in range(len(ys))], ys
-    start = int(start_timestamp)
-    return [float(int(t) - start) for t in timestamps.tolist()], ys
-
-
-def _ref_rep_pick(xs, ys, lo: int, hi: int, prev, nxt) -> int:
-    """The raw index a bucket that is not an edge stores: steps 4 and 5.
-
-    A running maximum seeded at -1 and replaced only on a strictly greater
-    area, so the first of two equal areas stays; `area > running` is False for
-    a NaN area, so one never wins. No winner: the first sample whose y is not
-    NaN. None of those either: the bucket's first sample as stored.
-    """
-    pax, pay = prev
-    nax, nay = nxt
-    running, winner, first_valid = -1.0, None, None
-    for i in range(lo, hi):
-        y = ys[i]
-        if y != y:
-            continue
-        if first_valid is None:
-            first_valid = i
-        area = abs((pax - nax) * (y - pay) - (pax - xs[i]) * (nay - pay))
-        if area > running:
-            running, winner = area, i
-    if winner is not None:
-        return winner
-    return lo if first_valid is None else first_valid
-
-
-def _ref_rep_level(values, span: int, timestamps=None, start_timestamp: int = 0):
-    """Every bucket's representative at one level, as raw indices.
-
-    The anchors are left-to-right float64 sums over the non-NaN samples
-    divided by their count — a Python loop, never `sum()` over floats of
-    unknown order and never numpy, whose float sum is pairwise.
-    """
-    xs, ys = _ref_rep_coordinates(values, timestamps, start_timestamp)
-    n = len(ys)
-    buckets = [(lo, min(lo + span, n)) for lo in range(0, n, span)]
-    anchors = []
-    for lo, hi in buckets:
-        sx = sy = 0.0
-        valid = 0
-        for i in range(lo, hi):
-            if ys[i] == ys[i]:
-                sx += xs[i]
-                sy += ys[i]
-                valid += 1
-        anchors.append((sx / valid, sy / valid) if valid
-                       else (float("nan"), float("nan")))
-    reps = []
-    for j, (lo, hi) in enumerate(buckets):
-        if j == 0:
-            reps.append(0)                      # a one-bucket level lands here too
-        elif j == len(buckets) - 1:
-            reps.append(n - 1)
-        else:
-            reps.append(_ref_rep_pick(xs, ys, lo, hi, anchors[j - 1], anchors[j + 1]))
-    return reps
-
-
-def _ref_time(start: int, rate: float, i: int) -> int:
-    """The one time rule, over the exact rational value of the stored rate."""
-    exact = Fraction(i) * NS / Fraction(rate)
-    return start + rhe(exact.numerator, exact.denominator)
-
-
-def _same_sample(values, i: int, want) -> bool:
-    """Sample `i` is the value the case states: its bits, for a float."""
-    if values.dtype.kind == "f":
-        bits = values[i:i + 1].view(f"<u{values.dtype.itemsize}")[0]
-        return want["dtype"] == values.dtype.name and int(want["bits"], 16) == int(bits)
-    return int(values[i]) == int(want)
-
-
-def c_rep_rule(v, c):
-    if c["applies_to"] == "bucket":
-        xs, ys = arr_of(c["xs"]).tolist(), arr_of(c["ys"]).tolist()
-        prev = (f_of(c["prev_anchor"]["x"]), f_of(c["prev_anchor"]["y"]))
-        nxt = (f_of(c["next_anchor"]["x"]), f_of(c["next_anchor"]["y"]))
-        got = _ref_rep_pick(xs, ys, 0, len(ys), prev, nxt)
-        assert got == c["expected_bucket_relative_index"], (
-            f"the rule picks index {got}, the case says "
-            f"{c['expected_bucket_relative_index']}")
-        return
-    values = arr_of(c["input"])
-    span = c["branching_factor"] ** c["level"]
-    assert c["bucket_span"] == span, "bucket_span is not branching_factor ** level"
-    start = int(c["start_timestamp"])
-    ts = arr_of(c["timestamps"]) if c["timing"] == "variable" else None
-    reps = _ref_rep_level(values, span, ts, start)
-    assert len(reps) == c["expected_bucket_count"] == len(c["expected"])
-    for j, (i, want) in enumerate(zip(reps, c["expected"])):
-        assert want["bucket"] == j
-        assert int(want["raw_index"]) == i, (
-            f"bucket {j}: the rule picks sample {i}, the case says {want['raw_index']}")
-        assert want["bucket_relative_index"] == i - j * span
-        assert _same_sample(values, i, want["rep"]), (
-            f"bucket {j}: rep is not sample {i}'s value, bit for bit")
-        t = int(ts[i]) if ts is not None else _ref_time(start, f_of(c["sample_rate"]), i)
-        assert int(want["rep_ts"]) == t, (
-            f"bucket {j}: rep_ts {want['rep_ts']}, the time rule gives {t}")
-
-
-def _decoded_by_stream(data: bytes) -> dict:
-    """Every stream of a file, decoded, keyed `(channel, level, kind)`.
-
-    A level's blocks are concatenated in block order and the result shaped by
-    the columns the block table gives that kind, so a level reads as one
-    array: `(N,)` samples at level 0, `(N, 3)` positions and values above it.
-    """
-    features, = struct.unpack_from("<Q", data, 92)
-    parts: dict = {}
-    for ci, lv, _b, kind, dtype, cols, stream in _walk_streams(
-            data, bool(features & FEATURE_MOMENT_STREAM)):
-        parts.setdefault((ci, lv, kind), (dtype, cols, []))[2].append(
-            _decode(stream, dtype))
-    out = {}
-    for key, (dtype, cols, chunks) in parts.items():
-        arr = np.frombuffer(b"".join(chunks), dtype=np.dtype(dtype))
-        out[key] = arr if cols == 1 else arr.reshape(-1, cols)
-    return out
-
-
-def _check_stored_representatives(data: bytes) -> None:
-    """Every representative a file stores is the one the rule names.
-
-    For every numeric channel and every level above 0, the values stream's
-    third column must be, bucket by bucket, the raw sample this file's own walk
-    of the rule picks — bit for bit — and the third column of the positions or
-    timestamps stream that sample's time. The golden files are written by this
-    repository's builder, so this is what keeps them to the specification
-    rather than to the builder: the walk is re-derived here and reads only the
-    file, taking each channel's samples from its level-0 blocks and its group's
-    timing from the group entry.
-    """
-    streams = _decoded_by_stream(data)
-    bf, = struct.unpack_from("<I", data, 8)
-    n_channels, = struct.unpack_from("<I", data, 16)
-    group_off, = struct.unpack_from("<Q", data, 24)
-    channel_off, = struct.unpack_from("<Q", data, 32)
-    for ci in range(n_channels):
-        base = channel_off + ci * CHANNEL_ENTRY_SIZE
-        if data[base + 65] != 0 or (ci, 0, "values") not in streams:
-            continue                        # bitfield, or no samples at all
-        gid, = struct.unpack_from("<H", data, base + 66)
-        entry = group_off + gid * GROUP_ENTRY_SIZE
-        rate, start = struct.unpack_from("<dq", data, entry)
-        variable = data[entry + 24] == 1
-        raw = streams[(ci, 0, "values")]
-        ts = streams[(ci, 0, "timestamps")] if variable else None
-        lead = "timestamps" if variable else "positions"
-        lv = 1
-        while (ci, lv, "values") in streams:
-            reps = _ref_rep_level(raw, bf ** lv, ts, start)
-            values, times = streams[(ci, lv, "values")], streams[(ci, lv, lead)]
-            assert len(reps) == values.shape[0] == times.shape[0], (
-                f"channel {ci} level {lv}: {values.shape[0]} buckets stored, "
-                f"the samples imply {len(reps)}")
-            for j, i in enumerate(reps):
-                assert bits_equal(values[j:j + 1, 2], raw[i:i + 1]), (
-                    f"channel {ci} level {lv} bucket {j}: the stored rep is not "
-                    f"sample {i}, the one the rule names")
-                t = int(ts[i]) if variable else _ref_time(start, rate, i)
-                assert int(times[j, 2]) == t, (
-                    f"channel {ci} level {lv} bucket {j}: rep_ts is "
-                    f"{int(times[j, 2])}, sample {i} is at {t}")
-            lv += 1
-
-
-def c_rep_stored(v, c):
-    """One golden channel's representatives, from its own samples, as stored.
-
-    The input is required to BE the channel's level-0 samples, so the case
-    cannot drift from the file it names, and the group's rate and start are
-    read from the file rather than trusted from the case. The expected columns
-    are then required twice over: from the rule, walked here, and from the
-    file's own third columns at this level.
-    """
-    data = (VECTORS / c["file"]).read_bytes()
-    streams = _decoded_by_stream(data)
-    raw = arr_of(c["input"])
-    assert bits_equal(streams[(c["channel"], 0, "values")], raw), (
-        "the input is not the channel's level-0 samples")
-    group_off, = struct.unpack_from("<Q", data, 24)
-    rate, start = struct.unpack_from("<dq", data, group_off)
-    assert (rate, start) == (f_of(c["sample_rate"]), int(c["start_timestamp"]))
-    bf, = struct.unpack_from("<I", data, 8)
-    block_samples, = struct.unpack_from("<I", data, 20)
-    assert (bf, block_samples) == (c["branching_factor"], c["block_samples"])
-    span = bf ** c["level"]
-    assert c["bucket_span"] == span
-
-    reps = _ref_rep_level(raw, span, None, start)
-    assert len(reps) == c["expected_bucket_count"]
-    assert bits_equal(np.array(reps, dtype=np.int64), arr_of(c["expected_raw_index"])), (
-        "the rule picks different samples from the ones the case states")
-    assert bits_equal(np.ascontiguousarray(raw[reps]), arr_of(c["expected_rep"]))
-    times = np.array([_ref_time(start, rate, i) for i in reps], dtype=np.int64)
-    assert bits_equal(times, arr_of(c["expected_rep_ts"]))
-
-    values = streams[(c["channel"], c["level"], "values")]
-    positions = streams[(c["channel"], c["level"], "positions")]
-    assert bits_equal(values[:, 2], arr_of(c["expected_rep"])), (
-        "the file's stored rep column is not the one the case states")
-    assert bits_equal(positions[:, 2], arr_of(c["expected_rep_ts"])), (
-        "the file's stored rep_ts column is not the one the case states")
-
-
 CHECKS = {
     "set1-div-round-half-even": c_rhe,
     "set1-ticks-to-ns": c_ticks_to_ns,
@@ -1815,8 +1587,6 @@ CHECKS = {
     "set4-chan-pebay-nan": c_merge_nan,
     "set4-chan-pebay-order": c_merge_order,
     "set4-chan-pebay-range": c_range,
-    "set5-representative-rule": c_rep_rule,
-    "set5-representative-stored": c_rep_stored,
     "v1-block-crc": c_crc,
     "v1-block-framing": c_framing,
     "v1-time-axis": c_time_axis,

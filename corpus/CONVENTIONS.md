@@ -137,7 +137,7 @@ with the width implied by the dtype:
   `v1-time-axis`, is a bare big-endian hex string holding a float64 — `"0x408F400000000000"` is
   1000.0 — with `sample_rate_repr` beside it for a human and the exact numerator and denominator
   beside that, which is what the timestamp rule actually evaluates. It is the **only** bare bit
-  pattern in the corpus: every other one, all 3,700 of them, sits inside a `bits` descriptor
+  pattern in the corpus: every other one, all 3,630 of them, sits inside a `bits` descriptor
   carrying its `dtype`. There are no others to look for.
 
 ---
@@ -182,7 +182,6 @@ vectors your implementation is ready for.
 | `feature:streaming` | it opens `file_state = active` files |
 | `feature:crc` | it checks the per-block CRC |
 | `feature:moments` | it reads or writes the `(count, mean, M2, M3, M4)` moment stream |
-| `feature:representative` | it reads the representative column and its position |
 | `feature:read-rejection` | it parses a whole file and refuses a malformed one |
 
 `check_corpus.py` skips for one reason only — an optional third-party codec is not installed — and

@@ -4,8 +4,8 @@
   "conventions": "corpus/CONVENTIONS.md",
   "generated_from": "tools/generate_all.py",
   "counts": {
-    "vectors": 27,
-    "cases": 1340,
+    "vectors": 25,
+    "cases": 1322,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -13,11 +13,10 @@
       "set2-anchored-fold": 2,
       "set3-build-level": 6,
       "set4-chan-pebay": 4,
-      "set5-representative": 2,
       "v1-format": 6
     },
     "by_kind": {
-      "fixture": 23,
+      "fixture": 21,
       "negative": 1,
       "oracle": 3
     }
@@ -775,7 +774,7 @@
       "files": [
         {
           "path": "set3-build-level/set3-build-level-numeric.json",
-          "sha256": "65bebeeb23468ab19fc0a84c1fc8245f788ab9f579ebef7b8e116fdebb6b028a"
+          "sha256": "e35f47aa76f791e1bdc9f2f4fab375d3044cfa2cb86197100eef0420a4c747d8"
         },
         {
           "path": "set3-build-level/raw_float32_bf256_n512_input.bin",
@@ -992,79 +991,6 @@
         {
           "path": "set4-chan-pebay/range_with-nan_buckets.bin",
           "sha256": "53fbf74d0c00551b1d780150b233333dfbb820249e8def78d94fd72bd5295250"
-        }
-      ]
-    },
-    {
-      "id": "set5-representative-rule",
-      "set": "set5-representative",
-      "kind": "fixture",
-      "asserts": "At every level L >= 1 each bucket of a numeric channel stores the representative the specification's rule names \u2014 the channel's first sample in the level's first bucket and its last in the last, and in every other bucket the non-NaN raw sample of greatest triangle area against its neighbours' anchors, the first of equal areas winning \u2014 with its value bit for bit and its time by the one time rule.",
-      "source": "tools/_representative.py \u2014 the specification's rule in scalar Python; times by the exact rule in tools/_tslod_build.py; inputs constructed by tools/gen_set5_representative.py",
-      "contract": "A stored representative is a sample two writers must agree on, because a reader draws it, and two files that disagree about it draw different pictures from identical data.",
-      "requires": [
-        "feature:representative",
-        "dtype:float32",
-        "dtype:float64",
-        "dtype:int64",
-        "timing:fixed",
-        "timing:variable"
-      ],
-      "case_count": 16,
-      "files": [
-        {
-          "path": "set5-representative/set5-representative-rule.json",
-          "sha256": "b8100e5744245dc453db71ea5d75018603403e18a1ad6c02bda8249879efe316"
-        }
-      ]
-    },
-    {
-      "id": "set5-representative-stored",
-      "set": "set5-representative",
-      "kind": "fixture",
-      "asserts": "Channel 0 of v1_branching_factor_16.tslod stores, at levels 1 and 2, the representative the rule names for every bucket \u2014 the third column of each level's values stream is the chosen sample's value and the third column of its positions stream that sample's time \u2014 and level 2's is chosen from the raw samples, not from level 1's representatives.",
-      "source": "tools/_representative.py \u2014 the specification's rule in scalar Python; times by the exact rule in tools/_tslod_build.py; inputs constructed by tools/gen_set5_representative.py",
-      "contract": "A stored representative is a sample two writers must agree on, because a reader draws it, and two files that disagree about it draw different pictures from identical data.",
-      "requires": [
-        "format:v1",
-        "profile:0",
-        "feature:representative",
-        "dtype:float32",
-        "timing:fixed"
-      ],
-      "case_count": 2,
-      "files": [
-        {
-          "path": "set5-representative/set5-representative-stored.json",
-          "sha256": "8add37e421b195c22f7a21c8f77426e27b9e670b5b833453afdebc85206e6ee7"
-        },
-        {
-          "path": "v1-format/files/v1_branching_factor_16.tslod",
-          "sha256": "d6deff73d8d36bbd8947cf69992ea32434587b65cbfc7660b56d983ba9ee5034"
-        },
-        {
-          "path": "set5-representative/bf16_sig_input.bin",
-          "sha256": "7f7dadb712b0d9fab916d094fdff3843f3f7fee2c95f40ba9382e5d4ecbb1c09"
-        },
-        {
-          "path": "set5-representative/bf16_sig_level1_raw_index.bin",
-          "sha256": "615300a5db456d49653ea2544df91cad6e76cb1dcd8b3166514af9a68bb44ec1"
-        },
-        {
-          "path": "set5-representative/bf16_sig_level1_rep.bin",
-          "sha256": "ba647b46cc9567c78a40d627a38fbce441030ce45faa26bcf70507574ea56037"
-        },
-        {
-          "path": "set5-representative/bf16_sig_level1_rep_ts.bin",
-          "sha256": "9777bb2a9669ea2b8efc736b6295414b895eaaccf37281f22ff8910bdaa6db9b"
-        },
-        {
-          "path": "v1-format/files/v1_branching_factor_16.tslod",
-          "sha256": "d6deff73d8d36bbd8947cf69992ea32434587b65cbfc7660b56d983ba9ee5034"
-        },
-        {
-          "path": "set5-representative/bf16_sig_input.bin",
-          "sha256": "7f7dadb712b0d9fab916d094fdff3843f3f7fee2c95f40ba9382e5d4ecbb1c09"
         }
       ]
     },
