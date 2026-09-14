@@ -166,7 +166,8 @@ drops one that coincides with another, what it does with a series no longer than
 with no valid sample, and how it combines stored buckets when it draws fewer than it read — is the
 reader's own, because a read-side rule is the format's only when it computes a quantity the format
 names, and choosing among stored values names none. The moment fold's range order, under **Bucket
-statistics**, is the one read-side rule stated here, because a merged moment is such a quantity.
+statistics**, is one of the two read-side rules stated here — the other is the window rule under
+**Time** — because a merged moment is such a quantity.
 
 ## Bucket statistics
 
@@ -391,6 +392,23 @@ The round trip is bit-exact below 1 GHz; at and above it the recovery error is b
 `(1 + rate/10⁹)/2` ticks, and the vectors state the observed error per case rather than claiming
 exactness (`set1-*`).
 
+For a variable-rate group every sample's stamp is stored rather than computed, and a channel's
+stored stamps are **non-decreasing** — within a block and across every block boundary. **Equal
+consecutive stamps are legal**: two samples may carry the same nanosecond, and no reader may assume
+a strict increase anywhere. A decreasing pair makes the file malformed
+(`timestamp-stream-decreasing`). The rule is stated as non-decreasing rather than increasing because
+a recording whose source stamps two samples alike is a recording and not a fault, and a reader that
+treats equality as impossible drops one of the two.
+
+⛔ **A request for the half-open window [t₀, t₁) selects every sample whose stored stamp `s`
+satisfies `t₀ ≤ s < t₁`, wherever a block boundary falls.** The test is on the stamp and never on the
+block that holds it: where a block's first stamp equals `t₀`, an equal stamp ending the block before
+it is selected too, and both copies of a duplicated `t₀` are in the window. This is stated because
+the shape that breaks it is the natural implementation — a reader that finds its first block by
+comparing the block's `start_timestamp` against `t₀` and then scans forward drops every earlier copy
+of `t₀`, and answers one sample short with nothing in the file to say so
+(`v1-variable-window-straddle`).
+
 ## Rejection
 
 A version-1 reader reads **exactly** version 1 and refuses every other value. Every validity
@@ -448,6 +466,22 @@ any stream is read. A level table whose entries end past the end of the file
 (`scaling-type-unknown`), and a `scaling_gain` or `scaling_offset` that is not finite
 (`scaling-parameter-not-finite`), either of which turns every sample in the channel into a NaN or a
 saturation.
+
+Each of the three text fields holds up to the field's **full width** of UTF-8 — 64 bytes for `name`,
+16 for `unit`, 32 for `calibration_id` — NUL-padded where the value is shorter. A value that fills
+its field carries **no terminator**, and a reader takes the bytes before the first NUL or the field's
+end, whichever comes first. A writer refuses a value longer than the field and **never truncates one
+to fit**: the field's width is a byte count and a value's length is not, so a cut lands inside a
+multi-byte sequence whenever the two disagree, and what it produces is exactly the invalid UTF-8
+`text-field-not-utf8` rejects — a writer that accommodates an over-long name silently writes a file
+no conforming reader will open.
+
+Two channel entries carrying the same `name` — compared as the bytes each decodes to, before the
+first NUL or the field's end — make the file malformed (`channel-name-duplicate`), across the whole
+file and not merely within a group. A name is how a caller asks for a channel, so a file holding two
+of one name has no answer to the question; a reader that resolves a name to the first entry matching
+it returns a channel the caller did not ask for and reports nothing, which is the one failure worse
+than a refusal.
 
 **The level entry and the block index entry.** A `block_count` above `allocated`
 (`block-count-exceeds-allocated`), which points at entries never filled in — the rule is an upper

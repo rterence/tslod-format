@@ -39,7 +39,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,323 test cases across 25 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,333 test cases across 26 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -50,7 +50,7 @@ contract between implementations rather than one implementation's private detail
 
 | set | what it pins |
 |---|---|
-| `v1-format` | 19 golden `.tslod` files, the profile-0 and profile-2 conformance sets, block framing, the CRC, the time axis, and the read-time rejections |
+| `v1-format` | 22 golden `.tslod` files, the profile-0 and profile-2 conformance sets, block framing, the CRC, the time axis, the window rule on a variable-rate channel, and the read-time rejections |
 | `record-layouts` | every field of all five records, with a golden encoding, and the wire enums |
 | `set1-tick-timebase` | the tick conversions and the one rounding rule they share |
 | `set2-anchored-fold` | where a bucket sits, and how deep the pyramid is |
@@ -93,7 +93,11 @@ Each case says which kind it is:
   expected value is computed independently at high precision, never taken from an existing
   implementation, and it carries a stated tolerance.
 
-A **negative** case is a well-formed file with one field patched, and the rejection it must produce.
+A **negative** case is a file that must be refused, and the rejection class it must produce. Usually
+it is a well-formed file with one field patched; where the defect is the file's length it states a
+length to truncate to instead, and where the defect is the file's data — a timestamp out of order,
+which cannot be patched in without breaking the block's checksum first — the file is built carrying
+it.
 
 ### Encoding
 
@@ -127,13 +131,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 25 vectors, 1323 cases
+corpus: 26 vectors, 1333 cases
 
 skipped, because an optional codec is not installed:
     44 cases need pcodec — pip install pcodec
     106 cases need zstandard — pip install zstandard
 
-passed 1173  failed 0  skipped 150
+passed 1183  failed 0  skipped 150
 RESULT: PASS, with codec cases skipped
 ```
 

@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 63,
+  "case_count": 68,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -124,7 +124,7 @@
       "truncate_to": "0",
       "field": "file",
       "expected_error": "CorruptFileError",
-      "original_size_bytes": "5214",
+      "original_size_bytes": "10236",
       "verified_against_an_implementation": false,
       "reason": "zero bytes is the commonest damaged file there is \u2014 a create that never wrote, a copy that never ran. It is refused for being too short to hold a header, not for a magic that was never there to mismatch"
     },
@@ -135,7 +135,7 @@
       "truncate_to": "64",
       "field": "file",
       "expected_error": "CorruptFileError",
-      "original_size_bytes": "5214",
+      "original_size_bytes": "10236",
       "verified_against_an_implementation": false,
       "reason": "half a header. A reader that unpacks fields before checking the length reads whatever follows the buffer"
     },
@@ -146,7 +146,7 @@
       "truncate_to": "127",
       "field": "file",
       "expected_error": "CorruptFileError",
-      "original_size_bytes": "5214",
+      "original_size_bytes": "10236",
       "verified_against_an_implementation": false,
       "reason": "the boundary, and the one an off-by-one gets wrong: 127 bytes is not a header and 128 is. A reader comparing with > rather than >= accepts this and reads one byte past the end"
     },
@@ -217,7 +217,7 @@
       "patch": {
         "offset": "16",
         "width_bytes": 4,
-        "original_hex": "01000000",
+        "original_hex": "02000000",
         "patched_hex": "00000000"
       },
       "field": "header.num_channels",
@@ -442,7 +442,7 @@
       "patch": {
         "offset": "264",
         "width_bytes": 8,
-        "original_hex": "1614000000000000",
+        "original_hex": "6C27000000000000",
         "patched_hex": "0000000000010000"
       },
       "field": "channel_entry.level_table_offset",
@@ -496,6 +496,52 @@
       "reason": "and the calibration identifier, which is what ties the channel to the record of how it was calibrated. One rule for all three text fields, so one class"
     },
     {
+      "name": "v1-channel-name-fills-field-is-ACCEPTED",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": null,
+      "patch": {
+        "offset": "192",
+        "width_bytes": 64,
+        "original_hex": "7369675F610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "patched_hex": "6161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161C3A9"
+      },
+      "field": "channel_entry.name",
+      "expected_error": null,
+      "must_open": true,
+      "verified_against_an_implementation": false,
+      "reason": "the maximum is the field's FULL width \u2014 64 bytes \u2014 and a terminating NUL is optional. This name fills all 64 with valid UTF-8 and leaves no NUL anywhere in the field, and the file must open: a reader takes the bytes before the first NUL OR the field's end. Without this case the width is pinned only where it fails, and a reader that insists on a terminator refuses a valid file while passing every rejection here"
+    },
+    {
+      "name": "v1-channel-name-cut-mid-sequence",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "text-field-not-utf8",
+      "patch": {
+        "offset": "192",
+        "width_bytes": 64,
+        "original_hex": "7369675F610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "patched_hex": "616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161C3"
+      },
+      "field": "channel_entry.name",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the signature of a writer that truncated instead of refusing. 0xC3 begins a two-byte sequence and the field ends before its second byte, so the 64 bytes a reader takes are not valid UTF-8. This is precisely the file a writer produces when it cuts an over-long name to fit, which is why the rule is refuse and never truncate: the cut manufactures this class out of a value that was perfectly good UTF-8 before it"
+    },
+    {
+      "name": "v1-channel-duplicate-name",
+      "file": "v1-format/files/v1_negative_base.tslod",
+      "rejection_class": "channel-name-duplicate",
+      "patch": {
+        "offset": "356",
+        "width_bytes": 1,
+        "original_hex": "62",
+        "patched_hex": "61"
+      },
+      "field": "channel_entry.name",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "two entries carrying one name leave a reader unable to resolve that name to a channel, and one that returns the first match answers with a channel the caller did not ask for and reports nothing \u2014 the failure that is worse than a refusal. The rule is per FILE and not per group"
+    },
+    {
       "name": "v1-scaling-type-unknown",
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "scaling-type-unknown",
@@ -545,7 +591,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "block-count-exceeds-allocated",
       "patch": {
-        "offset": "5166",
+        "offset": "10116",
         "width_bytes": 8,
         "original_hex": "0100000000000000",
         "patched_hex": "0200000000000000"
@@ -560,9 +606,9 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "block-index-out-of-bounds",
       "patch": {
-        "offset": "5182",
+        "offset": "10132",
         "width_bytes": 8,
-        "original_hex": "B613000000000000",
+        "original_hex": "EC25000000000000",
         "patched_hex": "0000000000010000"
       },
       "field": "level_entry.block_index_offset",
@@ -575,7 +621,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "zero-size-index-entry",
       "patch": {
-        "offset": "5062",
+        "offset": "9724",
         "width_bytes": 8,
         "original_hex": "5000000000000000",
         "patched_hex": "0000000000000000"
@@ -590,7 +636,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "zero-size-index-entry",
       "patch": {
-        "offset": "5070",
+        "offset": "9732",
         "width_bytes": 8,
         "original_hex": "0400000000000000",
         "patched_hex": "0000000000000000"
@@ -605,7 +651,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "block-extent-past-eof",
       "patch": {
-        "offset": "5054",
+        "offset": "9716",
         "width_bytes": 8,
         "original_hex": "3B01000000000000",
         "patched_hex": "0000000000010000"
@@ -620,9 +666,9 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "block-extent-past-eof",
       "patch": {
-        "offset": "5046",
+        "offset": "9708",
         "width_bytes": 8,
-        "original_hex": "6411000000000000",
+        "original_hex": "0412000000000000",
         "patched_hex": "0000000000010000"
       },
       "field": "block_index_entry.file_offset",
@@ -696,7 +742,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "decoded-size-mismatch",
       "patch": {
-        "offset": "5062",
+        "offset": "9724",
         "width_bytes": 8,
         "original_hex": "5000000000000000",
         "patched_hex": "4F00000000000000"
@@ -711,7 +757,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "decoded-size-mismatch",
       "patch": {
-        "offset": "5062",
+        "offset": "9724",
         "width_bytes": 8,
         "original_hex": "5000000000000000",
         "patched_hex": "5100000000000000"
@@ -726,7 +772,7 @@
       "file": "v1-format/files/v1_negative_base.tslod",
       "rejection_class": "decoded-size-mismatch",
       "patch": {
-        "offset": "5070",
+        "offset": "9732",
         "width_bytes": 8,
         "original_hex": "0400000000000000",
         "patched_hex": "0500000000000000"
@@ -895,6 +941,44 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "under profile 0 EVERY recipe byte must be 0x00. A profile-0 file carrying a zstd recipe is the file that would make the stdlib-only reference reader need a codec, which is the whole point of the profile"
+    },
+    {
+      "name": "v1-variable-stamps-decreasing-at-a-block-boundary",
+      "file": "v1-format/files/v1_negative_variable_stamps_decreasing_at_block_boundary.tslod",
+      "rejection_class": "timestamp-stream-decreasing",
+      "field": "group_entry.timestamps",
+      "decreasing_pair_indices": [
+        "255",
+        "256"
+      ],
+      "decreasing_pair_stamps": [
+        "1700000000255000000",
+        "1700000000254999999"
+      ],
+      "block_samples": 256,
+      "pair_crosses_a_block_boundary": true,
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a variable-rate channel's stamps are non-decreasing across the whole channel, within a block and across every block boundary; equal neighbours are legal and a DECREASE is not. Stamp 256 is the FIRST sample of block 1 and sits one nanosecond below stamp 255, the LAST of block 0, so the rule is broken exactly at the join. This is the shape a per-block check cannot see: every block is internally sorted and the file is still malformed, which is why the rule is stated across boundaries and not only within a block. This case carries NO patch, and cannot: every block's CRC is verified before any stream is decoded, so a patched stamp byte is refused as a CRC mismatch and would pin the CRC rule under this one's name. The defect is built into the file with a valid CRC over it"
+    },
+    {
+      "name": "v1-variable-stamps-decreasing-within-a-block",
+      "file": "v1-format/files/v1_negative_variable_stamps_decreasing_within_a_block.tslod",
+      "rejection_class": "timestamp-stream-decreasing",
+      "field": "group_entry.timestamps",
+      "decreasing_pair_indices": [
+        "299",
+        "300"
+      ],
+      "decreasing_pair_stamps": [
+        "1700000000299000000",
+        "1700000000298999999"
+      ],
+      "block_samples": 256,
+      "pair_crosses_a_block_boundary": false,
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a variable-rate channel's stamps are non-decreasing across the whole channel, within a block and across every block boundary; equal neighbours are legal and a DECREASE is not. Stamps 299 and 300 are both inside block 1, so this is the rule's plain reading with no boundary involved. It is the companion to the boundary case: one rule, both the places it binds, because a reader that compares only across joins passes the other case and accepts this file. This case carries NO patch, and cannot: every block's CRC is verified before any stream is decoded, so a patched stamp byte is refused as a CRC mismatch and would pin the CRC rule under this one's name. The defect is built into the file with a valid CRC over it"
     }
   ]
 }

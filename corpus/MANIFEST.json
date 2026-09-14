@@ -4,8 +4,8 @@
   "conventions": "corpus/CONVENTIONS.md",
   "generated_from": "tools/generate_all.py",
   "counts": {
-    "vectors": 25,
-    "cases": 1323,
+    "vectors": 26,
+    "cases": 1333,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -13,10 +13,10 @@
       "set2-anchored-fold": 2,
       "set3-build-level": 6,
       "set4-chan-pebay": 4,
-      "v1-format": 6
+      "v1-format": 7
     },
     "by_kind": {
-      "fixture": 21,
+      "fixture": 22,
       "negative": 1,
       "oracle": 3
     }
@@ -1051,191 +1051,203 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 63,
+      "case_count": 68,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "771d19aeae173767b21b9a2008a990ca74c82a3015b877917869b6d1f4258f2d"
+          "sha256": "2433da4b48f479459f067e4d76cbc3c5dc4c937e08ae10dbc2205ad47a6d2600"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_no_moment_stream.tslod",
@@ -1243,15 +1255,15 @@
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
-          "sha256": "3516b75d4ab80aafdb717be3720da6e5b6bbb1eda4f1fd8f6017db54ee360bc2"
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_p2_with_moments.tslod",
@@ -1276,6 +1288,14 @@
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
           "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
+        },
+        {
+          "path": "v1-format/files/v1_negative_variable_stamps_decreasing_at_block_boundary.tslod",
+          "sha256": "144616d2d07d18bc438bc7e9439477fdf6b9cbab3b258af6a9f96461954d159e"
+        },
+        {
+          "path": "v1-format/files/v1_negative_variable_stamps_decreasing_within_a_block.tslod",
+          "sha256": "6060a6a6e51ea8a7efbc4078588db3d0a7553320e0607f2fd48b2a16a805e751"
         }
       ]
     },
@@ -1403,6 +1423,47 @@
         {
           "path": "v1-format/v1-time-axis.json",
           "sha256": "d1b963fc74f1921ac0f568c07f3f0ae8de2eaecafb8a21154b9f591860ee03eb"
+        }
+      ]
+    },
+    {
+      "id": "v1-variable-window-straddle",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:403-410). Equal consecutive stamps are legal (spec/v1/README.md:395-401).",
+      "source": "spec/v1/README.md:395-410, written by tools/_tslod_build.py",
+      "contract": "A reader that finds its first block by comparing the block's start_timestamp against t0 and then scans forward drops every earlier copy of t0 and answers one sample short, with nothing in the file to say so. Two implementations must return the same samples for the same window, so which samples a stamp range holds is the format's to state and not a reader's private policy.",
+      "requires": [
+        "format:v1",
+        "profile:0",
+        "recipe:0x00",
+        "timing:variable"
+      ],
+      "case_count": 5,
+      "files": [
+        {
+          "path": "v1-format/v1-variable-window-straddle.json",
+          "sha256": "fac2dcec67c181a3e1d3315985ff3eedb1764c84efdebd9a29c38a8dc481aa1b"
+        },
+        {
+          "path": "v1-format/files/v1_variable_window_straddle.tslod",
+          "sha256": "dc07bf4b75cd6f206e3fd70383997d9fa87d84a400d324ed015fdda8b57f5f64"
+        },
+        {
+          "path": "v1-format/files/v1_variable_window_straddle.tslod",
+          "sha256": "dc07bf4b75cd6f206e3fd70383997d9fa87d84a400d324ed015fdda8b57f5f64"
+        },
+        {
+          "path": "v1-format/files/v1_variable_window_straddle.tslod",
+          "sha256": "dc07bf4b75cd6f206e3fd70383997d9fa87d84a400d324ed015fdda8b57f5f64"
+        },
+        {
+          "path": "v1-format/files/v1_variable_window_straddle.tslod",
+          "sha256": "dc07bf4b75cd6f206e3fd70383997d9fa87d84a400d324ed015fdda8b57f5f64"
+        },
+        {
+          "path": "v1-format/files/v1_variable_window_straddle.tslod",
+          "sha256": "dc07bf4b75cd6f206e3fd70383997d9fa87d84a400d324ed015fdda8b57f5f64"
         }
       ]
     }

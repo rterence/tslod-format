@@ -1,0 +1,178 @@
+{
+  "id": "v1-variable-window-straddle",
+  "set": "v1-format",
+  "kind": "fixture",
+  "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:403-410). Equal consecutive stamps are legal (spec/v1/README.md:395-401).",
+  "source": "spec/v1/README.md:395-410, written by tools/_tslod_build.py",
+  "contract": "A reader that finds its first block by comparing the block's start_timestamp against t0 and then scans forward drops every earlier copy of t0 and answers one sample short, with nothing in the file to say so. Two implementations must return the same samples for the same window, so which samples a stamp range holds is the format's to state and not a reader's private policy.",
+  "requires": [
+    "format:v1",
+    "profile:0",
+    "recipe:0x00",
+    "timing:variable"
+  ],
+  "notes": "The counts are the assertion. A duplicated stamp is LEGAL, so a window whose t0 lands on one must select both copies however the blocks are cut; the interior duplicate is the control that says the boundary is not special, and it is no accident that it gives the same count. Integer stamps and integer arithmetic throughout, so the file and every expected value are reproducible bit for bit on any architecture.",
+  "case_count": 5,
+  "cases": [
+    {
+      "name": "v1-window-t0-on-a-stamp-duplicated-across-a-block-boundary",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "channel": 0,
+      "channel_sample_count": 150,
+      "block_samples": 64,
+      "level0_block_sample_counts": [
+        64,
+        64,
+        22
+      ],
+      "duplicate_index_pairs": [
+        [
+          "63",
+          "64"
+        ],
+        [
+          "100",
+          "101"
+        ]
+      ],
+      "window_t0": "1700000000063000000",
+      "window_t1": "1700000000070000000",
+      "expected_sample_count": 8,
+      "expected_first_index": "63",
+      "expected_last_index": "70",
+      "expected_first_stamp": "1700000000063000000",
+      "expected_last_stamp": "1700000000069000000",
+      "rule": "t0 <= s < t1 over the stored stamps, whatever block holds them",
+      "verified_against_an_implementation": false,
+      "reason": "THE CASE THIS VECTOR EXISTS FOR. t0 is the stamp carried by BOTH index 63, the last sample of block 0, and index 64, the first of block 1. The rule selects every sample whose stamp satisfies t0 <= s < t1, so both copies are in the window and the count is 8. A reader that locates its first block by comparing start_timestamp against t0 begins at block 1, drops index 63, and answers 7 \u2014 one short, with a valid file and no error"
+    },
+    {
+      "name": "v1-window-t0-on-an-interior-duplicate-is-the-control",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "channel": 0,
+      "channel_sample_count": 150,
+      "block_samples": 64,
+      "level0_block_sample_counts": [
+        64,
+        64,
+        22
+      ],
+      "duplicate_index_pairs": [
+        [
+          "63",
+          "64"
+        ],
+        [
+          "100",
+          "101"
+        ]
+      ],
+      "window_t0": "1700000000099000000",
+      "window_t1": "1700000000106000000",
+      "expected_sample_count": 8,
+      "expected_first_index": "100",
+      "expected_last_index": "107",
+      "expected_first_stamp": "1700000000099000000",
+      "expected_last_stamp": "1700000000105000000",
+      "rule": "t0 <= s < t1 over the stored stamps, whatever block holds them",
+      "verified_against_an_implementation": false,
+      "reason": "the control, and the reason the boundary case means anything. This t0 lands on a duplicated stamp too, but one wholly inside block 1, where no block-selection shortcut can drop a copy. It gives the SAME count as the straddling case by construction: the rule is a test on a stamp, so the boundary is not special, and a suite that showed 8 here and accepted 7 there would be pinning the bug"
+    },
+    {
+      "name": "v1-window-t1-on-a-duplicated-stamp-excludes-both-copies",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "channel": 0,
+      "channel_sample_count": 150,
+      "block_samples": 64,
+      "level0_block_sample_counts": [
+        64,
+        64,
+        22
+      ],
+      "duplicate_index_pairs": [
+        [
+          "63",
+          "64"
+        ],
+        [
+          "100",
+          "101"
+        ]
+      ],
+      "window_t0": "1700000000056000000",
+      "window_t1": "1700000000063000000",
+      "expected_sample_count": 7,
+      "expected_first_index": "56",
+      "expected_last_index": "62",
+      "expected_first_stamp": "1700000000056000000",
+      "expected_last_stamp": "1700000000062000000",
+      "rule": "t0 <= s < t1 over the stored stamps, whatever block holds them",
+      "verified_against_an_implementation": false,
+      "reason": "the half-open end, on the straddling value. t1 equals the stamp at indices 63 and 64, and `s < t1` excludes BOTH \u2014 not one of the two. A reader comparing with <= admits two samples rather than one, which is why the bound is stated half-open and pinned on a duplicate"
+    },
+    {
+      "name": "v1-window-inside-one-block",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "channel": 0,
+      "channel_sample_count": 150,
+      "block_samples": 64,
+      "level0_block_sample_counts": [
+        64,
+        64,
+        22
+      ],
+      "duplicate_index_pairs": [
+        [
+          "63",
+          "64"
+        ],
+        [
+          "100",
+          "101"
+        ]
+      ],
+      "window_t0": "1700000000130000000",
+      "window_t1": "1700000000135000000",
+      "expected_sample_count": 5,
+      "expected_first_index": "132",
+      "expected_last_index": "136",
+      "expected_first_stamp": "1700000000130000000",
+      "expected_last_stamp": "1700000000134000000",
+      "rule": "t0 <= s < t1 over the stored stamps, whatever block holds them",
+      "verified_against_an_implementation": false,
+      "reason": "the ordinary case, wholly inside the ragged last block and touching no duplicate. It is here so the vector is not only about its own hard cases: the same rule, applied where nothing is unusual, must give the plain answer"
+    },
+    {
+      "name": "v1-window-spanning-three-blocks",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "channel": 0,
+      "channel_sample_count": 150,
+      "block_samples": 64,
+      "level0_block_sample_counts": [
+        64,
+        64,
+        22
+      ],
+      "duplicate_index_pairs": [
+        [
+          "63",
+          "64"
+        ],
+        [
+          "100",
+          "101"
+        ]
+      ],
+      "window_t0": "1700000000040000000",
+      "window_t1": "1700000000140000000",
+      "expected_sample_count": 102,
+      "expected_first_index": "40",
+      "expected_last_index": "141",
+      "expected_first_stamp": "1700000000040000000",
+      "expected_last_stamp": "1700000000139000000",
+      "rule": "t0 <= s < t1 over the stored stamps, whatever block holds them",
+      "verified_against_an_implementation": false,
+      "reason": "one window across all three level-0 blocks, containing both duplicated pairs. 100 distinct stamps fall in [t0, t1) and two of them are carried by two samples each, so the count is 102 and not 100. A reader that de-duplicated stamps, or that summed per-block counts computed with a strict comparison at each join, answers 100 or 101"
+    }
+  ]
+}

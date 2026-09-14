@@ -373,6 +373,9 @@ def open_v1(data: bytes) -> dict:
         groups.append({"timing_mode": timing_mode, "timing_flags": timing_flags})
 
     blocks = 0
+    #: The decoded `name` of each channel already seen, and where it was seen.
+    #: A file may carry each name once; see the duplicate check below.
+    seen_names: dict[str, int] = {}
     for ci in range(n_channels):
         base = channel_off + ci * CHANNEL_ENTRY_SIZE
         dtype_code = data[base + 64]
@@ -396,14 +399,30 @@ def open_v1(data: bytes) -> dict:
             raise CorruptFile(
                 "level-table-out-of-bounds",
                 f"{num_levels} entries at {level_off} end past {len(data)}")
-        # The three text fields are UTF-8, NUL-padded to their width.
+        # The three text fields are UTF-8, NUL-padded to their width. A value
+        # that FILLS its field carries no terminator, so the bytes a reader
+        # takes are those before the first NUL *or the field's end* — which is
+        # what `split` gives on a field holding no NUL at all.
+        text = {}
         for fname, off, width in (("name", 0, 64), ("unit", 80, 16),
                                   ("calibration_id", 114, 32)):
             try:
-                data[base + off:base + off + width].split(b"\x00")[0].decode("utf-8")
+                text[fname] = (data[base + off:base + off + width]
+                               .split(b"\x00")[0].decode("utf-8"))
             except UnicodeDecodeError:
                 raise CorruptFile("text-field-not-utf8",
                                   f"channel_entry.{fname}")
+        # A name is how a caller asks for a channel, so a file holding two of
+        # one name has no answer to give. The comparison is on the decoded
+        # text, which is what a caller passes and what the reader resolves.
+        # This reads only the channel table, so it falls in step 1 with the
+        # header and the index entries.
+        if text["name"] in seen_names:
+            raise CorruptFile(
+                "channel-name-duplicate",
+                f"channels {seen_names[text['name']]} and {ci} are both named "
+                f"{text['name']!r}")
+        seen_names[text["name"]] = ci
         scaling_type = data[base + 96]
         if scaling_type not in (0, 1):
             raise CorruptFile("scaling-type-unknown", str(scaling_type))
@@ -443,6 +462,10 @@ def open_v1(data: bytes) -> dict:
                     f"branching_factor {bf} give {depth}")
 
         timing_mode = groups[group_id]["timing_mode"]
+        #: The last level-0 stamp of the previous block, so the non-decreasing
+        #: rule is checked ACROSS a block boundary and not only within a block.
+        #: That boundary is where the rule is actually broken in practice.
+        prev_last_stamp = None
         for lv in range(num_levels):
             block_count, allocated, index_off = _level_entry(data, level_off, lv)
             for b in range(block_count):
@@ -513,6 +536,33 @@ def open_v1(data: bytes) -> dict:
                             "decoded-size-mismatch",
                             f"a stream decodes to {got} bytes, its shape "
                             f"implies {want}")
+
+                # A variable-rate channel's stored stamps are non-decreasing,
+                # within a block and across every boundary. EQUAL neighbours
+                # are legal — two samples may carry the same nanosecond — so
+                # only a strict decrease is refused. Checked after the streams
+                # are decoded, because until then there are no stamps to read.
+                if lv == 0 and timing_mode == 1:
+                    stamps = np.frombuffer(
+                        _decode(split_streams(body, n)[0], "int64"),
+                        dtype="<i8")
+                    if len(stamps) > 1:
+                        drops = np.nonzero(np.diff(stamps) < 0)[0]
+                        if len(drops):
+                            i = int(drops[0])
+                            raise CorruptFile(
+                                "timestamp-stream-decreasing",
+                                f"channel {ci} block {b}: stamp {i + 1} is "
+                                f"{stamps[i + 1]}, below its predecessor "
+                                f"{stamps[i]}")
+                    if len(stamps):
+                        if prev_last_stamp is not None and stamps[0] < prev_last_stamp:
+                            raise CorruptFile(
+                                "timestamp-stream-decreasing",
+                                f"channel {ci} block {b}: first stamp "
+                                f"{stamps[0]} is below {prev_last_stamp}, the "
+                                f"last stamp of the block before it")
+                        prev_last_stamp = int(stamps[-1])
                 blocks += 1
     return {"branching_factor": bf, "block_samples": block_samples,
             "profile": profile, "block_count": blocks}
@@ -1471,6 +1521,64 @@ def c_profile2(v, c):
     assert sha == c["decoded_sha256"]
 
 
+def _level0_stamps(data: bytes, channel: int, has_moments: bool) -> np.ndarray:
+    """Every level-0 stamp of one variable-rate channel, in block order.
+
+    Read out of the FILE's stored streams and concatenated across blocks,
+    never taken from a generator's array: what the vector pins is what the
+    bytes say. Concatenating is also what makes the block boundary invisible
+    here, which is the rule's whole content.
+    """
+    out = []
+    for ci, lv, _b, kind, dtype, _cols, stream in _walk_streams(data, has_moments):
+        if ci == channel and lv == 0 and kind == "timestamps":
+            out.append(np.frombuffer(_decode(stream, dtype), dtype="<i8"))
+    return np.concatenate(out) if out else np.zeros(0, dtype="<i8")
+
+
+def c_window(v, c):
+    """`t0 <= s < t1`, re-derived from the file's own stored stamps.
+
+    The rule pays no attention to which block holds a stamp, so neither does
+    this check: it selects over the whole concatenated stream. A reader that
+    picked its first block by comparing `start_timestamp` would answer one
+    short on the straddling case, which is the case this vector exists for.
+    """
+    data = (VECTORS / c["file"]).read_bytes()
+    has_moments = bool(struct.unpack_from("<Q", data, 92)[0] & 1)
+    stamps = _level0_stamps(data, int(c["channel"]), has_moments)
+    assert len(stamps) == int(c["channel_sample_count"]), (
+        f"{c['name']}: the file holds {len(stamps)} stamps, the case says "
+        f"{c['channel_sample_count']}")
+    # The premises the expected values rest on, checked from the bytes before
+    # the rule is applied: non-decreasing, and the equal pairs really equal.
+    assert np.all(np.diff(stamps) >= 0), (
+        f"{c['name']}: the stored stamps are not non-decreasing")
+    for pair in c["duplicate_index_pairs"]:
+        i, j = int(pair[0]), int(pair[1])
+        assert j == i + 1 and stamps[i] == stamps[j], (
+            f"{c['name']}: indices {i} and {j} are not an equal neighbouring "
+            f"pair in the file")
+    t0, t1 = int(c["window_t0"]), int(c["window_t1"])
+    sel = np.nonzero((stamps >= t0) & (stamps < t1))[0]
+    assert len(sel) == int(c["expected_sample_count"]), (
+        f"{c['name']}: the rule selects {len(sel)} samples, the case says "
+        f"{c['expected_sample_count']}")
+    assert int(sel[0]) == int(c["expected_first_index"]), (
+        f"{c['name']}: first index {int(sel[0])}, the case says "
+        f"{c['expected_first_index']}")
+    assert int(sel[-1]) == int(c["expected_last_index"]), (
+        f"{c['name']}: last index {int(sel[-1])}, the case says "
+        f"{c['expected_last_index']}")
+    assert int(stamps[sel[0]]) == int(c["expected_first_stamp"])
+    assert int(stamps[sel[-1]]) == int(c["expected_last_stamp"])
+    # A non-decreasing stream cannot put a selected sample between two
+    # unselected ones, so the selection is a contiguous run of indices. If it
+    # ever were not, the count above would be right for the wrong reason.
+    assert int(sel[-1]) - int(sel[0]) + 1 == len(sel), (
+        f"{c['name']}: the selected indices are not contiguous")
+
+
 def c_negative(v, c):
     """Apply the patch and require the reader to refuse — or to accept."""
     if "truncate_to" in c:
@@ -1487,6 +1595,25 @@ def c_negative(v, c):
                 f"the case says {want}")
             return
         raise AssertionError(f"{c['name']}: the truncated file was accepted")
+
+    if "file" in c and "patch" not in c:
+        # A fourth shape, beside the patch, the truncation and the framing
+        # cases: the defect is the file's DATA. A stamp out of order cannot be
+        # patched into a well-formed file, because every block's CRC is
+        # verified before any stream is decoded — a patched stamp byte is
+        # refused as `block-crc-mismatch`, which would pin the CRC rule under
+        # a time rule's name. So the file is BUILT with the defect and a valid
+        # CRC, and the case names no patch.
+        try:
+            open_v1((VECTORS / c["file"]).read_bytes())
+        except CorruptFile as exc:
+            want = c["rejection_class"]
+            want = want[3:] if want.startswith("v1-") else want
+            assert exc.rejection_class == want, (
+                f"{c['name']}: refused as {exc.rejection_class}, "
+                f"the case says {want}")
+            return
+        raise AssertionError(f"{c['name']}: the malformed file was accepted")
 
     if "file" in c:
         data = bytearray((VECTORS / c["file"]).read_bytes())
@@ -1610,6 +1737,7 @@ CHECKS = {
     "v1-block-crc": c_crc,
     "v1-block-framing": c_framing,
     "v1-time-axis": c_time_axis,
+    "v1-variable-window-straddle": c_window,
     "v1-negative-vectors": c_negative,
     "v1-profile0-conformance-set": c_profile0,
     "v1-profile2-conformance-set": c_profile2,

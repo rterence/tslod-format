@@ -292,6 +292,29 @@ class BuildResult:
     layout: dict = field(default_factory=dict)
 
 
+def text_field(value: str, width: int, fieldname: str, channel: str) -> bytes:
+    """One of the three channel text fields, NUL-padded, or a refusal.
+
+    ⛔ REFUSES rather than truncating. A text field holds up to the field's
+    FULL width of UTF-8 and a value that fills it carries no terminator, so
+    the only thing left to decide is what to do with a value that does not
+    fit — and the answer is not "make it fit". The field's width is a byte
+    count and a value's length is not, so a cut lands inside a multi-byte
+    sequence whenever the two disagree, and what it writes is exactly the
+    invalid UTF-8 `text-field-not-utf8` rejects: this builder would author a
+    corpus file its own checker refuses to open. `[:width]` after an `ljust`
+    is how that happened silently, and it is why the slice is gone.
+    """
+    raw = value.encode("utf-8")
+    if len(raw) > width:
+        raise ValueError(
+            f"channel {channel!r}: {fieldname} is {len(raw)} UTF-8 bytes and the "
+            f"field is {width}; a writer refuses an over-long value and never "
+            f"truncates it, because a cut inside a multi-byte sequence writes "
+            f"the invalid UTF-8 a reader rejects")
+    return raw.ljust(width, b"\x00")
+
+
 def build(spec: FileSpec) -> BuildResult:
     if spec.features & FEATURE_MOMENT_STREAM:
         raise ValueError(
@@ -457,14 +480,14 @@ def build(spec: FileSpec) -> BuildResult:
     for ch, ch_state in zip(spec.channels, per_channel):
         channel_table += struct.pack(
             CHANNEL_ENTRY_FMT,
-            ch.name.encode("utf-8").ljust(64, b"\x00")[:64],
+            text_field(ch.name, 64, "name", ch.name),
             DTYPE_ENUM[str(np.dtype(ch.data.dtype).name)],
             ch.aggregation_mode, ch.group_id, ch_state["num_levels"],
             ch_state["level_table_offset"],
-            ch.unit.encode("utf-8").ljust(16, b"\x00")[:16],
+            text_field(ch.unit, 16, "unit", ch.name),
             ch.scaling_type, b"\x00",
             struct.pack("<dd", ch.scaling_gain, ch.scaling_offset),
-            ch.calibration_id.encode("utf-8").ljust(32, b"\x00")[:32],
+            text_field(ch.calibration_id, 32, "calibration_id", ch.name),
             b"\x00" * 14)
 
     header = struct.pack(

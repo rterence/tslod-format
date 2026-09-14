@@ -841,6 +841,158 @@ def gen_time_axis() -> Vector:
 # ---------------------------------------------------------------------------
 
 
+def gen_window_straddle() -> Vector:
+    """The window rule, pinned by a POSITIVE vector.
+
+    Authored from the rule the specification now states, not copied from any
+    implementation's fixture: the stamps are an integer construction chosen so
+    that one duplicated pair straddles a level-0 block boundary and another
+    sits inside a block, and every expected value below was computed by hand
+    from `t0 <= s < t1` before this generator ran.
+    """
+    v = Vector(
+        id="v1-variable-window-straddle",
+        set_=SET,
+        kind="fixture",
+        asserts=(
+            "A request for the half-open window [t0, t1) on a variable-rate channel "
+            "selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever "
+            "a block boundary falls: where a block's first stamp equals t0, an equal "
+            "stamp ending the block before it is selected too, and both copies of a "
+            "duplicated t0 are in the window (spec/v1/README.md:403-410). Equal "
+            "consecutive stamps are legal (spec/v1/README.md:395-401)."
+        ),
+        source="spec/v1/README.md:395-410, written by tools/_tslod_build.py",
+        contract=(
+            "A reader that finds its first block by comparing the block's "
+            "start_timestamp against t0 and then scans forward drops every earlier copy "
+            "of t0 and answers one sample short, with nothing in the file to say so. "
+            "Two implementations must return the same samples for the same window, so "
+            "which samples a stamp range holds is the format's to state and not a "
+            "reader's private policy."
+        ),
+        requires=["format:v1", "profile:0", "recipe:0x00", "timing:variable"],
+        notes=(
+            "The counts are the assertion. A duplicated stamp is LEGAL, so a window "
+            "whose t0 lands on one must select both copies however the blocks are cut; "
+            "the interior duplicate is the control that says the boundary is not "
+            "special, and it is no accident that it gives the same count. Integer "
+            "stamps and integer arithmetic throughout, so the file and every expected "
+            "value are reproducible bit for bit on any architecture."
+        ),
+    )
+    ts = 1_700_000_000_000_000_000
+    N, BS, STEP = 150, 64, 1_000_000
+
+    # s[i] = BASE + STEP * (i - [i >= 64] - [i >= 101]). Integer throughout.
+    # The two subtractions are what create the duplicated pairs: index 64
+    # repeats index 63's stamp, and index 101 repeats index 100's.
+    idx = np.arange(N, dtype=np.int64)
+    stamps = ts + STEP * (idx
+                          - (idx >= 64).astype(np.int64)
+                          - (idx >= 101).astype(np.int64))
+
+    def T(k: int) -> int:
+        """The stamp VALUE k steps above the base, which is how the windows
+        below are stated — never a raw literal."""
+        return ts + STEP * k
+
+    # The premises, asserted from the array before anything rests on them.
+    assert np.all(np.diff(stamps) >= 0), "the stamps must be non-decreasing"
+    assert stamps[63] == stamps[64] == T(63), "the straddling pair"
+    assert stamps[100] == stamps[101] == T(99), "the interior pair"
+    assert [int(i) for i in np.nonzero(np.diff(stamps) == 0)[0]] == [63, 100], \
+        "exactly two equal pairs, at 63/64 and 100/101"
+
+    spec = B.FileSpec(
+        compression_id=0, branching_factor=BS, block_samples=BS,
+        groups=[B.GroupSpec(1000.0, ts, timing_mode=1,
+                            timestamps=np.ascontiguousarray(stamps))],
+        channels=[B.ChannelSpec("var_sig", ramp("int32", N))])
+    result = B.build(spec)
+    rel = _write_file("v1_variable_window_straddle.tslod", result)
+
+    # The block geometry the cases talk about, read back from what was built:
+    # three level-0 blocks, so the straddling pair really does straddle one.
+    level0 = [blk["sample_count"] for (ci, lv, bi, blk) in result.blocks if lv == 0]
+    assert level0 == [64, 64, 22], f"level-0 blocks are {level0}, want [64, 64, 22]"
+    assert 63 // BS != 64 // BS, "the duplicated pair must cross a block boundary"
+    assert 100 // BS == 101 // BS, "the interior pair must not"
+    for (ci, lv, bi, blk) in result.blocks:
+        lo = blk["file_offset"]
+        assert zlib.crc32(result.data[lo:lo + blk["compressed_size"]]) \
+            & 0xFFFFFFFF == blk["crc32"], "every CRC must verify"
+
+    #: (slug, k0, k1, count, first index, last index, first k, last k, why) —
+    #: every number computed BY HAND from `t0 <= s < t1` before this ran.
+    cases = [
+        ("v1-window-t0-on-a-stamp-duplicated-across-a-block-boundary",
+         63, 70, 8, 63, 70, 63, 69,
+         "THE CASE THIS VECTOR EXISTS FOR. t0 is the stamp carried by BOTH "
+         "index 63, the last sample of block 0, and index 64, the first of "
+         "block 1. The rule selects every sample whose stamp satisfies "
+         "t0 <= s < t1, so both copies are in the window and the count is 8. A "
+         "reader that locates its first block by comparing start_timestamp "
+         "against t0 begins at block 1, drops index 63, and answers 7 — one "
+         "short, with a valid file and no error"),
+        ("v1-window-t0-on-an-interior-duplicate-is-the-control",
+         99, 106, 8, 100, 107, 99, 105,
+         "the control, and the reason the boundary case means anything. This "
+         "t0 lands on a duplicated stamp too, but one wholly inside block 1, "
+         "where no block-selection shortcut can drop a copy. It gives the SAME "
+         "count as the straddling case by construction: the rule is a test on "
+         "a stamp, so the boundary is not special, and a suite that showed 8 "
+         "here and accepted 7 there would be pinning the bug"),
+        ("v1-window-t1-on-a-duplicated-stamp-excludes-both-copies",
+         56, 63, 7, 56, 62, 56, 62,
+         "the half-open end, on the straddling value. t1 equals the stamp at "
+         "indices 63 and 64, and `s < t1` excludes BOTH — not one of the two. "
+         "A reader comparing with <= admits two samples rather than one, which "
+         "is why the bound is stated half-open and pinned on a duplicate"),
+        ("v1-window-inside-one-block",
+         130, 135, 5, 132, 136, 130, 134,
+         "the ordinary case, wholly inside the ragged last block and touching "
+         "no duplicate. It is here so the vector is not only about its own "
+         "hard cases: the same rule, applied where nothing is unusual, must "
+         "give the plain answer"),
+        ("v1-window-spanning-three-blocks",
+         40, 140, 102, 40, 141, 40, 139,
+         "one window across all three level-0 blocks, containing both "
+         "duplicated pairs. 100 distinct stamps fall in [t0, t1) and two of "
+         "them are carried by two samples each, so the count is 102 and not "
+         "100. A reader that de-duplicated stamps, or that summed per-block "
+         "counts computed with a strict comparison at each join, answers 100 "
+         "or 101"),
+    ]
+
+    for slug, k0, k1, count, first_i, last_i, first_k, last_k, why in cases:
+        t0, t1 = T(k0), T(k1)
+        # The generator now computes what the hand computed, and refuses to
+        # emit a case where the two disagree.
+        sel = np.nonzero((stamps >= t0) & (stamps < t1))[0]
+        assert len(sel) == count, f"{slug}: rule gives {len(sel)}, hand gave {count}"
+        assert int(sel[0]) == first_i, f"{slug}: first index"
+        assert int(sel[-1]) == last_i, f"{slug}: last index"
+        assert int(stamps[sel[0]]) == T(first_k), f"{slug}: first stamp"
+        assert int(stamps[sel[-1]]) == T(last_k), f"{slug}: last stamp"
+        v.case(slug,
+               file=rel, channel=0,
+               channel_sample_count=N,
+               block_samples=BS,
+               level0_block_sample_counts=level0,
+               duplicate_index_pairs=[[u64(63), u64(64)], [u64(100), u64(101)]],
+               window_t0=i64(t0), window_t1=i64(t1),
+               expected_sample_count=count,
+               expected_first_index=u64(first_i),
+               expected_last_index=u64(last_i),
+               expected_first_stamp=i64(T(first_k)),
+               expected_last_stamp=i64(T(last_k)),
+               rule="t0 <= s < t1 over the stored stamps, whatever block holds them",
+               verified_against_an_implementation=False,
+               reason=why)
+    return v
+
+
 def gen_v1_negatives() -> Vector:
     v = Vector(
         id="v1-negative-vectors",
@@ -871,10 +1023,19 @@ def gen_v1_negatives() -> Vector:
         ),
     )
     ts = 1_700_000_000_000_000_000
+    # TWO channels, both 1,024 float32 in one fixed-rate group. The second one
+    # is here because a duplicate name is a rule about a PAIR of entries and a
+    # single-channel file cannot express it at all. Their names differ in one
+    # byte, which is what lets the duplicate-name case be a one-byte patch
+    # that can break no other rule. Every offset below is computed from the
+    # layout, so the second channel moves the records after the channel table
+    # without any case having to know it did; the control at the end of this
+    # generator is what asserts that.
     good = B.build(B.FileSpec(
         compression_id=0, branching_factor=256, block_samples=256,
         groups=[B.GroupSpec(1000.0, ts)],
-        channels=[B.ChannelSpec("sig", ramp("float32", 1024))]))
+        channels=[B.ChannelSpec("sig_a", ramp("float32", 1024)),
+                  B.ChannelSpec("sig_b", ramp("float32", 1024, 1))]))
     rel = _write_file("v1_negative_base.tslod", good)
     H = B.header_offset
 
@@ -1125,6 +1286,55 @@ def gen_v1_negatives() -> Vector:
     ):
         raw_case(slug, C(fname), b"\xff\xfe", f"channel_entry.{fname}", why,
                  cls="text-field-not-utf8")
+
+    # ---- the text field's MAXIMUM, both halves. The maximum is the field's
+    # full width and a terminating NUL is optional, so the two cases that pin
+    # it are a name that fills the field and opens, and one whose last byte
+    # begins a sequence the field has no room to finish.
+    _name_off = C("name")
+    _fills = b"a" * 62 + "é".encode("utf-8")
+    assert len(_fills) == 64, "the accepting case must fill the field exactly"
+    v.case("v1-channel-name-fills-field-is-ACCEPTED",
+           file=rel, rejection_class=None,
+           patch={"offset": u64(_name_off), "width_bytes": 64,
+                  "original_hex": good.data[_name_off:_name_off + 64].hex().upper(),
+                  "patched_hex": _fills.hex().upper()},
+           field="channel_entry.name",
+           expected_error=None, must_open=True,
+           verified_against_an_implementation=False,
+           reason="the maximum is the field's FULL width — 64 bytes — and a "
+                  "terminating NUL is optional. This name fills all 64 with "
+                  "valid UTF-8 and leaves no NUL anywhere in the field, and "
+                  "the file must open: a reader takes the bytes before the "
+                  "first NUL OR the field's end. Without this case the width "
+                  "is pinned only where it fails, and a reader that insists on "
+                  "a terminator refuses a valid file while passing every "
+                  "rejection here")
+    _cut = b"a" * 63 + b"\xc3"
+    assert len(_cut) == 64, "the rejecting case must fill the field exactly"
+    raw_case("v1-channel-name-cut-mid-sequence", _name_off, _cut,
+             "channel_entry.name",
+             "the signature of a writer that truncated instead of refusing. "
+             "0xC3 begins a two-byte sequence and the field ends before its "
+             "second byte, so the 64 bytes a reader takes are not valid UTF-8. "
+             "This is precisely the file a writer produces when it cuts an "
+             "over-long name to fit, which is why the rule is refuse and never "
+             "truncate: the cut manufactures this class out of a value that "
+             "was perfectly good UTF-8 before it",
+             cls="text-field-not-utf8")
+
+    # ---- the duplicate name. The base's two channels differ in a single byte,
+    # so this patch is that byte and nothing else: sig_b becomes a second
+    # sig_a, and no other rule in the file can notice.
+    raw_case("v1-channel-duplicate-name",
+             B.channel_offset(good.layout, 1, "name") + 4, b"a",
+             "channel_entry.name",
+             "two entries carrying one name leave a reader unable to resolve "
+             "that name to a channel, and one that returns the first match "
+             "answers with a channel the caller did not ask for and reports "
+             "nothing — the failure that is worse than a refusal. The rule is "
+             "per FILE and not per group",
+             cls="channel-name-duplicate")
     case("v1-scaling-type-unknown", C("scaling_type"), "B", 3,
          "channel_entry.scaling_type",
          "scaling_type is 0 identity or 1 linear. It decides whether the "
@@ -1435,12 +1645,139 @@ def gen_v1_negatives() -> Vector:
                   "file carrying a zstd recipe is the file that would make the "
                   "stdlib-only reference reader need a codec, which is the whole point "
                   "of the profile")
+
+    # ---- a decreasing stamp pair, which CANNOT be expressed as a patch.
+    #
+    # Every block's CRC is verified BEFORE any stream is decoded, so patching
+    # a stamp byte into a well-formed file gets it refused as a CRC mismatch
+    # and would pin the CRC rule under this rule's name. The defect is
+    # therefore BUILT into the file, with a valid CRC over the bytes carrying
+    # it, and the case names no patch. Integer stamps and integer arithmetic
+    # only, so the file is byte-identical on every architecture.
+    #
+    # The rule binds in two places and one file can only break it in one, so
+    # there are two files. At a BLOCK BOUNDARY, which is where an
+    # implementation actually gets this wrong — a check written per block
+    # never compares across the join — and WITHIN a block, which is the plain
+    # reading of the rule and the branch the boundary case leaves untested.
+    for slug, fname, at, where in (
+        ("v1-variable-stamps-decreasing-at-a-block-boundary",
+         "v1_negative_variable_stamps_decreasing_at_block_boundary.tslod", 256,
+         "Stamp 256 is the FIRST sample of block 1 and sits one nanosecond "
+         "below stamp 255, the LAST of block 0, so the rule is broken exactly "
+         "at the join. This is the shape a per-block check cannot see: every "
+         "block is internally sorted and the file is still malformed, which is "
+         "why the rule is stated across boundaries and not only within a block"),
+        ("v1-variable-stamps-decreasing-within-a-block",
+         "v1_negative_variable_stamps_decreasing_within_a_block.tslod", 300,
+         "Stamps 299 and 300 are both inside block 1, so this is the rule's "
+         "plain reading with no boundary involved. It is the companion to the "
+         "boundary case: one rule, both the places it binds, because a reader "
+         "that compares only across joins passes the other case and accepts "
+         "this file"),
+    ):
+        dec_stamps = ts + np.arange(512, dtype=np.int64) * 1_000_000
+        dec_stamps[at] = dec_stamps[at - 1] - 1
+        assert dec_stamps[at] < dec_stamps[at - 1], "the pair must decrease"
+        assert all(dec_stamps[i] <= dec_stamps[i + 1]
+                   for i in range(511) if i != at - 1), \
+            "exactly one pair may decrease, or the case pins more than its rule"
+        dec = B.build(B.FileSpec(
+            compression_id=0, branching_factor=256, block_samples=256,
+            groups=[B.GroupSpec(1000.0, ts, timing_mode=1,
+                                timestamps=np.ascontiguousarray(dec_stamps))],
+            channels=[B.ChannelSpec("sig", ramp("int32", 512))]))
+        dec_rel = _write_file(fname, dec)
+        v.case(slug,
+               file=dec_rel, rejection_class="timestamp-stream-decreasing",
+               field="group_entry.timestamps",
+               decreasing_pair_indices=[u64(at - 1), u64(at)],
+               decreasing_pair_stamps=[i64(int(dec_stamps[at - 1])),
+                                       i64(int(dec_stamps[at]))],
+               block_samples=256,
+               pair_crosses_a_block_boundary=((at - 1) // 256 != at // 256),
+               expected_error="CorruptFileError",
+               verified_against_an_implementation=False,
+               reason="a variable-rate channel's stamps are non-decreasing "
+                      "across the whole channel, within a block and across "
+                      "every block boundary; equal neighbours are legal and a "
+                      "DECREASE is not. " + where + ". This case carries NO "
+                      "patch, and cannot: every block's CRC is verified before "
+                      "any stream is decoded, so a patched stamp byte is "
+                      "refused as a CRC mismatch and would pin the CRC rule "
+                      "under this one's name. The defect is built into the file "
+                      "with a valid CRC over it")
+
+    # ---- THE CONTROL on the base file's shape.
+    #
+    # The base gained a second channel, which moved every record after the
+    # channel table. No offset here is hard-coded — each is computed from the
+    # layout — and this is the assertion that proves it, case by case: every
+    # patched byte range must lie inside the record AND the field that the
+    # case's own `field` string names. What it catches is the failure that
+    # would otherwise be silent: an offset that went stale when the base's
+    # shape moved and still lands on some valid byte, pinning a class under
+    # another field's name. This is the control that makes one base enough.
+    field_alias = {"scaling_gain": "scaling_params",
+                   "scaling_offset": "scaling_params"}
+    n_ch = len(good.layout["channels"])
+
+    def _w(table: dict, fieldname: str) -> int:
+        """The field's width in bytes. The tables carry a struct code, not a
+        width, and `calcsize` of a bare code can pad — so the code is pinned
+        little-endian, which is what the format is anyway."""
+        return struct.calcsize("<" + table[fieldname][1])
+
+    def field_ranges(record: str, fieldname: str):
+        """Every (offset, width) the layout gives this field, over all indices."""
+        fieldname = field_alias.get(fieldname, fieldname)
+        if record == "header":
+            yield B.header_offset(fieldname), _w(B.HEADER_FIELDS, fieldname)
+        elif record == "group_entry":
+            width = _w(B.GROUP_FIELDS, fieldname)
+            yield B.group_offset(good.layout, 0, fieldname), width
+        elif record == "channel_entry":
+            width = _w(B.CHANNEL_FIELDS, fieldname)
+            for ci in range(n_ch):
+                yield B.channel_offset(good.layout, ci, fieldname), width
+        elif record == "level_entry":
+            width = _w(B.LEVEL_FIELDS, fieldname)
+            for ci in range(n_ch):
+                for lv in range(len(good.layout["channels"][ci]["index_offsets"])):
+                    yield B.level_offset(good.layout, ci, lv, fieldname), width
+        elif record == "block_index_entry":
+            width = _w(B.BLOCK_FIELDS, fieldname)
+            for ci in range(n_ch):
+                for lv in range(len(good.layout["channels"][ci]["index_offsets"])):
+                    for bi in range(16):
+                        yield B.block_offset(good.layout, ci, lv, bi, fieldname), width
+
+    on_base = 0
+    for c in v.cases:
+        if "patch" not in c or c.get("file") != rel:
+            continue
+        on_base += 1
+        lo, w = int(c["patch"]["offset"]), c["patch"]["width_bytes"]
+        record, _, fieldname = c["field"].partition(".")
+        assert any(lo >= start and lo + w <= start + width
+                   for start, width in field_ranges(record, fieldname)), (
+            f"{c['name']}: the patch at byte {lo} for {w} bytes lies inside no "
+            f"{c['field']} the layout gives. The base's shape moved and this "
+            f"offset went stale")
+        assert good.data[lo:lo + w].hex().upper() == c["patch"]["original_hex"], (
+            f"{c['name']}: original_hex is not what the base holds at {lo}")
+    assert on_base == 48, (
+        f"{on_base} patch cases on THIS base; the 45 that were on it before "
+        f"this sitting plus the three it adds is 48. Of the vector's 52 patch "
+        f"cases before, 45 were on this base, 5 on the tick-rate base and 2 on "
+        f"the moment-stream files. A case that vanished or arrived unnoticed "
+        f"makes the containment control above vacuous")
     return v
 
 
 def main() -> None:
     for factory in (gen_profile0_set, gen_profile2_set, gen_block_framing, gen_crc,
-                    gen_time_axis, gen_v1_negatives):
+                    gen_time_axis, gen_window_straddle, gen_v1_negatives):
         vector = factory()
         vector.write()
         print(f"  {vector.kind:9s} {vector.id:34s} {len(vector.cases):5d} cases")
