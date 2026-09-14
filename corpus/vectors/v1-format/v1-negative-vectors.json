@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 68,
+  "case_count": 69,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -795,7 +795,7 @@
       "field": "block_index_entry.uncompressed_size",
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
-      "reason": "the rule exists for this profile, so this is the case that proves it. Here there is no length arithmetic to catch the disagreement earlier \u2014 the values stream is compressed, so its decoded length is not knowable until it has been decoded, and comparing that length with the index entry is the only check a profile-2 reader has on the block's size"
+      "reason": "the rule exists for this profile, so this is the case that proves it. What profile 2 lacks is the FRAMING arithmetic profile 0 has: the values stream's encoded length is not known until it is decoded, so a reader cannot walk the block's lengths to find it. The shape comparison remains \u2014 uncompressed_size against sample_count x columns x width \u2014 and refuses this entry at step 1 with no codec at all, which is why this file is readable as a rejection by a reader that has no zstd. A profile-2 reader that skips the shape comparison meets the same disagreement at step 6 instead, and the class is the same either way"
     },
     {
       "name": "v1-stream-length-prefix-exceeds-block",
@@ -941,6 +941,24 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "under profile 0 EVERY recipe byte must be 0x00. A profile-0 file carrying a zstd recipe is the file that would make the stdlib-only reference reader need a codec, which is the whole point of the profile"
+    },
+    {
+      "name": "v1-block-start-timestamp-mismatch",
+      "file": "v1-format/files/v1_variable_window_straddle.tslod",
+      "rejection_class": "block-start-timestamp-mismatch",
+      "patch": {
+        "offset": "2672",
+        "width_bytes": 8,
+        "original_hex": "C04DEB39FE9C9717",
+        "patched_hex": "C14DEB39FE9C9717"
+      },
+      "field": "block_index_entry.start_timestamp",
+      "block_index": "1",
+      "stamp_the_stream_holds": "1700000000063000000",
+      "stamp_the_entry_holds": "1700000000063000001",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "a variable-rate channel's level-0 block index entry states the block's FIRST STORED STAMP, and this entry states one nanosecond later than the stream holds. It is not the stamp rule's case: every stored stamp is untouched and the channel is still non-decreasing everywhere, within every block and across both boundaries \u2014 only the entry moved. Nor is it the index-order rule's: the three level-0 starts are still non-decreasing with the patch applied, so the check at open passes and this block is reached. The patch is legal here precisely where the stamp rule's cannot be, because the index entry lies outside the block's CRC range and every checksum still verifies. What it costs a reader: block 1 begins on the stamp duplicated across the block 0/1 boundary, which is the value this vector's own window cases turn on, so an entry that lies by one nanosecond puts a reader searching the starts into the wrong block and drops a sample it would report no error about"
     },
     {
       "name": "v1-variable-stamps-decreasing-at-a-block-boundary",

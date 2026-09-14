@@ -376,6 +376,13 @@ def open_v1(data: bytes) -> dict:
     #: The decoded `name` of each channel already seen, and where it was seen.
     #: A file may carry each name once; see the duplicate check below.
     seen_names: dict[str, int] = {}
+    #: What STEP 1 collects for steps 2 to 8 to walk. Step 1 is the WHOLE
+    #: FILE'S: every group and channel entry and every level and block index
+    #: entry is checked before any block is read. That is what makes the
+    #: spec's closing sentence true — a file whose defects lie in different
+    #: blocks is refused for the earlier block's — and it can only be true if
+    #: no block is touched while an entry anywhere is still unchecked.
+    plan: list[dict] = []
     for ci in range(n_channels):
         base = channel_off + ci * CHANNEL_ENTRY_SIZE
         dtype_code = data[base + 64]
@@ -462,15 +469,13 @@ def open_v1(data: bytes) -> dict:
                     f"branching_factor {bf} give {depth}")
 
         timing_mode = groups[group_id]["timing_mode"]
-        #: The last level-0 stamp of the previous block, so the non-decreasing
-        #: rule is checked ACROSS a block boundary and not only within a block.
-        #: That boundary is where the rule is actually broken in practice.
-        prev_last_stamp = None
+        levels: list[list[tuple]] = []
         for lv in range(num_levels):
             block_count, allocated, index_off = _level_entry(data, level_off, lv)
+            entries = []
             for b in range(block_count):
                 e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
-                fo, cs, us, sc, _ts, crc, _res = struct.unpack_from(
+                fo, cs, us, sc, start_ts, crc, _res = struct.unpack_from(
                     "<QQQQqII", data, e)
                 if cs == 0:
                     raise CorruptFile("compressed-size-zero")
@@ -479,7 +484,7 @@ def open_v1(data: bytes) -> dict:
                 # uncompressed_size must agree with the shape as well as with
                 # the decoded bytes. A reader that notices here refuses the
                 # file at step 1; one that only compares after decoding
-                # refuses it at step 5. Same rule, same class.
+                # refuses it at step 6. Same rule, same class.
                 implied = _implied_size(sc, _value_columns(lv, aggregation_mode),
                                         ch_dtype)
                 if us != implied:
@@ -489,21 +494,52 @@ def open_v1(data: bytes) -> dict:
                         f"block's shape implies")
                 if fo + cs > len(data):
                     raise CorruptFile("block-extent-past-eof")
+                entries.append((fo, cs, us, sc, start_ts, crc))
+            # A variable-rate channel's level-0 block starts are its blocks'
+            # FIRST STORED STAMPS, so they carry the non-decreasing rule the
+            # stamps themselves carry. This is the index's one site, and it is
+            # in step 1: a reader locates blocks by searching these starts
+            # before anything is decoded, so an unsorted index gives a wrong
+            # window without the bad pair ever being decoded. Equal starts are
+            # legal, as equal stamps are.
+            if lv == 0 and timing_mode == 1:
+                for i in range(len(entries) - 1):
+                    if entries[i + 1][4] < entries[i][4]:
+                        raise CorruptFile(
+                            "timestamp-stream-decreasing",
+                            f"channel {ci} level 0: block {i + 1} starts at "
+                            f"{entries[i + 1][4]}, before block {i} at "
+                            f"{entries[i][4]}")
+            levels.append(entries)
+        plan.append({"ci": ci, "dtype": ch_dtype, "agg": aggregation_mode,
+                     "timing_mode": timing_mode, "levels": levels})
+
+    # -- steps 2 to 8, one block at a time ---------------------------------
+    for ch in plan:
+        ci, ch_dtype = ch["ci"], ch["dtype"]
+        aggregation_mode, timing_mode = ch["agg"], ch["timing_mode"]
+        #: The last level-0 stamp of the previous block, so the non-decreasing
+        #: rule is checked ACROSS a block boundary and not only within a block.
+        #: That boundary is where the rule is actually broken in practice.
+        prev_last_stamp = None
+        for lv, entries in enumerate(ch["levels"]):
+            for b, (fo, cs, us, sc, start_ts, crc) in enumerate(entries):
+                # (2) the block's CRC, before any of its streams is parsed.
                 if zlib.crc32(data[fo:fo + cs]) & 0xFFFFFFFF != crc:
                     raise CorruptFile("block-crc-mismatch",
                                       f"channel {ci} level {lv} block {b}")
                 body = data[fo:fo + cs]
-                # Steps 2 to 6 of the evaluation order spec/v1 states, in that
+                # Steps 3 to 8 of the evaluation order spec/v1 states, in that
                 # order, so that two readers give a broken file the same class.
                 n = stream_count(body, lv, timing_mode, aggregation_mode, us,
                                  has_moments, profile)
                 leading = _leading_count(lv, timing_mode, aggregation_mode)
 
-                # (2) the leading stream's prefix, whose position bit 0 cannot
+                # (3) the leading stream's prefix, whose position bit 0 cannot
                 #     move.
                 after_leading = _validate_prefixed(body, 0, leading, profile)
 
-                # (3) at profile 0 only, the bit against the length arithmetic.
+                # (4) at profile 0 only, the bit against the length arithmetic.
                 #     It sits between the two prefix checks because it needs
                 #     nothing but the leading prefix and the bytes remaining,
                 #     while every check below is parameterised by the stream
@@ -512,14 +548,14 @@ def open_v1(data: bytes) -> dict:
                     check_flag_against_framing(body, after_leading, us,
                                                has_moments)
 
-                # (4) the remaining prefixes and the last stream's recipe.
+                # (5) the remaining prefixes and the last stream's recipe.
                 rest = _validate_prefixed(body, after_leading,
                                           n - 1 - leading, profile)
                 _validate_last(body, rest, profile)
 
-                # (5) every stream decodes to exactly the size its shape
+                # (6) every stream decodes to exactly the size its shape
                 #     implies; for the values stream that size is also what
-                #     uncompressed_size states. (6) the moment stream is the
+                #     uncompressed_size states. (8) the moment stream is the
                 #     last of them, where bit 0 says there is one.
                 kinds = []
                 if leading:
@@ -537,15 +573,27 @@ def open_v1(data: bytes) -> dict:
                             f"a stream decodes to {got} bytes, its shape "
                             f"implies {want}")
 
-                # A variable-rate channel's stored stamps are non-decreasing,
-                # within a block and across every boundary. EQUAL neighbours
-                # are legal — two samples may carry the same nanosecond — so
-                # only a strict decrease is refused. Checked after the streams
-                # are decoded, because until then there are no stamps to read.
+                # (7) a variable-rate level-0 block, once its timestamps stream
+                # has passed step 6. First (a): the block's first stored stamp
+                # IS its index entry's start_timestamp, so a reader may locate
+                # blocks from the index alone. Then (b): the stamps are
+                # non-decreasing, within a block and across every boundary —
+                # EQUAL neighbours are legal, two samples may carry the same
+                # nanosecond, so only a strict decrease is refused. (a) before
+                # (b), because an entry that lies about a stream is refused
+                # before the stream it lies about is judged. Both are checked
+                # after the streams are decoded, because until then there are
+                # no stamps to read.
                 if lv == 0 and timing_mode == 1:
                     stamps = np.frombuffer(
                         _decode(split_streams(body, n)[0], "int64"),
                         dtype="<i8")
+                    if len(stamps) and int(stamps[0]) != start_ts:
+                        raise CorruptFile(
+                            "block-start-timestamp-mismatch",
+                            f"channel {ci} block {b}: the index entry says the "
+                            f"block starts at {start_ts}, its first stored "
+                            f"stamp is {int(stamps[0])}")
                     if len(stamps) > 1:
                         drops = np.nonzero(np.diff(stamps) < 0)[0]
                         if len(drops):

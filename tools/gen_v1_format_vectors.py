@@ -434,6 +434,12 @@ def _walk_payloads(spec, result) -> list:
 #: exists FOR profile 2 has to have a case at profile 2.
 _PROFILE2_BUILDS: dict = {}
 
+#: The window-straddle file, kept for the same reason one level along: a rule
+#: about a VARIABLE-RATE block's index entry needs a well-formed variable-rate
+#: file to patch, and this is the set's. Keeping it costs no golden — building
+#: a second variable-rate file to patch would add one for nothing.
+_WINDOW_BUILD: dict = {}
+
 
 def gen_profile2_set() -> Vector:
     v = Vector(
@@ -859,10 +865,10 @@ def gen_window_straddle() -> Vector:
             "selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever "
             "a block boundary falls: where a block's first stamp equals t0, an equal "
             "stamp ending the block before it is selected too, and both copies of a "
-            "duplicated t0 are in the window (spec/v1/README.md:394-401). Equal "
-            "consecutive stamps are legal (spec/v1/README.md:386-392)."
+            "duplicated t0 are in the window (spec/v1/README.md:432-439). Equal "
+            "consecutive stamps are legal (spec/v1/README.md:415-421)."
         ),
-        source="spec/v1/README.md:386-401, written by tools/_tslod_build.py",
+        source="spec/v1/README.md:415-439, written by tools/_tslod_build.py",
         contract=(
             "A reader that finds its first block by comparing the block's "
             "start_timestamp against t0 and then scans forward drops every earlier copy "
@@ -911,6 +917,7 @@ def gen_window_straddle() -> Vector:
         channels=[B.ChannelSpec("var_sig", ramp("int32", N))])
     result = B.build(spec)
     rel = _write_file("v1_variable_window_straddle.tslod", result)
+    _WINDOW_BUILD["v1_variable_window_straddle.tslod"] = (rel, result, stamps)
 
     # The block geometry the cases talk about, read back from what was built:
     # three level-0 blocks, so the straddling pair really does straddle one.
@@ -1538,11 +1545,16 @@ def gen_v1_negatives() -> Vector:
            expected_error="CorruptFileError",
            verified_against_an_implementation=False,
            reason="the rule exists for this profile, so this is the case that "
-                  "proves it. Here there is no length arithmetic to catch the "
-                  "disagreement earlier — the values stream is compressed, so "
-                  "its decoded length is not knowable until it has been "
-                  "decoded, and comparing that length with the index entry is "
-                  "the only check a profile-2 reader has on the block's size")
+                  "proves it. What profile 2 lacks is the FRAMING arithmetic "
+                  "profile 0 has: the values stream's encoded length is not "
+                  "known until it is decoded, so a reader cannot walk the "
+                  "block's lengths to find it. The shape comparison remains — "
+                  "uncompressed_size against sample_count x columns x width — "
+                  "and refuses this entry at step 1 with no codec at all, "
+                  "which is why this file is readable as a rejection by a "
+                  "reader that has no zstd. A profile-2 reader that skips the "
+                  "shape comparison meets the same disagreement at step 6 "
+                  "instead, and the class is the same either way")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",
@@ -1645,6 +1657,60 @@ def gen_v1_negatives() -> Vector:
                   "file carrying a zstd recipe is the file that would make the "
                   "stdlib-only reference reader need a codec, which is the whole point "
                   "of the profile")
+
+    # ---- the index entry must tell the truth about the block it describes.
+    #
+    # Unlike the stamp rule below this one CAN be a patch, and for the reason
+    # that rule cannot: the index entry lies OUTSIDE the block's CRC range, so
+    # moving start_timestamp leaves every checksum verifying and the file is
+    # well formed until the entry is compared with the stream it describes.
+    # The base is the window-straddle file — the set's well-formed variable-rate
+    # golden — so the case costs no golden of its own, and it is the apt one:
+    # that vector exists because a reader must not SELECT blocks by
+    # start_timestamp, and this case pins the other half of the same field.
+    w_rel, w, w_stamps = _WINDOW_BUILD["v1_variable_window_straddle.tslod"]
+    w_level0 = [blk for (ci, lv, bi, blk) in w.blocks if lv == 0]
+    bs_off = B.block_offset(w.layout, 0, 0, 1, "start_timestamp")
+    bs_good, = struct.unpack_from("<q", w.data, bs_off)
+    # The premises, from what was built, before anything rests on them.
+    assert bs_good == int(w_stamps[w_level0[0]["sample_count"]]), \
+        "block 1's entry must hold the stamp of block 1's first sample"
+    assert bs_good == int(w_stamps[63]) == int(w_stamps[64]), \
+        "and that stamp is the pair straddling the block 0/1 boundary"
+    patched_starts = [blk["start_timestamp"] for blk in w_level0]
+    patched_starts[1] += 1
+    assert all(patched_starts[i] <= patched_starts[i + 1]
+               for i in range(len(patched_starts) - 1)), \
+        "the patch must leave the starts non-decreasing, or step 1 fires first"
+
+    v.case("v1-block-start-timestamp-mismatch",
+           file=w_rel, rejection_class="block-start-timestamp-mismatch",
+           patch={"offset": u64(bs_off), "width_bytes": 8,
+                  "original_hex": w.data[bs_off:bs_off + 8].hex().upper(),
+                  "patched_hex": struct.pack("<q", bs_good + 1).hex().upper()},
+           field="block_index_entry.start_timestamp",
+           block_index=u64(1),
+           stamp_the_stream_holds=i64(bs_good),
+           stamp_the_entry_holds=i64(bs_good + 1),
+           expected_error="CorruptFileError",
+           verified_against_an_implementation=False,
+           reason="a variable-rate channel's level-0 block index entry states "
+                  "the block's FIRST STORED STAMP, and this entry states one "
+                  "nanosecond later than the stream holds. It is not the stamp "
+                  "rule's case: every stored stamp is untouched and the channel "
+                  "is still non-decreasing everywhere, within every block and "
+                  "across both boundaries — only the entry moved. Nor is it the "
+                  "index-order rule's: the three level-0 starts are still "
+                  "non-decreasing with the patch applied, so the check at open "
+                  "passes and this block is reached. The patch is legal here "
+                  "precisely where the stamp rule's cannot be, because the "
+                  "index entry lies outside the block's CRC range and every "
+                  "checksum still verifies. What it costs a reader: block 1 "
+                  "begins on the stamp duplicated across the block 0/1 "
+                  "boundary, which is the value this vector's own window cases "
+                  "turn on, so an entry that lies by one nanosecond puts a "
+                  "reader searching the starts into the wrong block and drops a "
+                  "sample it would report no error about")
 
     # ---- a decreasing stamp pair, which CANNOT be expressed as a patch.
     #

@@ -293,18 +293,47 @@ the five of bucket 1, never planar (`v1-block-framing`).
 Two readers must give the same broken file the same rejection class, so the order is part of the
 format:
 
-1. The header and the index entries, as above.
-2. The **leading** stream's length prefix — the positions or timestamps stream — whose position
+1. **The header and the index entries — the whole file's, before any block is read.** The header's
+   own fields; then every group entry; then every channel entry — its `dtype`, `aggregation_mode`,
+   `group_id` and `num_levels`, then that its level table lies within the file
+   (`level-table-out-of-bounds`), then its three text fields (`text-field-not-utf8`), then its `name`
+   against every name already seen (`channel-name-duplicate`), then its scaling fields, then in a
+   sealed file its depth (`num-levels-mismatch`); then every level entry and every block index
+   entry, under the rules stated in **Rejection** — among them `uncompressed_size` against the shape
+   the entry implies (`decoded-size-mismatch`), an entry whose block reaches past the end of the
+   file (`block-extent-past-eof`), and the zero-valued fields. Nothing here reads a block. For a
+   variable-rate channel's level 0 the index entries' `start_timestamp`s must also be
+   **non-decreasing in block order**: each one is a stored stamp by the rule under **Time**, so a
+   decrease among them is `timestamp-stream-decreasing`, and a reader raises it here — it locates
+   blocks by searching those starts before anything is decoded, and an unsorted index answers it
+   wrongly with no stream ever examined.
+2. **Each block's CRC**, over `[file_offset, file_offset + compressed_size)`, before any of that
+   block's streams is parsed (`block-crc-mismatch`) — which is what **Integrity**'s *checked before
+   decode* means for this order. Every step below runs on a block whose checksum has already
+   verified, which is why a defect built into a block's data is one this list can reach at all.
+3. The **leading** stream's length prefix — the positions or timestamps stream — whose position
    feature bit 0 cannot move.
-3. At profile 0 only, feature bit 0 against the length arithmetic
+4. At profile 0 only, feature bit 0 against the length arithmetic
    (`moment-stream-flag-mismatch`).
-4. The remaining length prefixes, and the last stream's recipe byte.
-5. Decode each stream and compare its length with the size its shape implies, the values stream's
+5. The remaining length prefixes, and the last stream's recipe byte.
+6. Decode each stream and compare its length with the size its shape implies, the values stream's
    being `uncompressed_size` (`decoded-size-mismatch`).
-6. The moment stream, where bit 0 says there is one.
+7. For a level-0 block of a **variable-rate** channel, once its timestamps stream has passed step 6:
+   first that the block's first stored stamp **equals** its index entry's `start_timestamp`
+   (`block-start-timestamp-mismatch`), and then that its stamps are non-decreasing within the block
+   and that its first is not below the last stamp of the block before it
+   (`timestamp-stream-decreasing`). In that order, because an entry that lies about a stream is
+   refused before the stream it lies about is judged.
+8. The moment stream, where bit 0 says there is one.
+
+Step 1 is the whole file's and precedes every block. Steps 2 to 8 are one block's, taken in block
+order within a level, level order within a channel and channel order within the file, so a file
+whose defects lie in different blocks is refused for the earlier block's. Steps 7 and 8 never both
+apply to the same block: a level-0 block carries no moment stream, and a block that carries one is
+above level 0.
 
 A reader that cross-checks `uncompressed_size` against the implied shape at step 1 refuses a
-disagreeing index entry there; a reader that only compares after decoding refuses it at step 5. Both
+disagreeing index entry there; a reader that only compares after decoding refuses it at step 6. Both
 give `decoded-size-mismatch`, because it is one rule and not two, and where `uncompressed_size` and
 the decoded bytes disagree either reader catches it.
 
@@ -313,9 +342,9 @@ that disagrees with the block leaves `uncompressed_size` and the decoded bytes e
 both are wrong in the same way — so nothing but the shape notices, and every stream in that block is
 then read at the wrong length.
 
-Step 3 sits between the two prefix checks, and it has to. The cross-check needs only the leading
+Step 4 sits between the two prefix checks, and it has to. The cross-check needs only the leading
 stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on
-no later prefix being valid — while every check from step 4 onward is parameterised by the stream
+no later prefix being valid — while every check from step 5 onward is parameterised by the stream
 count that bit 0 supplies. Run the full prefix walk first and a wrong bit derails the walk before
 the cross-check is ever reached, so the file is refused for a damaged prefix or an unknown recipe
 byte, whichever the values stream's first bytes happen to look like. The class would then depend on
@@ -390,6 +419,15 @@ a strict increase anywhere. A decreasing pair makes the file malformed
 (`timestamp-stream-decreasing`). The rule is stated as non-decreasing rather than increasing because
 a recording whose source stamps two samples alike is a recording and not a fault, and a reader that
 treats equality as impossible drops one of the two.
+
+For a variable-rate channel, a level-0 block's index `start_timestamp` **is its first stored stamp**
+— the entry says what the stream says, so a reader may locate blocks from the index alone and the
+window rule below still tests the stamp itself. A block whose entry and stream disagree makes the
+file malformed (`block-start-timestamp-mismatch`, `v1-negative-vectors`). It follows that a
+channel's level-0 starts are non-decreasing in block order, each one being a stored stamp, and a
+reader raises a decrease among them from the index before it reads a block. The rule binds **level 0
+only**: a fixed-rate block's `start_timestamp` is given by the time rule above, and an upper level's
+is not constrained here — its leading stream holds a stamp per column rather than one per sample.
 
 ⛔ **A request for the half-open window [t₀, t₁) selects every sample whose stored stamp `s`
 satisfies `t₀ ≤ s < t₁`, wherever a block boundary falls.** The test is on the stamp and never on the
