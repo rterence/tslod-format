@@ -859,10 +859,10 @@ def gen_window_straddle() -> Vector:
             "selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever "
             "a block boundary falls: where a block's first stamp equals t0, an equal "
             "stamp ending the block before it is selected too, and both copies of a "
-            "duplicated t0 are in the window (spec/v1/README.md:403-410). Equal "
-            "consecutive stamps are legal (spec/v1/README.md:395-401)."
+            "duplicated t0 are in the window (spec/v1/README.md:394-401). Equal "
+            "consecutive stamps are legal (spec/v1/README.md:386-392)."
         ),
-        source="spec/v1/README.md:395-410, written by tools/_tslod_build.py",
+        source="spec/v1/README.md:386-401, written by tools/_tslod_build.py",
         contract=(
             "A reader that finds its first block by comparing the block's "
             "start_timestamp against t0 and then scans forward drops every earlier copy "

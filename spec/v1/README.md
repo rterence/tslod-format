@@ -279,15 +279,6 @@ positions `N×2` i64, variable-rate timestamp tuples `N×5` i64, values `N×1` a
 `N×5` numeric and `N×2` bitfield, moments `N×5` f64. A stream that decodes to any other length makes
 the file malformed (`decoded-size-mismatch`).
 
-This rule is also what refuses a file written to either shape version 1 carried before this row —
-four-column values `[min, max, first, last]` with two-column positions, and three-column values
-`[min, max, rep]` with three-column positions — and no class of its own is needed. Above level 0 a
-numeric values stream in those shapes decodes to `N×4` or `N×3` where `N×5` is implied, and with
-`sample_count` at least 1 no two of the three sizes can coincide; a bitfield values stream is two
-columns as it already was, and four in the oldest shape. Every such block is therefore refused as
-`decoded-size-mismatch`, by a reader that compares at step 1 and by one that compares at step 5
-alike. A file with no block above level 0 holds no bucket and reads the same under all three.
-
 For the values stream that size is also what the index entry's `uncompressed_size` states, so
 `uncompressed_size` must agree with the shape as well as with the decoded bytes — three numbers that
 have to be one number. At profile 0 the shape is knowable before anything is decoded and the whole
