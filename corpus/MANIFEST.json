@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 26,
-    "cases": 1334,
+    "cases": 1335,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1009,7 +1009,7 @@
       "files": [
         {
           "path": "v1-format/v1-block-crc.json",
-          "sha256": "58eb69daac70df34415da0931cdec1d0f208641c855e7daad5cbb3743c71a27b"
+          "sha256": "f88b4566afe64a151afda193ee759d529ac48cae0330685d3d6883bc1eb8aecb"
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
@@ -1051,11 +1051,15 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 69,
+      "case_count": 70,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "3dc5702171383485f69ef217f3765b4fbd422e4fbb6951f4ee33987c8fcb45dc"
+          "sha256": "06c260afd8522e38ee873decfeda6333240f230cb9421fe87b1b112db8099fb4"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
@@ -1434,8 +1438,8 @@
       "id": "v1-variable-window-straddle",
       "set": "v1-format",
       "kind": "fixture",
-      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:432-439). Equal consecutive stamps are legal (spec/v1/README.md:415-421).",
-      "source": "spec/v1/README.md:415-439, written by tools/_tslod_build.py",
+      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:441-448). Equal consecutive stamps are legal (spec/v1/README.md:424-430).",
+      "source": "spec/v1/README.md:424-448, written by tools/_tslod_build.py",
       "contract": "A reader that finds its first block by comparing the block's start_timestamp against t0 and then scans forward drops every earlier copy of t0 and answers one sample short, with nothing in the file to say so. Two implementations must return the same samples for the same window, so which samples a stamp range holds is the format's to state and not a reader's private policy.",
       "requires": [
         "format:v1",
@@ -1447,7 +1451,7 @@
       "files": [
         {
           "path": "v1-format/v1-variable-window-straddle.json",
-          "sha256": "9f80b214802a2c497d66a4aa67e6c87315e9400b84f3f9a147349e05fb11b8ed"
+          "sha256": "ede9d9d69294c120788aca158fafc18e42b3fe88bf1ef35d38bd8d111d082a00"
         },
         {
           "path": "v1-format/files/v1_variable_window_straddle.tslod",

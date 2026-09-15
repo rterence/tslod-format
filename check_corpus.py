@@ -477,14 +477,22 @@ def open_v1(data: bytes) -> dict:
                 e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
                 fo, cs, us, sc, start_ts, crc, _res = struct.unpack_from(
                     "<QQQQqII", data, e)
+                # All three zeros are ONE rule — an index entry describes a
+                # block that exists — so they share a class. compressed_size
+                # is checked first because its zero is what an all-zero entry
+                # rides in on: the CRC of an empty range is 0x00000000, which
+                # is exactly what such an entry stores. It is NOT the stream
+                # length prefix's rule (`stream-length-prefix-zero`), which
+                # lives inside a block and is a different number entirely.
                 if cs == 0:
-                    raise CorruptFile("compressed-size-zero")
+                    raise CorruptFile("zero-size-index-entry")
                 if us == 0 or sc == 0:
                     raise CorruptFile("zero-size-index-entry")
                 # uncompressed_size must agree with the shape as well as with
-                # the decoded bytes. A reader that notices here refuses the
-                # file at step 1; one that only compares after decoding
-                # refuses it at step 6. Same rule, same class.
+                # the decoded bytes. This is arithmetic on the entry, so it is
+                # a step-1 check for every conforming reader and not a choice:
+                # it fires before the extent check on an entry carrying both.
+                # Step 6 compares the DECODED bytes and raises the same class.
                 implied = _implied_size(sc, _value_columns(lv, aggregation_mode),
                                         ch_dtype)
                 if us != implied:

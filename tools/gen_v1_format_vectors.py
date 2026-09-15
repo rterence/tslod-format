@@ -773,9 +773,11 @@ def gen_crc() -> Vector:
            compressed_size=u64(0),
            crc32_of_empty_range=f"0x{zlib.crc32(b'') & 0xFFFFFFFF:08X}",
            must_be_rejected=True,
-           note="an index entry whose compressed_size is zero is rejected as today "
-                ", which is what stops an all-zero entry passing: the CRC of an "
-                "empty range is 0x00000000, and an all-zero entry stores exactly that")
+           note="an index entry whose compressed_size is zero is rejected as "
+                "zero-size-index-entry, which is what stops an all-zero entry "
+                "passing: the CRC of an empty range is 0x00000000, and an "
+                "all-zero entry stores exactly that. The patched case that "
+                "pins the class is v1-compressed-size-zero")
     return v
 
 
@@ -865,10 +867,10 @@ def gen_window_straddle() -> Vector:
             "selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever "
             "a block boundary falls: where a block's first stamp equals t0, an equal "
             "stamp ending the block before it is selected too, and both copies of a "
-            "duplicated t0 are in the window (spec/v1/README.md:432-439). Equal "
-            "consecutive stamps are legal (spec/v1/README.md:415-421)."
+            "duplicated t0 are in the window (spec/v1/README.md:441-448). Equal "
+            "consecutive stamps are legal (spec/v1/README.md:424-430)."
         ),
-        source="spec/v1/README.md:415-439, written by tools/_tslod_build.py",
+        source="spec/v1/README.md:424-448, written by tools/_tslod_build.py",
         contract=(
             "A reader that finds its first block by comparing the block's "
             "start_timestamp against t0 and then scans forward drops every earlier copy "
@@ -1391,6 +1393,23 @@ def gen_v1_negatives() -> Vector:
          "stream's decoded length, so zero would imply every stream is empty "
          "while the block plainly holds bytes",
          rejection_class="zero-size-index-entry")
+    _cs0 = B.block_offset(good.layout, 0, 1, 0, "compressed_size")
+    case("v1-compressed-size-zero", _cs0, "Q", 0,
+         "block_index_entry.compressed_size",
+         "the third field of the same rule, and the one an all-zero entry "
+         "rides in on: the CRC of an empty range is 0x00000000, which is "
+         "exactly what an all-zero entry stores, so without this refusal such "
+         "an entry passes its own checksum. It is refused BEFORE the CRC is "
+         "computed and it shares the class of the other two zeros, because it "
+         "is the same rule - an index entry describes a block that exists. It "
+         "is emphatically NOT stream-length-prefix-zero: that rule is a u32 "
+         "inside a block that has already passed its CRC, and this one is a "
+         "u64 in the index, refused before any block is read at all. A reader "
+         "that answers a zero compressed_size with the stream prefix's class "
+         "sends its user into the block for a defect that is in the index. "
+         "The entry lies outside the CRC range, so this is a one-field patch "
+         "and every block's checksum still verifies",
+         rejection_class="zero-size-index-entry")
 
     # ---- a block whose extent leaves the file
     _blk = B.block_offset(good.layout, 0, 1, 0, "file_offset")
@@ -1528,10 +1547,12 @@ def gen_v1_negatives() -> Vector:
                   "count's. sample_count is the block's row count at its own "
                   "level, so it fixes the decoded size of EVERY stream in the "
                   "block; one more row than the block holds and no stream is "
-                  "the length its shape implies. A reader can refuse this "
-                  "before it decodes anything, by comparing uncompressed_size "
-                  "with the shape, or after decoding, by comparing the bytes. "
-                  "It is one rule, so it is one class either way")
+                  "the length its shape implies. The shape comparison is "
+                  "arithmetic on the index entry, so every conforming reader "
+                  "refuses this at step 1, before anything is decoded; step "
+                  "6's comparison of the decoded bytes raises the same class "
+                  "where an entry the shape passed still disagrees. One rule, "
+                  "one class, two sites")
 
     p2_rel, p2 = _PROFILE2_BUILDS["v1_p2_with_moments.tslod"]
     p2_off = B.block_offset(p2.layout, 0, 1, 0, "uncompressed_size")
@@ -1552,9 +1573,11 @@ def gen_v1_negatives() -> Vector:
                   "uncompressed_size against sample_count x columns x width — "
                   "and refuses this entry at step 1 with no codec at all, "
                   "which is why this file is readable as a rejection by a "
-                  "reader that has no zstd. A profile-2 reader that skips the "
-                  "shape comparison meets the same disagreement at step 6 "
-                  "instead, and the class is the same either way")
+                  "reader that has no zstd. The shape comparison is not a "
+                  "reader's option, so this entry never reaches a codec; step "
+                  "6's comparison of the DECODED length against "
+                  "uncompressed_size is the profile's own and raises the same "
+                  "class where an entry the shape passed still disagrees")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",
@@ -1832,11 +1855,12 @@ def gen_v1_negatives() -> Vector:
             f"offset went stale")
         assert good.data[lo:lo + w].hex().upper() == c["patch"]["original_hex"], (
             f"{c['name']}: original_hex is not what the base holds at {lo}")
-    assert on_base == 48, (
-        f"{on_base} patch cases on THIS base; the 45 that were on it before "
-        f"this sitting plus the three it adds is 48. Of the vector's 52 patch "
-        f"cases before, 45 were on this base, 5 on the tick-rate base and 2 on "
-        f"the moment-stream files. A case that vanished or arrived unnoticed "
+    assert on_base == 49, (
+        f"{on_base} patch cases on THIS base; 48 stood at 6e70f1e and the "
+        f"zero compressed_size case added for the fold into zero-size-index-"
+        f"entry makes 49. The vector's remaining patch cases are on other "
+        f"files — 5 on the tick-rate base and 2 on the moment-stream files — "
+        f"and are not counted here. A case that vanished or arrived unnoticed "
         f"makes the containment control above vacuous")
     return v
 

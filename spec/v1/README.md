@@ -301,7 +301,12 @@ format:
    sealed file its depth (`num-levels-mismatch`); then every level entry and every block index
    entry, under the rules stated in **Rejection** — among them `uncompressed_size` against the shape
    the entry implies (`decoded-size-mismatch`), an entry whose block reaches past the end of the
-   file (`block-extent-past-eof`), and the zero-valued fields. Nothing here reads a block. For a
+   file (`block-extent-past-eof`), and the zero-valued fields. Nothing here reads a block. The
+   channel table is walked **per channel and not per kind**: for each channel entry in turn — the
+   entry's own fields, then its level entries and their block index entries — before the next
+   channel's. In a sealed file the depth is read from level 0's entry and its block index, so those
+   two entries' own rules (`block-count-exceeds-allocated`, `block-index-out-of-bounds`) are checked
+   for level 0 before the depth is compared; the remaining levels follow. For a
    variable-rate channel's level 0 the index entries' `start_timestamp`s must also be
    **non-decreasing in block order**: each one is a stored stamp by the rule under **Time**, so a
    decrease among them is `timestamp-stream-decreasing`, and a reader raises it here — it locates
@@ -332,15 +337,18 @@ whose defects lie in different blocks is refused for the earlier block's. Steps 
 apply to the same block: a level-0 block carries no moment stream, and a block that carries one is
 above level 0.
 
-A reader that cross-checks `uncompressed_size` against the implied shape at step 1 refuses a
-disagreeing index entry there; a reader that only compares after decoding refuses it at step 6. Both
-give `decoded-size-mismatch`, because it is one rule and not two, and where `uncompressed_size` and
-the decoded bytes disagree either reader catches it.
+`uncompressed_size` against the implied shape is a **step-1** check for every conforming reader. It
+is arithmetic on the index entry — `sample_count` × columns × width — and needs no byte decoded, so
+no reader has a reason to defer it: a disagreeing entry is refused at step 1, and an entry that also
+reaches past the end of the file is refused for `decoded-size-mismatch` and not for
+`block-extent-past-eof`. Step 6's comparison remains and raises the same class, where the decoded
+bytes disagree with an `uncompressed_size` the shape check passed. One rule, one class, two sites,
+and the order says which of them speaks.
 
-The shape comparison is nevertheless **required and not merely an early exit**. A `sample_count`
-that disagrees with the block leaves `uncompressed_size` and the decoded bytes equal to each other —
-both are wrong in the same way — so nothing but the shape notices, and every stream in that block is
-then read at the wrong length.
+The comparison is **required and not merely an early exit**, which is why it cannot be left to a
+reader's choice. A `sample_count` that disagrees with the block leaves `uncompressed_size` and the
+decoded bytes equal to each other — both are wrong in the same way — so nothing but the shape
+notices, and every stream in that block is then read at the wrong length.
 
 Step 4 sits between the two prefix checks, and it has to. The cross-check needs only the leading
 stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on
@@ -375,8 +383,9 @@ two conforming encoders may emit different bytes for the same input and both be 
 Every block carries a checksum — a CRC-32, the IEEE polynomial as zlib computes it (`0xEDB88320` reflected, init and
 xor-out `0xFFFFFFFF`, check value `0xCBF43926` for `"123456789"`), over exactly
 `[file_offset, file_offset + compressed_size)` — the index entry holding it lies outside that range
-— **checked before decode**. An index entry whose `compressed_size` is zero is rejected, which is
-what stops an all-zero entry passing on the CRC of an empty range (`v1-block-crc`).
+— **checked before decode**. An index entry whose `compressed_size` is zero is rejected
+(`zero-size-index-entry`), which is what stops an all-zero entry passing on the CRC of an empty
+range (`v1-block-crc`).
 
 ## Time
 
@@ -516,10 +525,16 @@ than a refusal.
 (`block-count-exceeds-allocated`), which points at entries never filled in — the rule is an upper
 bound and not equality, because an active file is exactly where the two differ legitimately. A block
 index whose entries end past the end of the file (`block-index-out-of-bounds`), the last of the four
-tables under the same bound as the other three. An `uncompressed_size` or `sample_count` of zero
-(`zero-size-index-entry`): one rule, that an index entry describes a block that exists, so one
-class. A `compressed_size` of zero is refused before the CRC is computed, which is what stops an
-all-zero entry passing on the checksum of an empty range (`v1-block-crc`).
+tables under the same bound as the other three. An `uncompressed_size`, `sample_count` or
+`compressed_size` of zero (`zero-size-index-entry`): one rule, that an index entry describes a block
+that exists, so one class. The `compressed_size` case is refused before the CRC is computed, which
+is what stops an all-zero entry passing on the checksum of an empty range (`v1-block-crc`, and
+`v1-compressed-size-zero` in `v1-negative-vectors`).
+
+Within step 1 these are taken in one order — for each level: its entry's `block_count` against
+`allocated`; then the whole index's bound; then each index entry in order — the zero-valued fields,
+`uncompressed_size` against the shape the entry implies, the block's extent — before that block's
+CRC.
 
 `total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
 conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a

@@ -81,7 +81,7 @@
       "compressed_size": "0",
       "crc32_of_empty_range": "0x00000000",
       "must_be_rejected": true,
-      "note": "an index entry whose compressed_size is zero is rejected as today , which is what stops an all-zero entry passing: the CRC of an empty range is 0x00000000, and an all-zero entry stores exactly that"
+      "note": "an index entry whose compressed_size is zero is rejected as zero-size-index-entry, which is what stops an all-zero entry passing: the CRC of an empty range is 0x00000000, and an all-zero entry stores exactly that. The patched case that pins the class is v1-compressed-size-zero"
     }
   ]
 }
