@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 70,
+  "case_count": 75,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -795,7 +795,7 @@
       "field": "block_index_entry.sample_count",
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
-      "reason": "the same rule from the shape's side rather than the byte count's. sample_count is the block's row count at its own level, so it fixes the decoded size of EVERY stream in the block; one more row than the block holds and no stream is the length its shape implies. The shape comparison is arithmetic on the index entry, so every conforming reader refuses this at step 1, before anything is decoded; step 6's comparison of the decoded bytes raises the same class where an entry the shape passed still disagrees. One rule, one class, two sites"
+      "reason": "the same rule from the shape's side rather than the byte count's. sample_count is the block's row count at its own level, so it fixes the decoded size of EVERY stream in the block; one more row than the block holds and no stream is the length its shape implies. The shape comparison is arithmetic on the index entry, so every conforming reader refuses this at step 1, before anything is decoded; step 6's comparison of each stream's declared size raises the same class where an entry the shape passed still disagrees. One rule, one class, two sites"
     },
     {
       "name": "v1-decoded-size-mismatch-at-profile-2",
@@ -810,7 +810,87 @@
       "field": "block_index_entry.uncompressed_size",
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
-      "reason": "the rule exists for this profile, so this is the case that proves it. What profile 2 lacks is the FRAMING arithmetic profile 0 has: the values stream's encoded length is not known until it is decoded, so a reader cannot walk the block's lengths to find it. The shape comparison remains \u2014 uncompressed_size against sample_count x columns x width \u2014 and refuses this entry at step 1 with no codec at all, which is why this file is readable as a rejection by a reader that has no zstd. The shape comparison is not a reader's option, so this entry never reaches a codec; step 6's comparison of the DECODED length against uncompressed_size is the profile's own and raises the same class where an entry the shape passed still disagrees"
+      "reason": "the rule exists for this profile, so this is the case that proves it. What profile 2 lacks is the FRAMING arithmetic profile 0 has: the values stream's encoded length is not known until it is decoded, so a reader cannot walk the block's lengths to find it. The shape comparison remains \u2014 uncompressed_size against sample_count x columns x width \u2014 and refuses this entry at step 1 with no codec at all, which is why this file is readable as a rejection by a reader that has no zstd. The shape comparison is not a reader's option, so this entry never reaches a codec; step 6's comparison of the size the values stream DECLARES against uncompressed_size is the profile's own and raises the same class where an entry the shape passed still disagrees"
+    },
+    {
+      "name": "v1-stream-zstd-frame-corrupt",
+      "file": "v1-format/files/v1_negative_p2_zstd_frame_corrupt.tslod",
+      "rejection_class": "stream-payload-undecodable",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_with_moments.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "1024",
+      "implied_size": "1024",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the values stream's zstd frame declares exactly the 1,024 bytes its shape implies, so step 6's comparison passes, and then its first block does not decode: its Block_Type is 3, which the zstd format reserves. The block's CRC is computed over the damaged bytes, so nothing before step 6 notices. The class is the rule's \u2014 the bytes are not a stream of this recipe \u2014 and not the codec's own error, which differs from one library to the next"
+    },
+    {
+      "name": "v1-stream-zstd-declares-wrong-size-and-is-corrupt",
+      "file": "v1-format/files/v1_negative_p2_zstd_declares_wrong_size_and_is_corrupt.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_with_moments.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "1028",
+      "implied_size": "1024",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "TWO defects in one frame, and this case is the order that decides between them: the frame declares 1,028 bytes where the shape implies 1,024, AND its first block is the reserved type v1-stream-zstd-frame-corrupt carries. The declaration is compared BEFORE the payload is decoded, so this is decoded-size-mismatch for every conforming reader, and a reader that decodes first and compares after refuses it as stream-payload-undecodable and does not conform. Comparing first is also the bound: no reader decodes past the size a block's shape implies to learn which class a file has. Each defect alone is refused for its own reason: the corruption is the case named above, and a frame declaring 1,028 over 1,024 bytes of content is refused by the declaration"
+    },
+    {
+      "name": "v1-stream-zstd-second-frame",
+      "file": "v1-format/files/v1_negative_p2_zstd_second_frame.tslod",
+      "rejection_class": "stream-payload-undecodable",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_with_moments.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "1024",
+      "implied_size": "1024",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the values stream's payload is its well-formed frame followed by a second copy of the same frame. The first frame declares and delivers exactly 1,024 bytes, so a reader that decodes one frame and ignores what follows accepts this file, and a reader that decodes every frame gets 2,048 bytes and calls it a size mismatch \u2014 two readers, one file, two answers. A payload is EXACTLY one frame with nothing after it, so the bytes are not a stream of this recipe, whichever way a decoder would have read them"
+    },
+    {
+      "name": "v1-stream-pco-size-hint-disagrees",
+      "file": "v1-format/files/v1_negative_p2_pco_size_hint_disagrees.tslod",
+      "rejection_class": "decoded-size-mismatch",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_no_moments.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "1028",
+      "implied_size": "1024",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the values stream's pco header declares 257 elements where the shape implies 256, and the payload after it decodes to exactly 256. pco itself treats the size hint as advisory, so a reader that decodes first and compares after accepts this file. This format binds it \u2014 a writer sets the hint to the stream's element count \u2014 because it is the one size a pco stream declares before it is decoded, and step 6 compares that declaration before it decodes anything"
+    },
+    {
+      "name": "v1-stream-pco-byte-after-termination",
+      "file": "v1-format/files/v1_negative_p2_pco_byte_after_termination.tslod",
+      "rejection_class": "stream-payload-undecodable",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_no_moments.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "1024",
+      "implied_size": "1024",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "the values stream's pco file is well formed and followed by one more byte, a zero \u2014 the value of a termination byte, so a reader that only checks the payload ends in one is not satisfied by accident. pco's own decoder stops at the termination and reports 256 elements, so a reader relying on it accepts this file. A payload is EXACTLY one standalone file with nothing after it: a byte no reader consumes has no purpose in a format, and a rule that left it unread would leave two readers free to differ about it"
     },
     {
       "name": "v1-stream-length-prefix-exceeds-block",

@@ -492,7 +492,8 @@ def open_v1(data: bytes) -> dict:
                 # the decoded bytes. This is arithmetic on the entry, so it is
                 # a step-1 check for every conforming reader and not a choice:
                 # it fires before the extent check on an entry carrying both.
-                # Step 6 compares the DECODED bytes and raises the same class.
+                # Step 6 compares each stream's DECLARED size and raises the
+                # same class.
                 implied = _implied_size(sc, _value_columns(lv, aggregation_mode),
                                         ch_dtype)
                 if us != implied:
@@ -561,10 +562,15 @@ def open_v1(data: bytes) -> dict:
                                           n - 1 - leading, profile)
                 _validate_last(body, rest, profile)
 
-                # (6) every stream decodes to exactly the size its shape
-                #     implies; for the values stream that size is also what
-                #     uncompressed_size states. (8) the moment stream is the
-                #     last of them, where bit 0 says there is one.
+                # (6) each stream in wire order, finished before the next: the
+                #     size it DECLARES against the size its shape implies —
+                #     for the values stream also what uncompressed_size states
+                #     — and only then the decode, which must deliver exactly
+                #     that. Declaration first is the bound: nothing is decoded
+                #     past the shape, and a payload both mis-declared and
+                #     corrupt gets one class however far a decoder would run.
+                #     (8) the moment stream is the last of them, where bit 0
+                #     says there is one.
                 kinds = []
                 if leading:
                     kinds.append(("int64", _leading_columns(lv, timing_mode,
@@ -574,12 +580,13 @@ def open_v1(data: bytes) -> dict:
                     kinds.append(("float64", 5))
                 for stream, (dt, cols) in zip(split_streams(body, n), kinds):
                     want = _implied_size(sc, cols, dt)
-                    got = len(_decode(stream, dt))
+                    got = _declared_size(stream, dt)
                     if got != want:
                         raise CorruptFile(
                             "decoded-size-mismatch",
-                            f"a stream decodes to {got} bytes, its shape "
+                            f"a stream declares {got} bytes, its shape "
                             f"implies {want}")
+                    _decode(stream, dt)
 
                 # (7) a variable-rate level-0 block, once its timestamps stream
                 # has passed step 6. First (a): the block's first stored stamp
@@ -1324,6 +1331,32 @@ def c_merge_order(v, c):
 
 
 def c_crc(v, c):
+    if "byte_offset_to_flip" in c:
+        # A flipped bit. The checksum must stop verifying, and the reader must
+        # refuse the file for that and for nothing else — a case that only
+        # stated both CRCs would pass whether or not any reader checked them.
+        data = (VECTORS / c["file"]).read_bytes()
+        lo = int(c["file_offset"])
+        hi = lo + int(c["compressed_size"])
+        at = int(c["byte_offset_to_flip"])
+        assert lo <= at < hi, f"byte {at} lies outside the CRC range [{lo}, {hi})"
+        assert data[at] == int(c["original_byte"], 16), (
+            "the file does not hold the byte the case says it flips")
+        flipped = bytearray(data)
+        flipped[at] ^= int(c["bit_mask"], 16)
+        assert flipped[at] == int(c["flipped_byte"], 16)
+        stored = int(c["stored_crc32"], 16)
+        assert zlib.crc32(data[lo:hi]) & 0xFFFFFFFF == stored
+        after = zlib.crc32(bytes(flipped[lo:hi])) & 0xFFFFFFFF
+        assert after == int(c["crc32_after_flip"], 16) and after != stored
+        open_v1(data)                     # the unflipped file must open
+        try:
+            open_v1(bytes(flipped))
+        except CorruptFile as exc:
+            assert exc.rejection_class == "block-crc-mismatch", (
+                f"{c['name']}: refused as {exc.rejection_class}")
+            return
+        raise AssertionError(f"{c['name']}: the flipped file was accepted")
     if "input_hex" in c:
         payload = bytes.fromhex(c["input_hex"])
         assert zlib.crc32(payload) & 0xFFFFFFFF == int(c["expected_crc32"], 16)
@@ -1336,9 +1369,12 @@ def c_crc(v, c):
         assert got == int(c["expected_crc32"], 16), (
             f"CRC over [{lo}, {hi}) is {got:#010x}, stored {c['expected_crc32']}")
         return
-    # The remaining cases state the variant itself: polynomial, init, xor-out.
-    assert zlib.crc32(b"123456789") & 0xFFFFFFFF == 0xCBF43926, (
-        "this is the CRC-32 variant with check value 0xCBF43926")
+    # No fall-through. A branch that asserted something true of every case
+    # passed a case that stated a rule and checked none of it.
+    raise AssertionError(
+        f"{c['name']}: a v1-block-crc case carries input_hex, or file + "
+        f"file_offset + compressed_size, or byte_offset_to_flip; this one "
+        f"carries none, so nothing would check it")
 
 
 def c_time_axis(v, c):
@@ -1527,9 +1563,145 @@ DTYPE_BY_ENUM = {0: "float32", 1: "float64", 2: "int8", 3: "int16", 4: "int32",
                  5: "int64", 6: "uint8", 7: "uint16", 8: "uint32", 9: "uint64"}
 
 
-def _decode(stream: bytes, dtype: str) -> bytes:
-    """`[recipe][payload]` -> decoded payload bytes, per the recipe registry."""
+ZSTD_FRAME_MAGIC = b"\x28\xB5\x2F\xFD"
+PCO_MAGIC = b"pco!"
+#: pco's own number-type byte per dtype, which its standalone format writes
+#: before every chunk. The 8-bit dtypes are decodable though no writer here
+#: emits them.
+PCO_NUMBER_TYPE = {"uint32": 1, "uint64": 2, "int32": 3, "int64": 4,
+                   "float32": 5, "float64": 6, "uint16": 7, "int16": 8,
+                   "uint8": 10, "int8": 11}
+#: The dtype names `pcodec.wrapped` takes.
+PCO_DT_NAME = {"float32": "f32", "float64": "f64", "int8": "i8", "int16": "i16",
+               "int32": "i32", "int64": "i64", "uint8": "u8", "uint16": "u16",
+               "uint32": "u32", "uint64": "u64"}
+
+
+def _undecodable(detail: str) -> CorruptFile:
+    return CorruptFile("stream-payload-undecodable", detail)
+
+
+def _zstd_declared(payload: bytes) -> int:
+    """The frame header's content size, read without decoding (RFC 8878 §3.1.1)."""
+    if payload[:4] != ZSTD_FRAME_MAGIC or len(payload) < 5:
+        raise _undecodable("the zstd payload does not begin with a standard frame")
+    fhd = payload[4]
+    if fhd & 0x08:
+        raise _undecodable("the zstd frame header sets its reserved bit")
+    single_segment = (fhd >> 5) & 1
+    off = 5 + (0 if single_segment else 1) + (0, 1, 2, 4)[fhd & 0x03]
+    size = (1 if single_segment else 0, 2, 4, 8)[fhd >> 6]
+    if size == 0:
+        raise _undecodable("the zstd frame does not declare its content size")
+    if len(payload) < off + size:
+        raise _undecodable("the zstd frame header is truncated")
+    declared = int.from_bytes(payload[off:off + size], "little")
+    return declared + 256 if size == 2 else declared
+
+
+def _pco_hint(payload: bytes) -> tuple[int, int, int]:
+    """pco's standalone size hint, the offset of the byte after it, and the
+    bits that pad its last byte (which pco requires to be zero).
+
+    Read from the magic, the standalone version and the hint alone — the one
+    thing a reader must see before it decodes. Every other header byte is
+    judged when the payload is decoded.
+    """
+    if payload[:4] != PCO_MAGIC or len(payload) < 5:
+        raise _undecodable("the pco payload does not begin with the standalone magic")
+    version = payload[4]
+    if version not in (2, 3):
+        raise _undecodable(f"pco standalone version {version} carries no size hint "
+                           f"this reader can read")
+    at = 5 if version == 2 else 6
+    head = int.from_bytes(payload[at:at + 2], "little")
+    power = (head & 0x3F) + 1
+    nbytes = (6 + power + 7) // 8
+    if len(payload) < at + nbytes:
+        raise _undecodable("the pco size hint is truncated")
+    bits = int.from_bytes(payload[at:at + nbytes], "little")
+    return (bits >> 6) & ((1 << power) - 1), at + nbytes, bits >> (6 + power)
+
+
+def _declared_size(stream: bytes, dtype: str) -> int:
+    """The decoded size a stream DECLARES, in bytes, before any of it is decoded.
+
+    Step 6 compares this with the shape's size first, and that is the bound:
+    no stream is decoded past what its block's shape implies. Needs no codec.
+    """
     recipe, payload = stream[0], stream[1:]
+    if recipe == 0x00:
+        return len(payload)
+    if recipe in (0x01, 0x03):
+        return _zstd_declared(payload)
+    if recipe == 0x02:
+        return _pco_hint(payload)[0] * np.dtype(dtype).itemsize
+    raise CorruptFile("unknown-recipe-byte", f"0x{recipe:02X}")
+
+
+def _pco_decode(payload: bytes, dtype: str, declared: int) -> bytes:
+    """Exactly one standalone file, walked chunk by chunk to its termination.
+
+    The walk is the reader's own rather than `simple_decompress`, which stops
+    at the termination byte and never says what follows it: a byte after the
+    file is a byte no reader consumes, and the format refuses it.
+    """
+    try:
+        from pcodec import wrapped
+    except ImportError:
+        raise Skip("pcodec")
+    want = declared // np.dtype(dtype).itemsize
+    _hint, off, padding = _pco_hint(payload)
+    if padding:
+        raise _undecodable("the bits after the pco size hint are not zero")
+    if payload[4] == 3 and payload[5] not in (0, PCO_NUMBER_TYPE[dtype]):
+        raise _undecodable(f"the pco file's uniform number type {payload[5]} is not {dtype}")
+    out, total = [], 0
+    try:
+        fd, n_read = wrapped.FileDecompressor.new(payload[off:])
+        off += n_read
+        while True:
+            if off >= len(payload):
+                raise _undecodable("the pco file ends before its termination byte")
+            kind = payload[off]
+            off += 1
+            if kind == 0:
+                break
+            if kind != PCO_NUMBER_TYPE[dtype]:
+                raise _undecodable(f"a pco chunk of number type {kind} in a {dtype} stream")
+            if off + 3 > len(payload):
+                raise _undecodable("a pco chunk preamble is truncated")
+            n = int.from_bytes(payload[off:off + 3], "little") + 1
+            off += 3
+            if total + n > want:
+                raise _undecodable(f"the pco chunks deliver more than the {want} "
+                                   f"elements the file declares")
+            cd, n_read = fd.chunk_decompressor(payload[off:], PCO_DT_NAME[dtype])
+            off += n_read
+            dst = np.empty(n, dtype=dtype)
+            progress, n_read = cd.read_page_into(payload[off:], n, dst)
+            off += n_read
+            if progress.n_processed != n:
+                raise _undecodable("a pco chunk delivers fewer elements than it declares")
+            out.append(dst)
+            total += n
+    except RuntimeError as exc:
+        raise _undecodable(f"pco refuses the payload: {exc}")
+    if off != len(payload):
+        raise _undecodable(f"{len(payload) - off} bytes follow the pco termination byte")
+    if total != want:
+        raise _undecodable(f"the pco file delivers {total} elements and declares {want}")
+    return b"".join(np.ascontiguousarray(a).tobytes() for a in out)
+
+
+def _decode(stream: bytes, dtype: str) -> bytes:
+    """`[recipe][payload]` -> decoded payload bytes, per the recipe registry.
+
+    Exactly one payload of the recipe, delivering exactly what it declares —
+    anything else is `stream-payload-undecodable`, whichever codec refuses.
+    """
+    recipe, payload = stream[0], stream[1:]
+    declared = _declared_size(stream, dtype)
     if recipe == 0x00:
         return payload
     if recipe in (0x01, 0x03):
@@ -1537,18 +1709,18 @@ def _decode(stream: bytes, dtype: str) -> bytes:
             import zstandard
         except ImportError:
             raise Skip("zstandard")
-        raw = zstandard.ZstdDecompressor().decompress(payload)
+        try:
+            raw = zstandard.ZstdDecompressor().decompress(
+                payload, allow_extra_data=False)
+        except zstandard.ZstdError as exc:
+            raise _undecodable(f"zstd refuses the payload: {exc}")
+        if len(raw) != declared:
+            raise _undecodable(f"the frame delivers {len(raw)} bytes and declares {declared}")
         if recipe == 0x01:
             return raw
         width = np.dtype(dtype).itemsize
         return np.frombuffer(raw, dtype=np.uint8).reshape(width, -1).T.tobytes()
-    if recipe == 0x02:
-        try:
-            from pcodec import standalone
-        except ImportError:
-            raise Skip("pcodec")
-        return np.ascontiguousarray(standalone.simple_decompress(payload)).tobytes()
-    raise CorruptFile("unknown-recipe-byte", f"0x{recipe:02X}")
+    return _pco_decode(payload, dtype, declared)
 
 
 def c_profile2(v, c):
@@ -1743,29 +1915,17 @@ def c_codec(v, c):
     recipe = int(c["recipe"], 16)
     stream = bytes.fromhex(c["stream_hex"])
     assert stream[0] == recipe, "the recipe byte is part of the stream"
-    payload = stream[int(c["payload_offset"]):]
+    assert int(c["payload_offset"]) == 1, "the payload follows the recipe byte"
+    assert recipe in RECIPE_REGISTRY, f"unknown recipe 0x{recipe:02X}"
     expected = arr_of(c["expected_payload"])
 
-    if recipe == 0x00:
-        got = payload
-    elif recipe in (0x01, 0x03):
-        try:
-            import zstandard
-        except ImportError:
-            raise Skip("zstandard")
-        got = zstandard.ZstdDecompressor().decompress(payload)
-        if recipe == 0x03:
-            n = expected.dtype.itemsize
-            got = np.frombuffer(got, dtype=np.uint8).reshape(
-                n, -1).T.tobytes()
-    elif recipe == 0x02:
-        try:
-            from pcodec import standalone
-        except ImportError:
-            raise Skip("pcodec")
-        got = standalone.simple_decompress(payload).tobytes()
-    else:
-        raise AssertionError(f"unknown recipe 0x{recipe:02X}")
+    # The reader's own definition of a recipe, and nothing parallel to it: a
+    # stream here declares its size and delivers exactly that, as in a file.
+    dtype = expected.dtype.name
+    assert _declared_size(stream, dtype) == expected.nbytes, (
+        f"the stream declares {_declared_size(stream, dtype)} bytes, "
+        f"expected {expected.nbytes}")
+    got = _decode(stream, dtype)
 
     assert got == expected.tobytes(), (
         f"decoded {len(got)} bytes, expected {expected.nbytes}")

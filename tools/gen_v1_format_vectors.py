@@ -434,6 +434,10 @@ def _walk_payloads(spec, result) -> list:
 #: exists FOR profile 2 has to have a case at profile 2.
 _PROFILE2_BUILDS: dict = {}
 
+#: The specs those files were built from, so a negative whose defect lies
+#: INSIDE a block can be built from the same spec with one stream damaged.
+_PROFILE2_SPECS: dict = {}
+
 #: The window-straddle file, kept for the same reason one level along: a rule
 #: about a VARIABLE-RATE block's index entry needs a well-formed variable-rate
 #: file to patch, and this is the set's. Keeping it costs no golden — building
@@ -479,6 +483,7 @@ def gen_profile2_set() -> Vector:
         result = B.build(spec)
         rel = _write_file(name, result)
         _PROFILE2_BUILDS[name] = (rel, result)
+        _PROFILE2_SPECS[name] = copy.deepcopy(spec)
 
         for (ci, level, bi, blk) in result.blocks:
             lo = blk["file_offset"]
@@ -757,6 +762,7 @@ def gen_crc() -> Vector:
     flipped[lo] ^= 0x01
     v.case("flipped-bit-must-be-rejected",
            file=rel,
+           file_offset=u64(lo), compressed_size=u64(blk["compressed_size"]),
            byte_offset_to_flip=u64(lo),
            bit_mask="0x01",
            original_byte=f"0x{result.data[lo]:02X}",
@@ -768,16 +774,6 @@ def gen_crc() -> Vector:
                 "reader refuses the block; without the check it would decode to a "
                 "plausible wrong value and draw a wrong plot")
     assert zlib.crc32(bytes(flipped[lo:hi])) & 0xFFFFFFFF != blk["crc32"]
-
-    v.case("compressed-size-zero-rejected-before-crc",
-           compressed_size=u64(0),
-           crc32_of_empty_range=f"0x{zlib.crc32(b'') & 0xFFFFFFFF:08X}",
-           must_be_rejected=True,
-           note="an index entry whose compressed_size is zero is rejected as "
-                "zero-size-index-entry, which is what stops an all-zero entry "
-                "passing: the CRC of an empty range is 0x00000000, and an "
-                "all-zero entry stores exactly that. The patched case that "
-                "pins the class is v1-compressed-size-zero")
     return v
 
 
@@ -867,10 +863,10 @@ def gen_window_straddle() -> Vector:
             "selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever "
             "a block boundary falls: where a block's first stamp equals t0, an equal "
             "stamp ending the block before it is selected too, and both copies of a "
-            "duplicated t0 are in the window (spec/v1/README.md:441-448). Equal "
-            "consecutive stamps are legal (spec/v1/README.md:424-430)."
+            "duplicated t0 are in the window (spec/v1/README.md:465-472). Equal "
+            "consecutive stamps are legal (spec/v1/README.md:448-454)."
         ),
-        source="spec/v1/README.md:424-448, written by tools/_tslod_build.py",
+        source="spec/v1/README.md:448-472, written by tools/_tslod_build.py",
         contract=(
             "A reader that finds its first block by comparing the block's "
             "start_timestamp against t0 and then scans forward drops every earlier copy "
@@ -1550,8 +1546,9 @@ def gen_v1_negatives() -> Vector:
                   "the length its shape implies. The shape comparison is "
                   "arithmetic on the index entry, so every conforming reader "
                   "refuses this at step 1, before anything is decoded; step "
-                  "6's comparison of the decoded bytes raises the same class "
-                  "where an entry the shape passed still disagrees. One rule, "
+                  "6's comparison of each stream's declared size raises the "
+                  "same class where an entry the shape passed still disagrees. "
+                  "One rule, "
                   "one class, two sites")
 
     p2_rel, p2 = _PROFILE2_BUILDS["v1_p2_with_moments.tslod"]
@@ -1575,9 +1572,193 @@ def gen_v1_negatives() -> Vector:
                   "which is why this file is readable as a rejection by a "
                   "reader that has no zstd. The shape comparison is not a "
                   "reader's option, so this entry never reaches a codec; step "
-                  "6's comparison of the DECODED length against "
-                  "uncompressed_size is the profile's own and raises the same "
-                  "class where an entry the shape passed still disagrees")
+                  "6's comparison of the size the values stream DECLARES "
+                  "against uncompressed_size is the profile's own and raises "
+                  "the same class where an entry the shape passed still "
+                  "disagrees")
+
+    # ---- a stream whose payload is not a payload of its recipe, and the
+    # order that gives a payload with two defects one class.
+    #
+    # Every defect here lies INSIDE a block, under its CRC, so none can be a
+    # patch: a patched byte would be refused as block-crc-mismatch. Each file
+    # is BUILT from a profile-2 golden's own spec with one stream damaged
+    # through the builder's stream_hook, which frames the damaged bytes and
+    # computes the CRC over them, so step 2 passes and step 6 is reached. The
+    # damaged stream is channel 0, level 0, block 0's values stream — the only
+    # stream of the first block the reader reaches, so nothing earlier can
+    # refuse the file first. Each case's premises are checked with the codec
+    # libraries themselves before it is written.
+    import zstandard
+    from pcodec import standalone as pco_standalone
+
+    def golden_first_stream(golden):
+        _rel, built = _PROFILE2_BUILDS[golden]
+        ci, lv, bi, blk = built.blocks[0]
+        assert (ci, lv, bi) == (0, 0, 0), "the first block built is 0/0/0"
+        assert blk["ts_columns"] in (None, 0), "a one-stream block"
+        stream = built.data[blk["file_offset"]:blk["file_offset"] + blk["compressed_size"]]
+        return stream, blk
+
+    def built_negative(golden, fname, damaged):
+        spec = copy.deepcopy(_PROFILE2_SPECS[golden])
+        spec.stream_hook = lambda ci, lv, bi, si, s: (
+            damaged if (ci, lv, bi, si) == (0, 0, 0, 0) else s)
+        built = B.build(spec)
+        for (ci, lv, bi, blk) in built.blocks:
+            lo, hi = blk["file_offset"], blk["file_offset"] + blk["compressed_size"]
+            assert zlib.crc32(built.data[lo:hi]) & 0xFFFFFFFF == blk["crc32"]
+        blk = built.blocks[0][3]
+        assert built.data[blk["file_offset"]:blk["file_offset"]
+                          + blk["compressed_size"]] == damaged
+        return _write_file(fname, built)
+
+    def zstd_strict(payload):
+        return zstandard.ZstdDecompressor().decompress(payload, allow_extra_data=False)
+
+    def zstd_refuses(payload):
+        try:
+            zstd_strict(payload)
+        except zstandard.ZstdError:
+            return True
+        return False
+
+    def corrupt_first_block(stream):
+        """The first zstd block's Block_Type set to 3, which RFC 8878 reserves:
+        every decoder refuses it, and the frame header is untouched."""
+        p = bytearray(stream[1:])
+        hs = zstandard.frame_header_size(bytes(p))
+        bh = int.from_bytes(p[hs:hs + 3], "little")
+        p[hs:hs + 3] = (bh | 0b110).to_bytes(3, "little")
+        return stream[:1] + bytes(p)
+
+    def declare(stream, size):
+        """The frame's Frame_Content_Size rewritten, content untouched."""
+        p = bytearray(stream[1:])
+        hs = zstandard.frame_header_size(bytes(p))
+        assert p[4] >> 6 == 1, "the golden frame stores a two-byte content size"
+        p[hs - 2:hs] = (size - 256).to_bytes(2, "little")
+        return stream[:1] + bytes(p)
+
+    zg = "v1_p2_with_moments.tslod"
+    zs, zblk = golden_first_stream(zg)
+    z_implied = zblk["sample_count"] * 4
+    assert zs[0] == B.RECIPE_TRANSPOSE_ZSTD
+    assert zstandard.frame_content_size(zs[1:]) == z_implied == 1024
+    assert len(zstd_strict(zs[1:])) == z_implied
+
+    def stream_case(slug, fname, cls, golden, declared, implied, why):
+        v.case(slug, file=fname, rejection_class=cls,
+               field="block.stream[0].payload", base_golden=f"{FILES}/{golden}",
+               channel_index=0, level=0, block_index=0, stream="values",
+               declared_size=u64(declared), implied_size=u64(implied),
+               expected_error="CorruptFileError",
+               verified_against_an_implementation=False, reason=why)
+
+    s1 = corrupt_first_block(zs)
+    assert zstandard.frame_content_size(s1[1:]) == z_implied
+    assert zstd_refuses(s1[1:])
+    stream_case("v1-stream-zstd-frame-corrupt",
+                built_negative(zg, "v1_negative_p2_zstd_frame_corrupt.tslod", s1),
+                "stream-payload-undecodable", zg, z_implied, z_implied,
+                "the values stream's zstd frame declares exactly the 1,024 "
+                "bytes its shape implies, so step 6's comparison passes, and "
+                "then its first block does not decode: its Block_Type is 3, "
+                "which the zstd format reserves. The block's CRC is computed "
+                "over the damaged bytes, so nothing before step 6 notices. "
+                "The class is the rule's — the bytes are not a stream of this "
+                "recipe — and not the codec's own error, which differs from "
+                "one library to the next")
+
+    s2 = declare(corrupt_first_block(zs), z_implied + 4)
+    assert zstandard.frame_content_size(s2[1:]) == z_implied + 4
+    assert zstd_refuses(s2[1:])
+    # The single-defect controls, as premises: the corruption alone is s1,
+    # refused above; the declaration alone is itself a defect a decoder
+    # refuses, because the frame's content is not the size it declares.
+    s2_declared_only = declare(zs, z_implied + 4)
+    assert zstandard.frame_content_size(s2_declared_only[1:]) != z_implied
+    assert zstd_refuses(s2_declared_only[1:])
+    stream_case("v1-stream-zstd-declares-wrong-size-and-is-corrupt",
+                built_negative(zg, "v1_negative_p2_zstd_declares_wrong_size_and_is_corrupt.tslod", s2),
+                "decoded-size-mismatch", zg, z_implied + 4, z_implied,
+                "TWO defects in one frame, and this case is the order that "
+                "decides between them: the frame declares 1,028 bytes where "
+                "the shape implies 1,024, AND its first block is the reserved "
+                "type v1-stream-zstd-frame-corrupt carries. The declaration is "
+                "compared BEFORE the payload is decoded, so this is "
+                "decoded-size-mismatch for every conforming reader, and a "
+                "reader that decodes first and compares after refuses it as "
+                "stream-payload-undecodable and does not conform. Comparing "
+                "first is also the bound: no reader decodes past the size a "
+                "block's shape implies to learn which class a file has. Each "
+                "defect alone is refused for its own reason: the corruption "
+                "is the case named above, and a frame declaring 1,028 over "
+                "1,024 bytes of content is refused by the declaration")
+
+    s4 = zs + zs[1:]
+    assert len(zstandard.ZstdDecompressor().decompress(s4[1:])) == z_implied
+    assert zstd_refuses(s4[1:])
+    stream_case("v1-stream-zstd-second-frame",
+                built_negative(zg, "v1_negative_p2_zstd_second_frame.tslod", s4),
+                "stream-payload-undecodable", zg, z_implied, z_implied,
+                "the values stream's payload is its well-formed frame followed "
+                "by a second copy of the same frame. The first frame declares "
+                "and delivers exactly 1,024 bytes, so a reader that decodes "
+                "one frame and ignores what follows accepts this file, and a "
+                "reader that decodes every frame gets 2,048 bytes and calls it "
+                "a size mismatch — two readers, one file, two answers. A "
+                "payload is EXACTLY one frame with nothing after it, so the "
+                "bytes are not a stream of this recipe, whichever way a "
+                "decoder would have read them")
+
+    pg = "v1_p2_no_moments.tslod"
+    ps, pblk = golden_first_stream(pg)
+    p_count = pblk["sample_count"]
+    assert ps[0] == B.RECIPE_PCO
+    p_ref = np.ascontiguousarray(pco_standalone.simple_decompress(ps[1:]))
+    assert p_ref.dtype == np.float32 and len(p_ref) == p_count == 256
+
+    def hint_bits(n):
+        """pco's standalone size hint as its format writes it: six bits of
+        (bit length - 1), then the value's bits, least significant first."""
+        power = max(n.bit_length(), 1)
+        return ((power - 1) | (n << 6)).to_bytes((6 + power + 7) // 8, "little")
+
+    assert ps[1:5] == b"pco!" and ps[5] == 3, "standalone version 3"
+    at = 1 + 6                                  # after the uniform-type byte
+    assert ps[at:at + 2] == hint_bits(p_count), "the golden's hint is its count"
+    assert len(hint_bits(p_count + 1)) == len(hint_bits(p_count))
+    s3 = ps[:at] + hint_bits(p_count + 1) + ps[at + 2:]
+    assert np.array_equal(pco_standalone.simple_decompress(s3[1:]), p_ref), (
+        "the hint is advisory to pco, so the payload still decodes")
+    stream_case("v1-stream-pco-size-hint-disagrees",
+                built_negative(pg, "v1_negative_p2_pco_size_hint_disagrees.tslod", s3),
+                "decoded-size-mismatch", pg, (p_count + 1) * 4, p_count * 4,
+                "the values stream's pco header declares 257 elements where "
+                "the shape implies 256, and the payload after it decodes to "
+                "exactly 256. pco itself treats the size hint as advisory, so "
+                "a reader that decodes first and compares after accepts this "
+                "file. This format binds it — a writer sets the hint to the "
+                "stream's element count — because it is the one size a pco "
+                "stream declares before it is decoded, and step 6 compares "
+                "that declaration before it decodes anything")
+
+    s5 = ps + b"\x00"
+    assert np.array_equal(pco_standalone.simple_decompress(s5[1:]), p_ref), (
+        "pco's own decoder stops at the termination byte and never sees this")
+    stream_case("v1-stream-pco-byte-after-termination",
+                built_negative(pg, "v1_negative_p2_pco_byte_after_termination.tslod", s5),
+                "stream-payload-undecodable", pg, p_count * 4, p_count * 4,
+                "the values stream's pco file is well formed and followed by "
+                "one more byte, a zero — the value of a termination byte, so a "
+                "reader that only checks the payload ends in one is not "
+                "satisfied by accident. pco's own decoder stops at the "
+                "termination and reports 256 elements, so a reader relying on "
+                "it accepts this file. A payload is EXACTLY one standalone "
+                "file with nothing after it: a byte no reader consumes has no "
+                "purpose in a format, and a rule that left it unread would "
+                "leave two readers free to differ about it")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",

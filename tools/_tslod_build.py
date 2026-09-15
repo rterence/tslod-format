@@ -145,10 +145,13 @@ class FileSpec:
     #: >= 1, False builds a file without it, which is what
     #: the "reader that does not want moments skips it" vector needs.
     moments: bool = True
-
-
-# ---------------------------------------------------------------------------
-# The pyramid
+    #: v1 only, for negative vectors. Called as
+    #: `stream_hook(channel, level, block, stream_index, stream)` with every
+    #: encoded stream, recipe byte included, and returns the stream to frame.
+    #: A defect INSIDE a block cannot be a patch — the block's CRC covers it —
+    #: so it is built instead, with the sizes, offsets and CRC computed over
+    #: the damaged bytes.
+    stream_hook: object = None
 # ---------------------------------------------------------------------------
 
 
@@ -420,7 +423,11 @@ def build(spec: FileSpec) -> BuildResult:
                 if moments_payload is not None:
                     block_streams.append(
                         (moments_payload, _r("moments"), "float64"))
-                body = _frame_v1(block_streams)
+                hook = None
+                if spec.stream_hook is not None:
+                    at = (len(per_channel), level, len(blocks))
+                    hook = lambda i, s, at=at: spec.stream_hook(*at, i, s)
+                body = _frame_v1(block_streams, hook)
 
                 offset = data_start + len(blob)
                 blob += body
@@ -636,7 +643,7 @@ def encode_stream_typed(payload: bytes, recipe: int, dtype: str) -> bytes:
     raise ValueError(f"recipe {recipe:#04x} is not encodable")
 
 
-def _frame_v1(streams_in: list) -> bytes:
+def _frame_v1(streams_in: list, hook=None) -> bytes:
     """v1 framing: `(payload, recipe, dtype)` per stream, in wire order.
 
     **Every stream except the last is prefixed by its own byte length as u32 LE,
@@ -654,6 +661,8 @@ def _frame_v1(streams_in: list) -> bytes:
     """
     streams = [encode_stream_typed(payload, recipe, dtype)
                for payload, recipe, dtype in streams_in]
+    if hook is not None:
+        streams = [hook(i, stream) for i, stream in enumerate(streams)]
     out = b""
     for stream in streams[:-1]:
         out += struct.pack("<I", len(stream)) + stream

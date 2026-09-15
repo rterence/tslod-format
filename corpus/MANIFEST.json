@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 26,
-    "cases": 1335,
+    "cases": 1339,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1005,11 +1005,11 @@
         "format:v1",
         "feature:crc"
       ],
-      "case_count": 9,
+      "case_count": 8,
       "files": [
         {
           "path": "v1-format/v1-block-crc.json",
-          "sha256": "f88b4566afe64a151afda193ee759d529ac48cae0330685d3d6883bc1eb8aecb"
+          "sha256": "1a29bf648639327210a260743a7998401d3dc888ed8342e1555fcdad7d3c3356"
         },
         {
           "path": "v1-format/files/v1_crc_reference.tslod",
@@ -1051,11 +1051,11 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 70,
+      "case_count": 75,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "06c260afd8522e38ee873decfeda6333240f230cb9421fe87b1b112db8099fb4"
+          "sha256": "245c1790aacebf2f30adfd2fdd44e7d4695f83a71b661fa1e7ec4d4ab0a3e1ce"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
@@ -1272,6 +1272,26 @@
         {
           "path": "v1-format/files/v1_p2_with_moments.tslod",
           "sha256": "36cb575207503098bfb9daec9dae0a4b63001e70f65b974224885f967e237863"
+        },
+        {
+          "path": "v1-format/files/v1_negative_p2_zstd_frame_corrupt.tslod",
+          "sha256": "bbf98dadce648ee67e71e382aff87da84e214624376b6a7e7062963d2471ab1f"
+        },
+        {
+          "path": "v1-format/files/v1_negative_p2_zstd_declares_wrong_size_and_is_corrupt.tslod",
+          "sha256": "fa4b62eabecfe4eed208ef216d0b3d4ad376e695a3b61568edfa7059ec943bf3"
+        },
+        {
+          "path": "v1-format/files/v1_negative_p2_zstd_second_frame.tslod",
+          "sha256": "f5ed2e24de32ad6c568c5399e4da55037b51735e4a1013ae19a10a815befc6f0"
+        },
+        {
+          "path": "v1-format/files/v1_negative_p2_pco_size_hint_disagrees.tslod",
+          "sha256": "b7516ffa485a671d42658f9b93d119fd6c3b7ccc5665c09a9de2bff53d833e25"
+        },
+        {
+          "path": "v1-format/files/v1_negative_p2_pco_byte_after_termination.tslod",
+          "sha256": "62a406588bc391a64590811d64260b2606be601d4b9fe30542ce50fcf14d1f6a"
         },
         {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
@@ -1438,8 +1458,8 @@
       "id": "v1-variable-window-straddle",
       "set": "v1-format",
       "kind": "fixture",
-      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:441-448). Equal consecutive stamps are legal (spec/v1/README.md:424-430).",
-      "source": "spec/v1/README.md:424-448, written by tools/_tslod_build.py",
+      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:465-472). Equal consecutive stamps are legal (spec/v1/README.md:448-454).",
+      "source": "spec/v1/README.md:448-472, written by tools/_tslod_build.py",
       "contract": "A reader that finds its first block by comparing the block's start_timestamp against t0 and then scans forward drops every earlier copy of t0 and answers one sample short, with nothing in the file to say so. Two implementations must return the same samples for the same window, so which samples a stamp range holds is the format's to state and not a reader's private policy.",
       "requires": [
         "format:v1",
@@ -1451,7 +1471,7 @@
       "files": [
         {
           "path": "v1-format/v1-variable-window-straddle.json",
-          "sha256": "ede9d9d69294c120788aca158fafc18e42b3fe88bf1ef35d38bd8d111d082a00"
+          "sha256": "1ff0212c6b3922ed6a1852b855547d86daec7b2fbc41d5beb920c9e5fcf17098"
         },
         {
           "path": "v1-format/files/v1_variable_window_straddle.tslod",

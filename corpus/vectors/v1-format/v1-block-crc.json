@@ -10,7 +10,7 @@
     "feature:crc"
   ],
   "notes": "The check value pins the variant unambiguously: reflected polynomial 0xEDB88320, init and xor-out 0xFFFFFFFF, giving 0xCBF43926 for the ASCII string '123456789'. There are several CRC-32s and they disagree; this one is the one crc32fast and zlib.crc32 both compute.",
-  "case_count": 9,
+  "case_count": 8,
   "cases": [
     {
       "name": "check-value",
@@ -67,6 +67,8 @@
     {
       "name": "flipped-bit-must-be-rejected",
       "file": "v1-format/files/v1_crc_reference.tslod",
+      "file_offset": "352",
+      "compressed_size": "1025",
       "byte_offset_to_flip": "352",
       "bit_mask": "0x01",
       "original_byte": "0x00",
@@ -75,13 +77,6 @@
       "crc32_after_flip": "0x6ABDD1E2",
       "must_be_rejected_before_decode": true,
       "note": "one bit, in the first byte of the payload. The CRC differs, so the reader refuses the block; without the check it would decode to a plausible wrong value and draw a wrong plot"
-    },
-    {
-      "name": "compressed-size-zero-rejected-before-crc",
-      "compressed_size": "0",
-      "crc32_of_empty_range": "0x00000000",
-      "must_be_rejected": true,
-      "note": "an index entry whose compressed_size is zero is rejected as zero-size-index-entry, which is what stops an all-zero entry passing: the CRC of an empty range is 0x00000000, and an all-zero entry stores exactly that. The patched case that pins the class is v1-compressed-size-zero"
     }
   ]
 }

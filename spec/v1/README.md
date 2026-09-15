@@ -276,14 +276,17 @@ format's.
 row count at its own level — raw samples at level 0, buckets above it — and the table above gives
 each stream its columns. The size is therefore `sample_count × columns × the dtype's width`:
 positions `N×2` i64, variable-rate timestamp tuples `N×5` i64, values `N×1` at level 0 and above it
-`N×5` numeric and `N×2` bitfield, moments `N×5` f64. A stream that decodes to any other length makes
-the file malformed (`decoded-size-mismatch`).
+`N×5` numeric and `N×2` bitfield, moments `N×5` f64. A stream that declares any other size makes the
+file malformed (`decoded-size-mismatch`), and one that does not decode to the size it declares is not
+a stream of its recipe (`stream-payload-undecodable`); **Codecs** says what each recipe declares, and
+step 6 of the order says which is taken first.
 
 For the values stream that size is also what the index entry's `uncompressed_size` states, so
 `uncompressed_size` must agree with the shape as well as with the decoded bytes — three numbers that
 have to be one number. At profile 0 the shape is knowable before anything is decoded and the whole
-check is arithmetic; at profile 2 the decoded length is knowable only after decoding, and comparing
-it is the only check a reader has on a block's size.
+check is arithmetic; at profile 2 each stream declares its decoded size in its codec's own header,
+and comparing that declaration — before a byte of the stream is decoded — is the only check a reader
+has on a block's size.
 
 Every payload is the array's bytes, little-endian, **row-major** — the five values of bucket 0, then
 the five of bucket 1, never planar (`v1-block-framing`).
@@ -321,8 +324,12 @@ format:
 4. At profile 0 only, feature bit 0 against the length arithmetic
    (`moment-stream-flag-mismatch`).
 5. The remaining length prefixes, and the last stream's recipe byte.
-6. Decode each stream and compare its length with the size its shape implies, the values stream's
-   being `uncompressed_size` (`decoded-size-mismatch`).
+6. Each stream in wire order, one finished before the next is begun: first the size it **declares**
+   under **Codecs** against the size its shape implies, the values stream's being
+   `uncompressed_size` (`decoded-size-mismatch`); then its payload decoded, which must be exactly
+   one payload of its recipe delivering exactly the size it declared
+   (`stream-payload-undecodable`). A payload whose declaration cannot be read is
+   `stream-payload-undecodable` at the first of the two.
 7. For a level-0 block of a **variable-rate** channel, once its timestamps stream has passed step 6:
    first that the block's first stored stamp **equals** its index entry's `start_timestamp`
    (`block-start-timestamp-mismatch`), and then that its stamps are non-decreasing within the block
@@ -341,14 +348,23 @@ above level 0.
 is arithmetic on the index entry — `sample_count` × columns × width — and needs no byte decoded, so
 no reader has a reason to defer it: a disagreeing entry is refused at step 1, and an entry that also
 reaches past the end of the file is refused for `decoded-size-mismatch` and not for
-`block-extent-past-eof`. Step 6's comparison remains and raises the same class, where the decoded
-bytes disagree with an `uncompressed_size` the shape check passed. One rule, one class, two sites,
-and the order says which of them speaks.
+`block-extent-past-eof`. Step 6's comparison remains and raises the same class, where the size a
+stream declares disagrees with an `uncompressed_size` the shape check passed. One rule, one class,
+two sites, and the order says which of them speaks.
 
 The comparison is **required and not merely an early exit**, which is why it cannot be left to a
 reader's choice. A `sample_count` that disagrees with the block leaves `uncompressed_size` and the
 decoded bytes equal to each other — both are wrong in the same way — so nothing but the shape
 notices, and every stream in that block is then read at the wrong length.
+
+The declaration is compared **before** the payload is decoded, and that is the bound: no conforming
+reader decodes a stream past the size its block's shape implies, and none needs to in order to know
+the class. A payload that declares the wrong size is `decoded-size-mismatch` whether or not its bytes
+would decode; a payload that declares the right size and then fails — a damaged block, a count
+delivered short or long, a byte after its frame or its termination — is `stream-payload-undecodable`
+whether the reader stopped at the declared size or decoded to the end. A reader that decodes first
+and compares after gives a frame that is both corrupt and mis-declared the other class, and does not
+conform.
 
 Step 4 sits between the two prefix checks, and it has to. The cross-check needs only the leading
 stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on
@@ -370,6 +386,14 @@ reader can see, not a rule it must know.
 and never appears in a released file; every other value is reserved and rejected with an error
 naming the byte. There is no registry escape.
 
+A stream's payload is **exactly one** payload of its recipe, with nothing after it: one zstd frame,
+or one pco standalone file ending at its termination byte. Each **declares its decoded size in its
+own header**, before any of it is decoded — identity by its length; zstd by the frame's content
+size, which for byte-transpose is the planar length and so the same number; pco by its header's size
+hint times the dtype's width. pco treats that hint as advisory; **binding it is a writer rule this
+format adds over pco's own**: a writer sets it to the stream's element count. The declaration is
+what step 6 of the order compares.
+
 `compression_id` is the file profile: `0` = none, where **every** recipe byte must be `0x00`, and
 `2` = recipe. Profile 0 is the interchange and conformance profile — it needs no codec at all, which
 is what lets a standard-library reader be measured against it.
@@ -385,7 +409,7 @@ xor-out `0xFFFFFFFF`, check value `0xCBF43926` for `"123456789"`), over exactly
 `[file_offset, file_offset + compressed_size)` — the index entry holding it lies outside that range
 — **checked before decode**. An index entry whose `compressed_size` is zero is rejected
 (`zero-size-index-entry`), which is what stops an all-zero entry passing on the CRC of an empty
-range (`v1-block-crc`).
+range (`v1-compressed-size-zero` in `v1-negative-vectors`).
 
 ## Time
 
@@ -528,13 +552,21 @@ index whose entries end past the end of the file (`block-index-out-of-bounds`), 
 tables under the same bound as the other three. An `uncompressed_size`, `sample_count` or
 `compressed_size` of zero (`zero-size-index-entry`): one rule, that an index entry describes a block
 that exists, so one class. The `compressed_size` case is refused before the CRC is computed, which
-is what stops an all-zero entry passing on the checksum of an empty range (`v1-block-crc`, and
-`v1-compressed-size-zero` in `v1-negative-vectors`).
+is what stops an all-zero entry passing on the checksum of an empty range (`v1-compressed-size-zero`
+in `v1-negative-vectors`).
 
 Within step 1 these are taken in one order — for each level: its entry's `block_count` against
 `allocated`; then the whole index's bound; then each index entry in order — the zero-valued fields,
 `uncompressed_size` against the shape the entry implies, the block's extent — before that block's
 CRC.
+
+**The stream.** A payload that is not a payload of the recipe its byte names
+(`stream-payload-undecodable`): a zstd payload that is not exactly one standard frame declaring its
+content size, a pco payload that is not exactly one standalone file of the stream's dtype declaring
+its size hint, either one with a byte after it, or either one decoding to anything but the size it
+declares. One rule — the bytes are not a stream of this recipe — so one class, whichever decoder
+refuses and however. It is taken after the declared size is compared with the shape (step 6), so a
+payload that both declares the wrong size and would not decode is `decoded-size-mismatch`.
 
 `total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
 conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a
