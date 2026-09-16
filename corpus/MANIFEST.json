@@ -1466,8 +1466,8 @@
       "id": "v1-variable-window-straddle",
       "set": "v1-format",
       "kind": "fixture",
-      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:465-472). Equal consecutive stamps are legal (spec/v1/README.md:448-454).",
-      "source": "spec/v1/README.md:448-472, written by tools/_tslod_build.py",
+      "asserts": "A request for the half-open window [t0, t1) on a variable-rate channel selects EVERY sample whose stored stamp s satisfies t0 <= s < t1, wherever a block boundary falls: where a block's first stamp equals t0, an equal stamp ending the block before it is selected too, and both copies of a duplicated t0 are in the window (spec/v1/README.md:481-488). Equal consecutive stamps are legal (spec/v1/README.md:464-470).",
+      "source": "spec/v1/README.md:464-488, written by tools/_tslod_build.py",
       "contract": "A reader that finds its first block by comparing the block's start_timestamp against t0 and then scans forward drops every earlier copy of t0 and answers one sample short, with nothing in the file to say so. Two implementations must return the same samples for the same window, so which samples a stamp range holds is the format's to state and not a reader's private policy.",
       "requires": [
         "format:v1",
@@ -1479,7 +1479,7 @@
       "files": [
         {
           "path": "v1-format/v1-variable-window-straddle.json",
-          "sha256": "1ff0212c6b3922ed6a1852b855547d86daec7b2fbc41d5beb920c9e5fcf17098"
+          "sha256": "2c0db54e69aeeb637feafb21bbfc14fec0c801960c5a22c02648752197704591"
         },
         {
           "path": "v1-format/files/v1_variable_window_straddle.tslod",
