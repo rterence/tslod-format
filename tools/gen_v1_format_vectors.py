@@ -551,6 +551,25 @@ def gen_profile2_set() -> Vector:
           "matters at profile 2: the two files differ in stream count, and only the "
           "header bit says so — there is no length arithmetic here to fall back on")
 
+    # The highest legal compression ratio in the corpus, and the reason it is
+    # here: the declared size is bounded by what the payload could deliver
+    # (Codecs), and a bound needs its accepting side. A constant channel is the
+    # extreme a real encoder reaches — 524,288 bytes of values in 34 — and any
+    # bound below that ratio would refuse this perfectly good file.
+    emit2("v1_p2_constant_high_ratio.tslod",
+          B.FileSpec(branching_factor=256, block_samples=131_072,
+                     groups=[B.GroupSpec(1000.0, ts)],
+                     channels=[B.ChannelSpec(
+                         "flat", np.zeros(131_072, dtype=np.float32))]),
+          {"timestamps": B.RECIPE_PCO,
+           "values": B.RECIPE_ZSTD,
+           "moments": B.RECIPE_TRANSPOSE_ZSTD},
+          "a constant channel in one 131,072-sample level-0 block, so its values "
+          "stream declares 524,288 bytes from a payload of a few dozen. It is the "
+          "accepting side of the declaration bound under Codecs: a reader whose "
+          "bound is below this file's ratio refuses a file every conforming "
+          "reader must read")
+
     emit2("v1_p2_active_with_moments.tslod",
           B.FileSpec(branching_factor=256, file_state=1,
                      groups=[B.GroupSpec(1000.0, ts)],
@@ -1759,6 +1778,57 @@ def gen_v1_negatives() -> Vector:
                 "file with nothing after it: a byte no reader consumes has no "
                 "purpose in a format, and a rule that left it unread would "
                 "leave two readers free to differ about it")
+
+    # ---- a declaration beyond what its payload could deliver.
+    #
+    # The base is the constant-ratio golden, whose level-0 block is ONE block of
+    # 131,072 float32 samples, so its values stream's shape implies 524,288
+    # bytes. The crafted frame declares exactly that — step 1 and step 6's first
+    # comparison both pass — out of thirteen bytes, which is beyond the 32,768
+    # bytes per payload byte a zstd frame can yield. Only the bound notices.
+    ZSTD_MAX_RATIO = 1 << 15                 # 2**17 per block / 4 bytes per block
+
+    def rle_frame(declared, block_content, byte=0x00):
+        """A minimal zstd frame: single segment, one RLE block, and whatever
+        content size we tell it to declare."""
+        fhd = (2 << 6) | (1 << 5)            # a four-byte content size field
+        header = (block_content << 3) | (1 << 1) | 1     # last block, RLE
+        return (b"\x28\xB5\x2F\xFD" + bytes([fhd]) + struct.pack("<I", declared)
+                + header.to_bytes(3, "little") + bytes([byte]))
+
+    bg = "v1_p2_constant_high_ratio.tslod"
+    bs, bblk = golden_first_stream(bg)
+    b_implied = bblk["sample_count"] * 4
+    assert bs[0] == B.RECIPE_ZSTD and b_implied == 524_288
+    # The golden's own ratio, which the bound must NOT refuse — the accepting
+    # side lives in the conformance set as a file every reader must read.
+    assert b_implied // (len(bs) - 1) > 15_000, "the golden is the high-ratio one"
+    assert b_implied <= ZSTD_MAX_RATIO * (len(bs) - 1), "and it is within the bound"
+
+    s6 = bytes([B.RECIPE_ZSTD]) + rle_frame(b_implied, 131_072)
+    assert zstandard.frame_content_size(s6[1:]) == b_implied
+    assert b_implied > ZSTD_MAX_RATIO * (len(s6) - 1), "the case must exceed the bound"
+    assert zstd_refuses(s6[1:]), "and a full decode must refuse it too"
+    # The payload itself is well formed: the same frame, declaring what one RLE
+    # block can actually deliver, decodes cleanly. Only the declaration is beyond.
+    assert len(zstd_strict(rle_frame(131_072, 131_072))) == 131_072
+    stream_case("v1-stream-declares-beyond-the-recipes-bound",
+                built_negative(bg, "v1_negative_p2_declares_beyond_the_bound.tslod", s6),
+                "stream-payload-undecodable", bg, b_implied, b_implied,
+                "thirteen bytes of payload declaring 524,288. The index entry "
+                "agrees with it and so does the block's shape, so step 1 passes "
+                "and so does step 6's comparison of the declaration against the "
+                "shape: every check before the bound sees a consistent file. A "
+                "zstd frame yields at most 128 KiB per block and a block costs "
+                "at least four bytes, so thirteen bytes could deliver at most "
+                "425,984 — this payload cannot be what it says it is, and that "
+                "is knowable without decoding a byte of it. Refusing it early "
+                "and decoding it to the end give the SAME class, which is what "
+                "makes the bound safe to state: the frame decodes its one "
+                "block, ends 393,216 bytes short of its declaration, and zstd "
+                "calls it corrupt. The accepting side is a golden, not a case "
+                "here: v1_p2_constant_high_ratio.tslod declares 524,288 bytes "
+                "from 34, a ratio of 15,420, and must be read")
 
     v.case("v1-stream-length-prefix-exceeds-block",
            rejection_class="stream-length-prefix-out-of-range",

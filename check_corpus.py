@@ -586,6 +586,7 @@ def open_v1(data: bytes) -> dict:
                             "decoded-size-mismatch",
                             f"a stream declares {got} bytes, its shape "
                             f"implies {want}")
+                    _within_the_payloads_reach(stream, got)
                     _decode(stream, dt)
 
                 # (7) a variable-rate level-0 block, once its timestamps stream
@@ -1639,6 +1640,28 @@ def _declared_size(stream: bytes, dtype: str) -> int:
     raise CorruptFile("unknown-recipe-byte", f"0x{recipe:02X}")
 
 
+#: The most a zstd frame can yield per byte of payload. A block costs at least
+#: four bytes — a three-byte header and a byte of content — and yields at most
+#: `Block_Maximum_Size`, 128 KiB, so 2**17 / 4. It is the FORMAT's maximum, not
+#: an encoder's: a payload that declares beyond it can never deliver, which is
+#: why refusing it here and discovering it at the end of a decode agree.
+ZSTD_MAX_RATIO = 1 << 15
+
+
+def _within_the_payloads_reach(stream: bytes, declared: int) -> None:
+    """Step 6's second comparison: what a payload of this length could deliver.
+
+    Identity declares its own length, so its bound is exact and already met.
+    pco carries no ratio: its chunks state their own counts and a reader walks
+    them, holding only what the payload has delivered.
+    """
+    recipe, payload = stream[0], len(stream) - 1
+    if recipe in (0x01, 0x03) and declared > ZSTD_MAX_RATIO * payload:
+        raise _undecodable(
+            f"a zstd payload of {payload} bytes declares {declared}, beyond the "
+            f"{ZSTD_MAX_RATIO * payload} its blocks could yield")
+
+
 def _pco_decode(payload: bytes, dtype: str, declared: int) -> bytes:
     """Exactly one standalone file, walked chunk by chunk to its termination.
 
@@ -2007,8 +2030,30 @@ def check_documented_counts(manifest: dict) -> list[str]:
           r"holds ([\d,]+) test cases across (\d+) vectors",
           "the corpus size", (cases, vectors))
     _find(problems, "README.md", readme,
-          r"\| `v1-format` \| (\d+) golden",
-          "the golden file count", (golden,))
+          r"\| `v1-format` \| (\d+) `\.tslod` files",
+          "the v1-format file count", (golden,))
+
+    # The files directory holds goldens AND files built with their defect, and
+    # says so in two places. Both counts come from the vectors, because a
+    # hand-written number about a directory is what the next file makes wrong.
+    # The population is asserted non-empty beside the comparison: a count of
+    # zero built negatives would otherwise satisfy any prose that said zero.
+    built = {c["file"] for c in json.loads(
+        (VECTORS / "v1-format" / "v1-negative-vectors.json").read_text())["cases"]
+        if "file" in c and "patch" not in c and "truncate_to" not in c}
+    if not built or not golden:
+        problems.append(
+            f"corpus/vectors/v1-format: {len(built)} files built with their "
+            f"defect and {golden} .tslod — neither may be zero, or the counts "
+            f"below are checked against nothing")
+    _find(problems, "corpus/CONVENTIONS.md",
+          (CORPUS_ROOT / "CONVENTIONS.md").read_text(),
+          r"at this commit (\d+) of its (\d+) files are built with their defect",
+          "the built-with-defect count", (len(built), golden))
+    _find(problems, "corpus/vectors/v1-format/README.md",
+          (VECTORS / "v1-format" / "README.md").read_text(),
+          r"holds (\d+) files, of which (\d+) are built with their defect",
+          "the door's counts", (golden, len(built)))
 
     # The illustrative run: tied to the manifest where it can be, and
     # internally consistent everywhere else.

@@ -10,7 +10,7 @@
     "feature:read-rejection"
   ],
   "notes": "Each case is a well-formed file with one field patched and the rejection class it must trigger. Two of them are ACCEPTING cases \u2014 a may-ignore feature bit, and a tick rate at exactly the largest legal value \u2014 because a bound pinned only where it fails is half pinned: a reader that refuses the boundary passes every rejection here and still refuses valid files.",
-  "case_count": 75,
+  "case_count": 76,
   "cases": [
     {
       "name": "v1-version-must-be-exactly-1",
@@ -891,6 +891,22 @@
       "expected_error": "CorruptFileError",
       "verified_against_an_implementation": false,
       "reason": "the values stream's pco file is well formed and followed by one more byte, a zero \u2014 the value of a termination byte, so a reader that only checks the payload ends in one is not satisfied by accident. pco's own decoder stops at the termination and reports 256 elements, so a reader relying on it accepts this file. A payload is EXACTLY one standalone file with nothing after it: a byte no reader consumes has no purpose in a format, and a rule that left it unread would leave two readers free to differ about it"
+    },
+    {
+      "name": "v1-stream-declares-beyond-the-recipes-bound",
+      "file": "v1-format/files/v1_negative_p2_declares_beyond_the_bound.tslod",
+      "rejection_class": "stream-payload-undecodable",
+      "field": "block.stream[0].payload",
+      "base_golden": "v1-format/files/v1_p2_constant_high_ratio.tslod",
+      "channel_index": 0,
+      "level": 0,
+      "block_index": 0,
+      "stream": "values",
+      "declared_size": "524288",
+      "implied_size": "524288",
+      "expected_error": "CorruptFileError",
+      "verified_against_an_implementation": false,
+      "reason": "thirteen bytes of payload declaring 524,288. The index entry agrees with it and so does the block's shape, so step 1 passes and so does step 6's comparison of the declaration against the shape: every check before the bound sees a consistent file. A zstd frame yields at most 128 KiB per block and a block costs at least four bytes, so thirteen bytes could deliver at most 425,984 \u2014 this payload cannot be what it says it is, and that is knowable without decoding a byte of it. Refusing it early and decoding it to the end give the SAME class, which is what makes the bound safe to state: the frame decodes its one block, ends 393,216 bytes short of its declaration, and zstd calls it corrupt. The accepting side is a golden, not a case here: v1_p2_constant_high_ratio.tslod declares 524,288 bytes from 34, a ratio of 15,420, and must be read"
     },
     {
       "name": "v1-stream-length-prefix-exceeds-block",

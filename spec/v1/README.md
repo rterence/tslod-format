@@ -326,10 +326,11 @@ format:
 5. The remaining length prefixes, and the last stream's recipe byte.
 6. Each stream in wire order, one finished before the next is begun: first the size it **declares**
    under **Codecs** against the size its shape implies, the values stream's being
-   `uncompressed_size` (`decoded-size-mismatch`); then its payload decoded, which must be exactly
-   one payload of its recipe delivering exactly the size it declared
+   `uncompressed_size` (`decoded-size-mismatch`); then that declaration against what its payload
+   could deliver under **Codecs** (`stream-payload-undecodable`); then its payload decoded, which
+   must be exactly one payload of its recipe delivering exactly the size it declared
    (`stream-payload-undecodable`). A payload whose declaration cannot be read is
-   `stream-payload-undecodable` at the first of the two.
+   `stream-payload-undecodable` at the first of the three.
 7. For a level-0 block of a **variable-rate** channel, once its timestamps stream has passed step 6:
    first that the block's first stored stamp **equals** its index entry's `start_timestamp`
    (`block-start-timestamp-mismatch`), and then that its stamps are non-decreasing within the block
@@ -364,7 +365,10 @@ would decode; a payload that declares the right size and then fails — a damage
 delivered short or long, a byte after its frame or its termination — is `stream-payload-undecodable`
 whether the reader stopped at the declared size or decoded to the end. A reader that decodes first
 and compares after gives a frame that is both corrupt and mis-declared the other class, and does not
-conform.
+conform. A declaration is a number in the file, so it is **compared and never reserved on**: a
+reader allocates against the bytes it has read — a zstd block yields at most 128 KiB and a pco chunk
+at most 2²⁴ numbers — so no file makes an allocation larger than the bytes that arrived to justify
+it.
 
 Step 4 sits between the two prefix checks, and it has to. The cross-check needs only the leading
 stream's prefix and the count of bytes remaining after it — pure length arithmetic that depends on
@@ -393,6 +397,18 @@ size, which for byte-transpose is the planar length and so the same number; pco 
 hint times the dtype's width. pco treats that hint as advisory; **binding it is a writer rule this
 format adds over pco's own**: a writer sets it to the stream's element count. The declaration is
 what step 6 of the order compares.
+
+**A declaration is bounded by the payload that carries it.** A zstd frame's blocks cost at least
+four bytes each — a three-byte header and a byte of content — and each yields at most 128 KiB, so a
+frame declares at most **32,768 bytes for every byte of its payload**, byte-transpose included; the
+identity recipe declares its own length, so its bound is that length. A stream declaring more is
+refused before it is decoded (`stream-payload-undecodable`), and that refusal cannot disagree with
+decoding the payload to the end: 32,768 is the format's own maximum, so a payload that thin can
+never deliver what it declared, and the reader that refuses early and the reader that decodes to the
+end meet at one class. pco carries no ratio and needs none: its chunks state their own counts, at
+most 2²⁴ numbers each, and a reader walks one standalone file chunk by chunk to its termination,
+holding what the payload has delivered and stopping at the declared count — so a pco declaration is
+not reserved on either.
 
 `compression_id` is the file profile: `0` = none, where **every** recipe byte must be `0x00`, and
 `2` = recipe. Profile 0 is the interchange and conformance profile — it needs no codec at all, which
@@ -563,8 +579,8 @@ CRC.
 **The stream.** A payload that is not a payload of the recipe its byte names
 (`stream-payload-undecodable`): a zstd payload that is not exactly one standard frame declaring its
 content size, a pco payload that is not exactly one standalone file of the stream's dtype declaring
-its size hint, either one with a byte after it, or either one decoding to anything but the size it
-declares. One rule — the bytes are not a stream of this recipe — so one class, whichever decoder
+its size hint, either one with a byte after it, either one declaring more than its payload could
+deliver (the bound under **Codecs**), or either one decoding to anything but the size it declares. One rule — the bytes are not a stream of this recipe — so one class, whichever decoder
 refuses and however. It is taken after the declared size is compared with the shape (step 6), so a
 payload that both declares the wrong size and would not decode is `decoded-size-mismatch`.
 

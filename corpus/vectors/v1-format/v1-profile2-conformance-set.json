@@ -14,7 +14,7 @@
     "feature:crc"
   ],
   "notes": "Profile 0 cannot exercise any of this: its every recipe byte is 0x00, so nothing in that set decodes, and the length arithmetic that settles the stream count there does not exist here. Each file below is written with a DIFFERENT recipe on each of its streams, so a reader that applies one recipe to a whole block fails on the first file. `decoded_sha256` is over every block's decoded streams concatenated in file order; it is verified here against the identity-encoded file of the same data before the vector is written.",
-  "case_count": 3,
+  "case_count": 4,
   "cases": [
     {
       "name": "v1_p2_with_moments.tslod",
@@ -1344,6 +1344,158 @@
         }
       ],
       "note": "the same shape with NO moment stream and bit 0 clear. This is the pair that matters at profile 2: the two files differ in stream count, and only the header bit says so \u2014 there is no length arithmetic here to fall back on"
+    },
+    {
+      "name": "v1_p2_constant_high_ratio.tslod",
+      "file": "v1-format/files/v1_p2_constant_high_ratio.tslod",
+      "file_size_bytes": "1092",
+      "block_count": 4,
+      "format_version": 1,
+      "compression_id": 2,
+      "branching_factor": 256,
+      "block_samples": 131072,
+      "features": "1",
+      "moment_stream_present": true,
+      "recipes": {
+        "timestamps": "0x02",
+        "values": "0x01",
+        "moments": "0x03"
+      },
+      "stream_count_per_numeric_level_block": 3,
+      "decoded_stream_count": 10,
+      "decoded_bytes": "563428",
+      "decoded_sha256": "3cd5622c4b042458bdc8ef0ea649638fab2fb37b30a46dbcd0548996df61bfb3",
+      "every_crc_verifies": true,
+      "blocks": [
+        {
+          "channel": 0,
+          "level": 0,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                131072
+              ],
+              "recipe": "0x01",
+              "sha256": "07854d2fef297a06ba81685e660c332de36d5d18d546927d30daad6d7fda1541"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 1,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                512,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "98448a5abd2022aeb465eec72028bd55f4ecc6a215c50afa0f6586d718ac800f"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                512,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                512,
+                5
+              ],
+              "recipe": "0x03",
+              "sha256": "49891a7ccdf0d79a3403c53172c313a065c1140f5c23690f06b890c6687868e7"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 2,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                2,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "312d5c256bb95cd8eaa1bc54a9525f83c259bc3615b034ec7534336c62f1f847"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                2,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                2,
+                5
+              ],
+              "recipe": "0x03",
+              "sha256": "b2fb22e6eefaa6a1c152e22957ac55533c1298d098849aa9c2768feb601fe384"
+            }
+          ]
+        },
+        {
+          "channel": 0,
+          "level": 3,
+          "block": 0,
+          "streams": [
+            {
+              "kind": "positions",
+              "dtype": "int64",
+              "shape": [
+                1,
+                2
+              ],
+              "recipe": "0x02",
+              "sha256": "812b9db01e127413e0cacf012e2712e5fac6a8bcbb6e289349e617575c33f7c8"
+            },
+            {
+              "kind": "values",
+              "dtype": "float32",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x01",
+              "sha256": "de47c9b27eb8d300dbb5f2c353e632c393262cf06340c4fa7f1b40c4cbd36f90"
+            },
+            {
+              "kind": "moments",
+              "dtype": "float64",
+              "shape": [
+                1,
+                5
+              ],
+              "recipe": "0x03",
+              "sha256": "c16df622553907ac70b640b66988ef80b1228f5dce75e8596c274723f57e0eb2"
+            }
+          ]
+        }
+      ],
+      "note": "a constant channel in one 131,072-sample level-0 block, so its values stream declares 524,288 bytes from a payload of a few dozen. It is the accepting side of the declaration bound under Codecs: a reader whose bound is below this file's ratio refuses a file every conforming reader must read"
     },
     {
       "name": "v1_p2_active_with_moments.tslod",

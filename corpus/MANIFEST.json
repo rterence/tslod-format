@@ -5,7 +5,7 @@
   "generated_from": "tools/generate_all.py",
   "counts": {
     "vectors": 26,
-    "cases": 1339,
+    "cases": 1341,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -1051,11 +1051,11 @@
         "format:v1",
         "feature:read-rejection"
       ],
-      "case_count": 75,
+      "case_count": 76,
       "files": [
         {
           "path": "v1-format/v1-negative-vectors.json",
-          "sha256": "245c1790aacebf2f30adfd2fdd44e7d4695f83a71b661fa1e7ec4d4ab0a3e1ce"
+          "sha256": "c54a1090fa70b56724a073b7b75323f895a7395f1402a6be7ee4627b5160e592"
         },
         {
           "path": "v1-format/files/v1_negative_base.tslod",
@@ -1294,6 +1294,10 @@
           "sha256": "62a406588bc391a64590811d64260b2606be601d4b9fe30542ce50fcf14d1f6a"
         },
         {
+          "path": "v1-format/files/v1_negative_p2_declares_beyond_the_bound.tslod",
+          "sha256": "a723399ba660326e812e2df29b36e695609f32b22f9d9d2aaab358f297ede4fc"
+        },
+        {
           "path": "v1-format/files/v1_negative_tick_rate_base.tslod",
           "sha256": "98e1a91cddd296df738b41c709ac16f46f315e15d309f3858f2a19821f631a24"
         },
@@ -1415,11 +1419,11 @@
         "recipe:0x03",
         "feature:crc"
       ],
-      "case_count": 3,
+      "case_count": 4,
       "files": [
         {
           "path": "v1-format/v1-profile2-conformance-set.json",
-          "sha256": "54f6471f3c40ce2408bca4f6fb962330f878df6775e95822142fd30540301630"
+          "sha256": "7107dc7f463ca087396c93b248c5b593bcb111f900dab33388b09ee765d48017"
         },
         {
           "path": "v1-format/files/v1_p2_with_moments.tslod",
@@ -1428,6 +1432,10 @@
         {
           "path": "v1-format/files/v1_p2_no_moments.tslod",
           "sha256": "c7592464d097749194594e4d24cafb3406b4169fd1561418478149162474a601"
+        },
+        {
+          "path": "v1-format/files/v1_p2_constant_high_ratio.tslod",
+          "sha256": "4e5899bac7e48b53470ce1463fceb95bc1f24020695ab7d6169b822592a0e878"
         },
         {
           "path": "v1-format/files/v1_p2_active_with_moments.tslod",

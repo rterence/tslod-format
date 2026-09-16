@@ -29,8 +29,28 @@ arrays. Every vector carries these keys:
 - **`oracle`** — the current output is *one correct answer among many*. The expected value comes
   from an **independent** reference, never from the implementation under test. Numerical results
   with a tolerance.
-- **`negative`** — a well-formed input with one field patched; the assertion is that the reader
-  **rejects** it, and the rejection class is named.
+- **`negative`** — an input the reader must **reject**, with the rejection class named. There are
+  four shapes, and they are the four the checker knows:
+  - a **patch** — a well-formed base file and one field overwritten (`file` and `patch`). A patch
+    case carrying `must_open: true` is the accepting half of a bound, where the file must be read
+    rather than refused;
+  - a **truncation** — where the defect IS the file's length, so the case states `truncate_to`
+    instead of a field to overwrite;
+  - a file **built with its defect** — where the defect lies inside a block, under its CRC, so a
+    patched byte would be refused as `block-crc-mismatch` and pin the checksum rule under another
+    rule's name. The file is built with the defect and a valid CRC over it, and the case carries
+    `file` with no `patch` and no `truncate_to`;
+  - a **framing** case — no file at all. The case states the malformed block in its own fields, and
+    the checker builds it and requires the refusal.
+
+**`vectors/v1-format/files/` is not a directory of goldens.** It holds every `.tslod` the set uses,
+and they are not all readable: at this commit 8 of its 29 files are built with their defect, and
+opening one is supposed to fail. A file's role is stated **only by the vectors that name it** — a
+golden by a conformance set or a fixture vector, a built negative by a `v1-negative-vectors` case
+carrying `file` with no `patch` and no `truncate_to`, which is the predicate a reader implements
+(`is_built_with_its_defect` in the engine's corpus crate). The directory name says nothing, the file
+name is a convenience and not a contract, and a reader that enumerates the directory and expects
+every file to open is wrong about them. Consult the vectors.
 
 **The two conformance sets carry per-block, per-stream detail** — for every block, each stream's
 `kind` (`positions`, `timestamps`, `values` or `moments`), `dtype`, `shape`, `recipe` byte and the
@@ -96,7 +116,7 @@ hexadecimal.** It is unsigned, and its digits are zero-padded to the field's wid
 { "recipe": "0x02", "expected_crc32": "0xCBF43926" }
 ```
 
-Thirteen fields are written this way. One byte, two digits: `recipe` (the largest, at 951
+Thirteen fields are written this way. One byte, two digits: `recipe` (the largest, at 961
 occurrences — every stream a conformance case lists records the one it carries), `recipe_byte`, `bit_mask`, `original_byte`, `flipped_byte`, and the per-stream values
 of a profile-2 case's `recipes` map — `timestamps`, `values` and `moments`. Thirty-two bits, eight
 digits: `expected_crc32`, `stored_crc32`, `crc32_after_flip`, `init` and
