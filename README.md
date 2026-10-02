@@ -39,7 +39,7 @@ is correct when it does what the specification says.
 
 ## The conformance suite
 
-`corpus/` holds 1,341 test cases across 26 vectors. Each case gives an input, the exact output
+`corpus/` holds 1,395 test cases across 28 vectors. Each case gives an input, the exact output
 expected from it, and what that output demonstrates. They are stored as JSON and raw binary rather
 than in any programming language, so implementations in Rust, C or Python are checked against
 identical expectations.
@@ -50,7 +50,7 @@ contract between implementations rather than one implementation's private detail
 
 | set | what it pins |
 |---|---|
-| `v1-format` | 29 `.tslod` files — goldens, and negatives built with their defect, told apart only by the vectors that name them ([`vectors/v1-format/README.md`](corpus/vectors/v1-format/README.md)) — the profile-0 and profile-2 conformance sets, block framing, the CRC, the time axis, the window rule on a variable-rate channel, and the read-time rejections |
+| `v1-format` | 79 `.tslod` files — goldens, and negatives built with their defect, told apart only by the vectors that name them ([`vectors/v1-format/README.md`](corpus/vectors/v1-format/README.md)) — the profile-0 and profile-2 conformance sets, block framing, the CRC, the time axis, the window rule on a variable-rate channel, the read-time rejections, and the metadata block behind feature bit 32: its conformance files and its negatives |
 | `record-layouts` | every field of all five records, with a golden encoding, and the wire enums |
 | `set1-tick-timebase` | the tick conversions and the one rounding rule they share |
 | `set2-anchored-fold` | where a bucket sits, and how deep the pyramid is |
@@ -132,13 +132,13 @@ A case is **skipped** for one reason only: an optional third-party codec is not 
 names the package.
 
 ```
-corpus: 26 vectors, 1341 cases
+corpus: 28 vectors, 1395 cases
 
 skipped, because an optional codec is not installed:
     45 cases need pcodec — pip install pcodec
     108 cases need zstandard — pip install zstandard
 
-passed 1188  failed 0  skipped 153
+passed 1242  failed 0  skipped 153
 RESULT: PASS, with codec cases skipped
 ```
 
