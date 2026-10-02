@@ -14,9 +14,15 @@ nothing about a file's name, says which a file is:
   `truncate_to`. The base itself is well formed and opens;
 - a file **built with its defect** is named by a `v1-negative-vectors` case carrying `file` with no
   `patch` and no `truncate_to`. It does not open. That predicate is the whole rule — the engine's
-  corpus crate implements it as `is_built_with_its_defect`.
+  corpus crate implements it as `is_built_with_its_defect`;
+- a file **built with a defect in its metadata block alone** is named by a
+  `v1-metadata-block-negatives` case whose `outcome` is `block-refused` and which carries no
+  `patch`. It **opens**: a reader that implements feature bit 32 refuses the block and serves the
+  file without it, and a reader that does not implement the bit never looks at the block. It is not
+  a golden either, because a reader that implements the bit must report the block's class.
 
-At this commit the directory holds 29 files, of which 8 are built with their defect.
+At this commit the directory holds 79 files, of which 8 are built with their defect
+and 43 with a defect in their metadata block alone.
 
 A reader that enumerates this directory and assumes every file is a golden will fail on them, and
 the failure will look like a bug in the reader rather than a wrong assumption about the corpus.

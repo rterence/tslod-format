@@ -58,6 +58,19 @@ DTYPE_ENUM = {"float32": 0, "float64": 1, "int8": 2, "int16": 3, "int32": 4,
 #: The builder derives it from what it actually wrote; nothing else may set it.
 FEATURE_MOMENT_STREAM = 1 << 0
 
+#: May-ignore feature bit 32: the file carries a metadata block, and the first
+#: 16 of the header's 28 reserved bytes hold its offset and length. Derived
+#: from whether a block is written, like bit 0; a caller may not set it.
+FEATURE_METADATA_BLOCK = 1 << 32
+#: Header offsets of the pointer bit 32 licenses: offset u64, then length u64.
+METADATA_OFFSET_AT = 100
+METADATA_LENGTH_AT = 108
+#: The bounds, each in UTF-8 bytes: the block on disk, one description, one
+#: provenance string.
+METADATA_BLOCK_MAX = 1024 * 1024
+DESCRIPTION_MAX = 1024
+PROVENANCE_STRING_MAX = 256
+
 RECIPE_IDENTITY = 0x00
 RECIPE_ZSTD = 0x01
 RECIPE_PCO = 0x02
@@ -152,6 +165,24 @@ class FileSpec:
     #: so it is built instead, with the sizes, offsets and CRC computed over
     #: the damaged bytes.
     stream_hook: object = None
+    #: v1 only. The metadata block as typed values —
+    #: `{"provenance": {...}, "channels": {name: description}}` — which the
+    #: builder validates and serialises itself in the one canonical form. A
+    #: writer takes typed values and never block bytes.
+    metadata: dict | None = None
+    #: Negative vectors and conformance edge files only, never a writer's
+    #: input: bytes written as the block IN PLACE of the serialised
+    #: `metadata`, unchecked, so a block can carry the defect a case names.
+    metadata_raw: bytes | None = None
+    #: Edge files only: `(offset, length)` written into the pointer instead of
+    #: the block's own extent.
+    metadata_pointer: tuple | None = None
+    #: Edge files only: whether bit 32 is set. None derives it — set exactly
+    #: when a block is written.
+    metadata_bit: bool | None = None
+    #: Where the block's bytes go: "after_channel_table" (the rule) or
+    #: "end", after the level tables (the misplaced-block negative).
+    metadata_at: str = "after_channel_table"
 # ---------------------------------------------------------------------------
 
 
@@ -318,11 +349,119 @@ def text_field(value: str, width: int, fieldname: str, channel: str) -> bytes:
     return raw.ljust(width, b"\x00")
 
 
+# ---------------------------------------------------------------------------
+# The metadata block (feature bit 32)
+# ---------------------------------------------------------------------------
+
+
+def canonical_json(value) -> bytes:
+    """The block's one canonical byte form, for a value of strings, objects
+    and arrays.
+
+    No whitespace; object members in ascending order of their names' UTF-8
+    bytes, which is code-point order; every string written raw except `"` and
+    `\\`, each escaped with one backslash. No other escape exists in the form,
+    because no string in a valid block holds a character below U+0020. This
+    serialises; it does not judge content, so a negative vector can serialise
+    a value whose content is wrong and still get canonical bytes.
+    """
+    if isinstance(value, str):
+        return b'"' + value.replace("\\", "\\\\").replace('"', '\\"').encode(
+            "utf-8") + b'"'
+    if isinstance(value, dict):
+        items = sorted(value.items(), key=lambda kv: kv[0].encode("utf-8"))
+        return b"{" + b",".join(canonical_json(k) + b":" + canonical_json(v)
+                                for k, v in items) + b"}"
+    if isinstance(value, list):
+        return b"[" + b",".join(canonical_json(v) for v in value) + b"]"
+    raise TypeError(f"a metadata block holds strings, objects and arrays, "
+                    f"not {type(value).__name__}")
+
+
+def forbidden_code_point(ch: str) -> bool:
+    """A C0 or C1 control, a bidirectional override or isolate, a surrogate
+    or a noncharacter: none may appear in any string of a block."""
+    cp = ord(ch)
+    return (cp <= 0x1F or 0x7F <= cp <= 0x9F
+            or 0x202A <= cp <= 0x202E or 0x2066 <= cp <= 0x2069
+            or 0xD800 <= cp <= 0xDFFF
+            or 0xFDD0 <= cp <= 0xFDEF or (cp & 0xFFFE) == 0xFFFE)
+
+
+def validate_metadata(block: dict, channel_names: list[str]) -> None:
+    """Refuse a block a writer must not write. A writer refuses an over-long
+    value and never truncates it, and stamps nothing without a source."""
+    def text(where: str, value, limit: int | None) -> None:
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"{where}: a non-empty string is required")
+        if any(forbidden_code_point(c) for c in value):
+            raise ValueError(f"{where}: holds a control, bidirectional, "
+                             f"surrogate or noncharacter code point")
+        if limit is not None and len(value.encode("utf-8")) > limit:
+            raise ValueError(f"{where}: {len(value.encode('utf-8'))} UTF-8 "
+                             f"bytes, the bound is {limit}; a writer refuses "
+                             f"and never truncates")
+
+    if set(block) != {"channels", "provenance"}:
+        raise ValueError(f"members {sorted(block)}; a block has exactly "
+                         f"channels and provenance")
+    for name, desc in block["channels"].items():
+        text(f"channels key {name!r}", name, None)
+        if name not in channel_names:
+            raise ValueError(f"channels key {name!r} names no channel")
+        text(f"description of {name!r}", desc, DESCRIPTION_MAX)
+    prov = block["provenance"]
+    allowed = {"writer", "writer_version", "product", "firmware", "sources"}
+    if not set(prov) <= allowed or not {"writer", "writer_version",
+                                         "sources"} <= set(prov):
+        raise ValueError(f"provenance members {sorted(prov)}")
+    for key in ("writer", "writer_version", "product", "firmware"):
+        if key in prov:
+            text(f"provenance.{key}", prov[key], PROVENANCE_STRING_MAX)
+    if not isinstance(prov["sources"], list) or not prov["sources"]:
+        raise ValueError("provenance.sources: a writer with no source writes "
+                         "no block")
+    for i, src in enumerate(prov["sources"]):
+        if set(src) != {"name", "sha256"}:
+            raise ValueError(f"sources[{i}] members {sorted(src)}")
+        text(f"sources[{i}].name", src["name"], PROVENANCE_STRING_MAX)
+        if "/" in src["name"] or "\\" in src["name"] or src["name"] in (".", ".."):
+            raise ValueError(f"sources[{i}].name is not a bare file name")
+        sha = src["sha256"]
+        if not (isinstance(sha, str) and len(sha) == 64
+                and all(c in "0123456789abcdef" for c in sha)):
+            raise ValueError(f"sources[{i}].sha256 is not 64 lowercase hex")
+
+
+def metadata_bytes(spec: "FileSpec") -> bytes | None:
+    """The block's bytes as written, or None when the file carries none."""
+    if spec.metadata_raw is not None:
+        return spec.metadata_raw
+    if spec.metadata is None:
+        return None
+    validate_metadata(spec.metadata, [c.name for c in spec.channels])
+    raw = canonical_json(spec.metadata)
+    if len(raw) > METADATA_BLOCK_MAX:
+        raise ValueError(f"the block is {len(raw)} bytes, the bound is "
+                         f"{METADATA_BLOCK_MAX}")
+    return raw
+
+
 def build(spec: FileSpec) -> BuildResult:
     if spec.features & FEATURE_MOMENT_STREAM:
         raise ValueError(
             "feature bit 0 is derived from whether a moment stream is written, "
             "so a caller must not set it in FileSpec.features")
+    if spec.features & FEATURE_METADATA_BLOCK:
+        raise ValueError(
+            "feature bit 32 is derived from whether a metadata block is "
+            "written, so a caller must not set it in FileSpec.features")
+    if spec.metadata_at not in ("after_channel_table", "end"):
+        raise ValueError(f"metadata_at {spec.metadata_at!r}")
+    #: The block's bytes, validated and serialised here from typed values, or
+    #: None. It is placed directly after the channel table and before the
+    #: first data block, so a file without one is laid out exactly as before.
+    meta = metadata_bytes(spec)
     #: Set by the block loop below the moment it writes a moment stream. The
     #: header's feature bit 0 is this and nothing else, so the bit cannot
     #: disagree with the framing.
@@ -337,7 +476,9 @@ def build(spec: FileSpec) -> BuildResult:
     n_groups, n_channels = len(spec.groups), len(spec.channels)
     group_table_offset = HEADER_SIZE
     channel_table_offset = group_table_offset + n_groups * GROUP_ENTRY_SIZE
-    data_start = channel_table_offset + n_channels * CHANNEL_ENTRY_SIZE
+    channel_table_end = channel_table_offset + n_channels * CHANNEL_ENTRY_SIZE
+    meta_here = meta is not None and spec.metadata_at == "after_channel_table"
+    data_start = channel_table_end + (len(meta) if meta_here else 0)
 
     # -- per-channel pyramids and blocks ----------------------------------
     blob = bytearray()
@@ -497,16 +638,35 @@ def build(spec: FileSpec) -> BuildResult:
             text_field(ch.calibration_id, 32, "calibration_id", ch.name),
             b"\x00" * 14)
 
+    tail_end = level_start + len(level_region)
+    if meta is None:
+        meta_extent = (0, 0)
+    elif meta_here:
+        meta_extent = (channel_table_end, len(meta))
+    else:
+        meta_extent = (tail_end, len(meta))
+    pointer = spec.metadata_pointer if spec.metadata_pointer is not None \
+        else meta_extent
+    bit = spec.metadata_bit if spec.metadata_bit is not None \
+        else meta is not None
+    # The reserved 28 bytes at 100: the pointer bit 32 licenses, then 12 that
+    # stay reserved. With no block and no override they are all zero, as
+    # every file written before bit 32 had them.
+    reserved = struct.pack("<QQ", *pointer) + b"\x00" * 12
+
     header = struct.pack(
         HEADER_FMT_V1, MAGIC, 1, bf, spec.compression_id, spec.file_state,
         n_groups, n_channels, block_samples,
         group_table_offset, channel_table_offset,
         spec.session_id, spec.sequence_number, spec.prev_file_hash,
-        spec.features | (FEATURE_MOMENT_STREAM if wrote_moments else 0),
-        b"\x00" * 28)
+        spec.features | (FEATURE_MOMENT_STREAM if wrote_moments else 0)
+        | (FEATURE_METADATA_BLOCK if bit else 0),
+        reserved)
 
     data = bytes(header) + bytes(group_table) + bytes(channel_table) \
-        + bytes(blob) + bytes(index_region) + bytes(level_region)
+        + (meta if meta_here else b"") \
+        + bytes(blob) + bytes(index_region) + bytes(level_region) \
+        + (meta if meta is not None and not meta_here else b"")
 
     flat = []
     for ci, ch_state in enumerate(per_channel):
@@ -522,6 +682,8 @@ def build(spec: FileSpec) -> BuildResult:
             "group_table_offset": group_table_offset,
             "channel_table_offset": channel_table_offset,
             "data_start": data_start,
+            "channel_table_end": channel_table_end,
+            "metadata_extent": meta_extent,
             "index_start": index_start,
             "level_start": level_start,
             "block_index_entry_size": idx_size,

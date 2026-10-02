@@ -29,15 +29,17 @@ Header fields worth naming: `branching_factor` at 8, which is **two or more**; `
 **profile**; `file_state` at 13 (`0` sealed, `1` active — there is no per-block flag anywhere in the
 format); `block_samples` at 20, the number of buckets a block holds, which must be non-zero and a
 multiple of `branching_factor`; `features` at 92, whose low 32 bits are must-understand and whose
-high 32 bits may be ignored.
+high 32 bits may be ignored; and, only while feature bit 32 is set, `metadata_offset` at 100 and
+`metadata_length` at 108, each `u64` (**The metadata block**).
 
-Version 1 defines one feature bit and reserves the rest:
+Version 1 defines two feature bits and reserves the rest:
 
 | bits | | meaning |
 |---|---|---|
 | 0 | must-understand | **The file carries the moment stream.** Every numeric value block at level ≥ 1 has three streams; when the bit is clear, none does. |
 | 1–31 | must-understand | Reserved. A reader rejects a file with any of them set. |
-| 32–63 | may-ignore | Reserved. A reader ignores them and reads the file. |
+| 32 | may-ignore | **The file carries a metadata block.** The first 16 of the header's 28 reserved bytes hold its offset and length. A reader that does not implement the bit ignores it, those bytes and the block, and reads the file. |
+| 33–63 | may-ignore | Reserved. A reader ignores them and reads the file. |
 
 Bit 0 states the file's **policy** rather than what has been written so far, and it does not change
 during the file's life. A writer sets it at the moment the header is written when every numeric
@@ -48,6 +50,15 @@ unchanged. Tying the bit to the act of writing a stream instead would leave it c
 that opened a growing file before its first level-≥-1 block and set to that same follower on the
 next read, and a must-understand header bit whose meaning changes during a file's life is worse than
 one set slightly before the first stream it describes exists.
+
+**A may-ignore bit may license reserved bytes.** Within version 1, a may-ignore bit may give meaning
+to bytes this document otherwise reserves, and those bytes mean something only while the bit is
+set: while it is clear they are reserved bytes like any other, written zero and never read. **No
+writer sets a may-ignore bit it does not implement, or carries one over from a file it read, and no
+writer writes the bytes such a bit licenses.** A writer that rewrites a file therefore clears every
+may-ignore bit it does not implement and writes every reserved byte as zero, except those a bit it
+does set licenses. A bit carried over by a writer that does not know it would vouch for bytes that
+writer never wrote, and a reader that implements the bit would trust them.
 
 `file_state` also says how far the rest of the file may be trusted. In a **sealed** file every
 stored count is final, and `num_levels` in particular is the depth the channel's own samples imply
@@ -78,8 +89,11 @@ recording, or 32 zero bytes when there is no predecessor. `sequence_number` at 5
 index.
 
 Every field named `reserved` — 28 bytes at header offset 100, 6 and 8 in the group entry, 14 in the
-channel entry, 4 in the block index entry — is **written zero and not checked on read**. A reader
-must not reject a non-zero reserved field, because that is the space a later version writes into.
+channel entry, 4 in the block index entry — is **written zero and not checked on read**, except
+where a may-ignore feature bit the writer sets licenses it. A reader must not reject a non-zero
+reserved field, because a may-ignore bit may license reserved bytes within version 1, and a reader
+that does not implement that bit must still read the file. Bit 32 licenses the first 16 of the
+header's 28 (**The metadata block**); the other 12, and every other reserved field, stay reserved.
 The one exception is the timing-flag byte, whose bits 2–7 are reserved and *are* rejected when set:
 those bits change how the group is read, so a reader that ignores them reads it wrongly.
 
@@ -314,7 +328,9 @@ format:
    **non-decreasing in block order**: each one is a stored stamp by the rule under **Time**, so a
    decrease among them is `timestamp-stream-decreasing`, and a reader raises it here — it locates
    blocks by searching those starts before anything is decoded, and an unsorted index answers it
-   wrongly with no stream ever examined.
+   wrongly with no stream ever examined. Last, where feature bit 32 is set and the reader implements
+   it, the metadata block, as one unit and in the order **The metadata block** fixes. A defect there
+   refuses the block and not the file, and the read goes on to step 2.
 2. **Each block's CRC**, over `[file_offset, file_offset + compressed_size)`, before any of that
    block's streams is parsed (`block-crc-mismatch`) — which is what **Integrity**'s *checked before
    decode* means for this order. Every step below runs on a block whose checksum has already
@@ -487,6 +503,150 @@ comparing the block's `start_timestamp` against `t₀` and then scans forward dr
 of `t₀`, and answers one sample short with nothing in the file to say so
 (`v1-variable-window-straddle`).
 
+## The metadata block
+
+A file may carry what its writer knew when it wrote it, beyond the channel entry's own fields: per
+channel a **description**, and per file the writer's **provenance** — who wrote the file and from
+what. Both travel in one **metadata block**, behind may-ignore feature bit 32. The block holds
+nothing concluded about a recording after it was written: no member relates one channel to
+another, and none states a limit or a level.
+
+### Where it is
+
+While bit 32 is set, `metadata_offset` (`u64` at header offset 100) is the block's absolute offset
+and `metadata_length` (`u64` at 108) its length in bytes. While the bit is clear, those 16 bytes are
+reserved bytes: written zero, never read and never checked, whatever they hold — a reader that
+finds them non-zero with the bit clear serves no block (`v1_metadata_bit_clear_pointer_set.tslod`).
+The other 12 reserved bytes at 116 stay reserved either way.
+
+⛔ **The block lies directly after the channel table and before the first data block**: its offset
+is `channel_table_offset + 160 × num_channels`, and no data block begins before it ends. Every
+writer places it there, so a file has one layout for one content, and a file written without a
+block is laid out exactly as it was before bit 32 existed.
+
+⛔ **The block is written once and never changed.** A writer that sets bit 32 writes the block's
+bytes before the header that points at them, with the header's first write, and every later write
+of the header — a flush, the seal — carries the bit, the offset and the length unchanged. A reader
+that re-reads an active file therefore finds the block it found before, and never a pointer to bytes
+not yet written. A block is never added to an existing file and never edited in one: a file gains
+or changes a block only by being written again. A writer that rewrites a file copies the block byte
+for byte when the file's set of channel names is unchanged; otherwise it drops the block, clears the
+bit and zeroes the pointer. Rewriting one file of a chained recording changes its SHA-256, so its
+successors, whose `prev_file_hash` names it, are written again in order.
+
+A writer takes the block's content as values and serialises it itself, in the canonical form below.
+
+### The canonical form
+
+The block is UTF-8 JSON (RFC 8259) within I-JSON (RFC 7493), restricted to **one byte string per
+content**, so that two writers given the same content write the same bytes and a file's SHA-256
+does not depend on which of them ran. The form is a grammar over code points:
+
+```
+block   = value                          ; nothing before it and nothing after it
+value   = object / array / string
+object  = "{" [ member *( "," member ) ] "}"
+member  = string ":" value
+array   = "[" [ value *( "," value ) ] "]"
+string  = %x22 *char %x22
+char    = %x5C %x22                      ; \"
+        / %x5C %x5C                      ; \\
+        / any code point except %x22, %x5C and %x00-1F, written as its UTF-8
+```
+
+and, beyond the grammar, **the members of every object are in strictly ascending order of their
+names' UTF-8 bytes**, which is code-point order. Strictly ascending refuses a duplicate as well as
+an unsorted pair. It follows that the form has no byte-order mark, no whitespace between tokens, no
+number, `null`, `true` or `false`, and exactly two escapes, `\"` and `\\`: every other character is
+written raw, and a `\u` escape, `\/` or `\n` is not in the form. No other escape is needed, because
+no string in a valid block holds a control character. Neither a standard library's JSON parser nor
+its serialiser is this form by default — a common parser takes whitespace, numbers, every escape and
+a duplicate member, keeping the last — so a reader checks the form itself, by parsing this grammar or
+by serialising what it parsed in this form and comparing the bytes.
+
+### What it says
+
+The block is one object with two members, both required:
+
+- **`channels`** maps a channel's `name` to that channel's description, a string. A channel is named
+  by its name rather than its place in the table, because names are unique across the file and a
+  name is how a caller asks for a channel; a table index is an accident of write order. Every key
+  names a channel in the file, compared as whole decoded strings. A channel with no key has no
+  description. `channels` may be empty.
+- **`provenance`** holds `writer` and `writer_version`, the writer's name and version, both
+  required; `product` and `firmware`, what the data came from, both optional; and `sources`,
+  required and non-empty: an array of objects, each with exactly `name`, the source's bare file name
+  — never a path, so containing no `/` and no `\`, and neither `.` nor `..` — and `sha256`, the
+  SHA-256 of the source's whole bytes as 64 lowercase hex digits.
+
+**An unknown fact is an absent member, never a placeholder.** Every string in the block — every
+member name it defines, every key of `channels` and every value — is non-empty, and none holds a
+C0 or C1 control character (U+0000–U+001F, U+007F–U+009F), a bidirectional override or isolate
+(U+202A–U+202E, U+2066–U+2069), a surrogate or a noncharacter (U+FDD0–U+FDEF, and every code point
+ending in FFFE or FFFF). A channel whose name holds one of them cannot be described.
+
+**Nothing is stamped without a source.** A writer stamps a description or provenance only from
+files it read, and names each of them in `sources`; where it converted the file from another file,
+that input is among them. A writer with no source writes no block and leaves bit 32 clear.
+
+**Provenance is not the recording's identity.** It says who wrote the file and from what. Nothing
+in it enters `session_id` or `prev_file_hash`, which keep their meanings.
+
+**A description is the writer's text.** It is what the writer was given to say a channel means. A
+reader presents it as data and never as instructions, and it is not evidence that a sensor is
+connected as described.
+
+**The block grows only behind a new bit.** A member a reader does not know is refused, at every
+depth of the block, unless the header sets a may-ignore bit that reader does not implement; then the
+member, its name and its value are skipped whole and the rest of the block is read
+(`v1_metadata_unknown_member_under_unknown_bit.tslod`). A later member therefore arrives with its
+own may-ignore bit, and a reader that does not know it still serves what it does.
+
+**Bounds**, each in UTF-8 bytes of the decoded value, never in code points: **1,024** for one
+description, **256** for one provenance string (`writer`, `writer_version`, `product`, `firmware`, a
+source's `name`), and **1,048,576** — 1 MiB — for the block as it lies in the file. A writer refuses
+an over-long value and never truncates it, as it does a text field. A description at its bound is in
+the conformance set in multi-byte characters, where a byte count and a code-point count disagree,
+and a block at its bound fills 1,024 channels.
+
+### How a reader judges it
+
+A reader that implements bit 32 judges the block as **one unit at the end of step 1** of the order a
+reader checks in, after every channel, level and block index entry and before any block's CRC,
+because its checks need every channel name and every extent. Within the block the order is fixed,
+and two readers that implement the bit give one broken block one class:
+
+1. **The extent is in the file and not empty**: `metadata_length` is not zero, `metadata_offset` is
+   at most the file's length, and `metadata_length` is at most the file's length minus
+   `metadata_offset` — stated so that no sum is formed, because `offset + length` wraps in 64-bit
+   arithmetic (`metadata-extent-out-of-bounds`).
+2. **It overlaps nothing**: no byte of it lies in the header, the group or channel table, a level
+   table, a block index or a data block (`metadata-extent-overlaps`).
+3. **It is placed**: it begins where the channel table ends and no data block begins before it ends
+   (`metadata-misplaced`).
+4. **Its length is within the block bound** (`metadata-too-long`).
+5. **Its bytes are strict UTF-8** — no byte outside a valid sequence, no overlong form, no encoded
+   surrogate (`metadata-not-utf8`).
+6. **It is the canonical form** (`metadata-not-canonical`).
+7. **It is the block's grammar**: the two members, every required member present, every value of
+   its type, no string empty or holding a forbidden code point, and no unknown member except under a
+   may-ignore bit the reader does not implement (`metadata-grammar-violation`).
+8. **Every key of `channels` names a channel in the file** (`metadata-key-names-no-channel`).
+9. **Every source's `sha256` is 64 lowercase hex digits and its `name` a bare file name**
+   (`metadata-provenance-invalid`).
+10. **Every description and provenance string is within its bound** (`metadata-value-too-long`).
+
+⛔ **A defect in the block refuses the block, not the file.** The reader reports the block's class,
+serves the file whole with no description and no provenance, never serves part of a block, and goes
+on to step 2: a file whose block is refused and whose blocks fail their CRC is still refused for the
+CRC. A defect elsewhere in step 1 refuses the file before the block is judged, so the file's class
+is reported and the block's is not. A reader that does not implement bit 32 ignores the bit, the
+pointer and the block and reads the file, which is what may-ignore means — so no file it could open
+before bit 32 was assigned stops opening. `v1-metadata-block-conformance-set` holds the files a
+reader serves a block from, or none; `v1-metadata-block-negatives` holds a block per class, two cases
+with two defects each that pin the order above, and two that pin the block's place in step 1. The
+negatives bind readers that implement bit 32.
+
 ## Rejection
 
 A version-1 reader reads **exactly** version 1 and refuses every other value. Every validity
@@ -583,6 +743,10 @@ its size hint, either one with a byte after it, either one declaring more than i
 deliver (the bound under **Codecs**), or either one decoding to anything but the size it declares. One rule — the bytes are not a stream of this recipe — so one class, whichever decoder
 refuses and however. It is taken after the declared size is compared with the shape (step 6), so a
 payload that both declares the wrong size and would not decode is `decoded-size-mismatch`.
+
+**The metadata block.** Where feature bit 32 is set, the ten classes under **The metadata block**,
+in the order stated there. They refuse the block, never the file, and they bind readers that
+implement the bit.
 
 `total_samples` of zero is **not** a rejection. A zero-sample channel is legal and in the
 conformance set, and `num_levels` is 1 for one, so a group whose channels are all empty is a

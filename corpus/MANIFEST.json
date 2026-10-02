@@ -4,8 +4,8 @@
   "conventions": "corpus/CONVENTIONS.md",
   "generated_from": "tools/generate_all.py",
   "counts": {
-    "vectors": 26,
-    "cases": 1341,
+    "vectors": 28,
+    "cases": 1395,
     "by_set": {
       "codec-vectors": 1,
       "record-layouts": 2,
@@ -13,11 +13,11 @@
       "set2-anchored-fold": 2,
       "set3-build-level": 6,
       "set4-chan-pebay": 4,
-      "v1-format": 7
+      "v1-format": 9
     },
     "by_kind": {
-      "fixture": 22,
-      "negative": 1,
+      "fixture": 23,
+      "negative": 2,
       "oracle": 3
     }
   },
@@ -1037,6 +1037,265 @@
         {
           "path": "v1-format/v1-block-framing.json",
           "sha256": "f5909f213c998361984d33b7268358d6c983f04f7a76536ba0ee08289a93b437"
+        }
+      ]
+    },
+    {
+      "id": "v1-metadata-block-conformance-set",
+      "set": "v1-format",
+      "kind": "fixture",
+      "asserts": "A reader that implements feature bit 32 serves each of these files whole, and serves exactly the metadata block the case states: the descriptions and provenance where bit 32 is set and the block is valid, and none where bit 32 is clear, whatever the pointer bytes hold.",
+      "source": "written by tools/_tslod_build.py, which serialises the block itself",
+      "contract": "The block has one canonical byte form, so one content has one byte string, and two readers that implement the bit must serve one file the same descriptions.",
+      "requires": [
+        "format:v1",
+        "profile:0",
+        "recipe:0x00",
+        "feature:crc",
+        "feature:metadata-block"
+      ],
+      "case_count": 8,
+      "files": [
+        {
+          "path": "v1-format/v1-metadata-block-conformance-set.json",
+          "sha256": "8a88bfdedca6a8ea22a9f2b9a348a1d43185c9e6be83a20e7bc137307e8d651a"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_block.tslod",
+          "sha256": "de803886acbe936f4237cdcd8171aa733081d13a2a0bd457b71e9ba01c1a59f0"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_block_minimal.tslod",
+          "sha256": "83ad7170ce9fa9c524e32647ba26774937acb120c275ab3f2c5b8c596e4cee65"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_block_at_bound.tslod",
+          "sha256": "57d0023659910dd4d338c864db4b4dc4dee775a9198b756d9b604a746b95cd6b"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_bit_clear_pointer_set.tslod",
+          "sha256": "564aef18c2d92f393947cef1454531895310056859307b1eb1dec2ba189d1495"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_unknown_may_ignore_bit.tslod",
+          "sha256": "db0b146adc1f715e4e6a7d56d7227c6c4c37cd3ac7db48ef4678d606b5738289"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_unknown_member_under_unknown_bit.tslod",
+          "sha256": "79dcc18369c60482a8c5d125f62946ebb927ec5ebc3e23841ec295a585405488"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_unknown_may_ignore_bit_no_block.tslod",
+          "sha256": "f8db3823d2a3c6a3716156444e407fe7aad05b6b466731dfe4cb5f2d6702ce3d"
+        },
+        {
+          "path": "v1-format/files/v1_all_ten_dtypes.tslod",
+          "sha256": "399cf218d78f6907ba53b06c4882d2cf36ac265a96aaf0f5a30d9dffb8a21250"
+        }
+      ]
+    },
+    {
+      "id": "v1-metadata-block-negatives",
+      "set": "v1-format",
+      "kind": "negative",
+      "asserts": "A reader that implements feature bit 32 refuses each of these metadata blocks with the rejection class the case names, taking the block's checks in the order spec/v1 fixes, and refuses the block and not the file: where the case's outcome is block-refused, the file opens and is served with no description and no provenance.",
+      "source": "the version-1 metadata block rules",
+      "contract": "Two readers that implement the bit must give one broken block one class, and neither may lose a file's samples to its metadata.",
+      "requires": [
+        "format:v1",
+        "profile:0",
+        "feature:read-rejection",
+        "feature:metadata-block"
+      ],
+      "case_count": 46,
+      "files": [
+        {
+          "path": "v1-format/v1-metadata-block-negatives.json",
+          "sha256": "063d3eb25bb8c4c4b8d84d06572e5c00376b9f99d26dbe7a73f5f585f94e287a"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_pointer_zero.tslod",
+          "sha256": "0a51abeed025059a2a30841297daea7d4b7c055d4f62dac83158ef6c8c31a8a4"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_offset_past_eof.tslod",
+          "sha256": "bba8258ea4cfff98f44823ab2c060e323c0c2c77bcdd3db1146ab03cd02b9ac4"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_length_past_eof.tslod",
+          "sha256": "3737fee81fb15cb466cb3cbead47e752a77a36974c028c10686d63d72c693057"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_extent_wraps.tslod",
+          "sha256": "891beb73e437effd41e4dd6aa29c8f1aff9e5ebd93095fe3951a4305769eca13"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_overlaps_header.tslod",
+          "sha256": "2f9347543a093ca397f59b2f8e881bbc47e62a7a5e8427892ff60f8ebea2e29e"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_overlaps_a_block.tslod",
+          "sha256": "cd36ae95d63b6ccfa001d729b9b9ae3089a932e7d123ff1f0c507b681a39da99"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_misplaced.tslod",
+          "sha256": "2e3b8f9c0d00bc974cde86ad5a37c1f6efb4ddcc1616ab5f2c682f7140179a33"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_block_over_bound.tslod",
+          "sha256": "5ac780b5e75881fdb381473334fcf2fb74b1bf67420bb5ce4fb22e8430c49162"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_invalid_utf8_byte.tslod",
+          "sha256": "81557530dd7349971192a3e7cbb7ae79f329070e86e09d7999c8899158909a51"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_encoded_surrogate.tslod",
+          "sha256": "ffe0f0e95a7b0e7e8e92a9717090e7cb51e49e2fb4a004db9880a2ecfcdfd234"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_whitespace.tslod",
+          "sha256": "e88a331374dcc18d17720989c55af59a04f749b2b1daf883af3d261cf2c4738d"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_leading_bom.tslod",
+          "sha256": "24a96f6f170bebbcd5fd62593f3f214ba95d48436293bafba43d3d7f4f9e6af6"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_members_unsorted.tslod",
+          "sha256": "221723bdbaf6a5788c93902addbbf93ce402eb5d0af879788a89f4a3e503b51f"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_duplicate_member.tslod",
+          "sha256": "a5894dc08a2ffddc7d710a348c7c8fbfaa19b73bf67656521b7dfd9b19ff9327"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_escaped_duplicate.tslod",
+          "sha256": "b27969595f466d7962ca0be492901ed19c5e31f84c61fbe3507caf1a3aebfcb0"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_unicode_escape.tslod",
+          "sha256": "2a083ca81fcb2e3061988b7445e3045397c178b7e1ed23c784897d536f673c5a"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_lone_surrogate_escape.tslod",
+          "sha256": "4c5adabb41dc23974284dc2523f765a9cdd2f9639178be3104fa4d16fb454185"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_newline_escape.tslod",
+          "sha256": "754c5db2fe480c8dc88b26adcf48942e84c44d28727aad256ea398250bf0add1"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_raw_tab.tslod",
+          "sha256": "8e547bbaa7f04f8f89f32b4716cded590de1631f9b9c22c581a393e5326c70f0"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_number.tslod",
+          "sha256": "092c75f97048a54011dac09bc1a24652d51d0e0d6c364a1ecea2714e6d3abd02"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_null.tslod",
+          "sha256": "94b1195c8f97829c7e7beef9d98f3e9d0b197c4cd052b7b659644522faa48b5e"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_trailing_bytes.tslod",
+          "sha256": "cbea7f5db4a5038c278f92b1958679b611ff48179844b6cbbb309ca1b1108899"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_top_level_array.tslod",
+          "sha256": "2533f1c6648fbf7f36d6dabd0f836e7cd87c08835ae0a1d4f2418c483ec98325"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_provenance_missing.tslod",
+          "sha256": "b23bc1129394ef4f4105302db6eab5cf36243be0cfe994da80dcb4403c7c8060"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_sources_empty.tslod",
+          "sha256": "3da1a1973601094f21bf4a9dd1b4e9692129f56b7c6f7bd965ff7b65952a546a"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_writer_version_missing.tslod",
+          "sha256": "689e94032059c4a1fc06c25eaaac5ab56b10c4170fde1459263ae1e3adcc225c"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_description_empty.tslod",
+          "sha256": "bb0f6eb820a22a7d58cc68fcae1c1e9f99b9420f1b2533e09c2fd60413f9b7d3"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_description_not_a_string.tslod",
+          "sha256": "9e5d91a40df484d18162d82b0f4ffa135d8b27d4747b299b56611dff688ab9ca"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_unknown_member.tslod",
+          "sha256": "89daa58d675270411558db2eee301616f363ccb8317bcfb497760c729145977b"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_unknown_source_member.tslod",
+          "sha256": "aa1fe17c5900be70b5c8d93187aae26a94a4c07b70a8509b6acbf938769c0a7d"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_bidi_override.tslod",
+          "sha256": "1e68a14edca9b0cfeff1a74629055a24c576dc7e79f869b18289310a72eb8256"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_c1_control.tslod",
+          "sha256": "248f75882013cc85f5c1b110a020411232bfef3811b37333b0fd91523e1fa427"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_noncharacter.tslod",
+          "sha256": "1037c34d240118fdd34be9f8a6d1b2b1f4f141790bdb51dc4ed2b5e339860676"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_key_names_no_channel.tslod",
+          "sha256": "786870b34bc34825bc763ed7282aaf2b72fa8473638a68312e8fe0b71ce7731f"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_key_is_a_prefix.tslod",
+          "sha256": "c499cb0c6075d0a571c9e1519775c7a14f87438d9a1bf6638e2f917b512dff0f"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_sha256_uppercase.tslod",
+          "sha256": "6188a4792089503f2cbb09253976c86ae0e581194f5ae06d6487d858b821fd6d"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_sha256_short.tslod",
+          "sha256": "deb043036d22d7fb3471c145c338e81b9565e78a8d998571fa44be263b1693f8"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_source_name_is_a_path.tslod",
+          "sha256": "e6b349c6e0a86935ea54350695495007698a0ef0a798d1ed827b8ab86082464e"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_source_name_backslash.tslod",
+          "sha256": "5564612d75afe2f0155ef029ec67e64d7517210ce440ab70bd79521960f383f1"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_description_over_bound.tslod",
+          "sha256": "ca544df366e2f31c400a4b905d73c263833071b79b47bf3a0c3b29dd9a55cd13"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_provenance_string_over_bound.tslod",
+          "sha256": "cc74670ada68dbd0bc6a78283af59c578f834e0eed523280834b413259221a7a"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_order_key_before_bound.tslod",
+          "sha256": "896590aa572177983242f811e51854a31316aeec46f0f06821d20c98b88b8290"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_order_grammar_before_provenance.tslod",
+          "sha256": "b7041a162ded68ef3f98510acca1260e318973cfb0225922e30533e9e6c91031"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_offset_past_eof.tslod",
+          "sha256": "bba8258ea4cfff98f44823ab2c060e323c0c2c77bcdd3db1146ab03cd02b9ac4"
+        },
+        {
+          "path": "v1-format/files/v1_metadata_neg_offset_past_eof.tslod",
+          "sha256": "bba8258ea4cfff98f44823ab2c060e323c0c2c77bcdd3db1146ab03cd02b9ac4"
+        },
+        {
+          "path": "v1-format/files/v1_negative_base.tslod",
+          "sha256": "d59c87ca3d64c97ee92358dd3f82c27cf37e3d74a1edb10ac0aaf187f63da577"
         }
       ]
     },

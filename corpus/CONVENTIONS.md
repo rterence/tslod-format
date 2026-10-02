@@ -43,9 +43,16 @@ arrays. Every vector carries these keys:
   - a **framing** case — no file at all. The case states the malformed block in its own fields, and
     the checker builds it and requires the refusal.
 
+  One vector refuses a **part** of a file rather than the file: `v1-metadata-block-negatives`, whose
+  cases judge the metadata block feature bit 32 licenses, and bind only readers that implement that
+  bit. Each of its cases carries `outcome` — `block-refused`, where the file opens, is served with
+  no metadata block, and the block is refused with the case's `rejection_class`; or `file-refused`,
+  where the file itself is refused with it — and takes the built shape or the patch shape above.
+
 **`vectors/v1-format/files/` is not a directory of goldens.** It holds every `.tslod` the set uses,
-and they are not all readable: at this commit 8 of its 29 files are built with their defect, and
-opening one is supposed to fail. A file's role is stated **only by the vectors that name it** — a
+and they are not all readable: at this commit 8 of its 79 files are built with their defect, and
+opening one is supposed to fail; 43 more are built with a defect in their metadata block alone, and
+they open. A file's role is stated **only by the vectors that name it** — a
 golden by a conformance set or a fixture vector, a built negative by a `v1-negative-vectors` case
 carrying `file` with no `patch` and no `truncate_to`, which is the predicate a reader implements
 (`is_built_with_its_defect` in the engine's corpus crate). The directory name says nothing, the file
@@ -203,6 +210,7 @@ vectors your implementation is ready for.
 | `feature:crc` | it checks the per-block CRC |
 | `feature:moments` | it reads or writes the `(count, mean, M2, M3, M4)` moment stream |
 | `feature:read-rejection` | it parses a whole file and refuses a malformed one |
+| `feature:metadata-block` | it implements feature bit 32: it reads, judges and serves the metadata block |
 
 `check_corpus.py` skips for one reason only — an optional third-party codec is not installed — and
 names the package. It does not skip on `requires`.

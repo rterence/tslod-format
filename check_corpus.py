@@ -286,6 +286,263 @@ def _level_entry(data: bytes, level_off: int, lv: int) -> tuple[int, int, int]:
     return block_count, allocated, index_off
 
 
+# --------------------------------------------------------------------------
+# The metadata block — may-ignore feature bit 32, judged at the end of step 1
+# --------------------------------------------------------------------------
+
+#: May-ignore feature bit 32 of `header.features`: the file carries a metadata
+#: block, whose offset and length are the u64s at header 100 and 108. Restated
+#: here rather than imported, like bit 0.
+FEATURE_METADATA_BLOCK = 1 << 32
+#: The may-ignore bits this reader implements. Any other high bit set is one
+#: it does not, and that is what relaxes the unknown-member rule.
+KNOWN_MAY_IGNORE = FEATURE_METADATA_BLOCK
+METADATA_BLOCK_MAX = 1 << 20
+DESCRIPTION_MAX = 1024
+PROVENANCE_STRING_MAX = 256
+_SHA256_HEX = re.compile(r"[0-9a-f]{64}")
+
+
+class BlockRefused(Exception):
+    """The metadata block broke a rule. The FILE is still read: a reader
+    serves it with no description and no provenance."""
+
+    def __init__(self, rejection_class: str, detail: str = ""):
+        super().__init__(f"{rejection_class}{': ' + detail if detail else ''}")
+        self.rejection_class = rejection_class
+
+
+def _not_canonical(detail: str) -> BlockRefused:
+    return BlockRefused("metadata-not-canonical", detail)
+
+
+def _parse_canonical(text: str):
+    """Parse the block's canonical form and nothing wider.
+
+    A hand-written parser over the canonical grammar, deliberately not
+    `json.loads`: the standard parser takes whitespace, numbers, literals,
+    every escape, duplicate members (last wins) and lone surrogate escapes,
+    and each of those is a block this reader must refuse. Here a byte string
+    is accepted exactly when it is the canonical serialisation of a value of
+    strings, objects and arrays — so one content has one byte string.
+    """
+    pos = 0
+
+    def string():
+        nonlocal pos
+        assert text[pos] == '"'
+        pos += 1
+        out = []
+        while True:
+            if pos >= len(text):
+                raise _not_canonical("a string runs to the end of the block")
+            ch = text[pos]
+            if ch == '"':
+                pos += 1
+                return "".join(out)
+            if ch == "\\":
+                nxt = text[pos + 1:pos + 2]
+                if nxt not in ('"', "\\"):
+                    raise _not_canonical(
+                        f"escape \\{nxt} at {pos}; the form escapes only "
+                        f"the quote and the backslash")
+                out.append(nxt)
+                pos += 2
+                continue
+            if ord(ch) < 0x20:
+                raise _not_canonical(f"U+{ord(ch):04X} raw in a string")
+            out.append(ch)
+            pos += 1
+
+    def value():
+        nonlocal pos
+        if pos >= len(text):
+            raise _not_canonical("a value is missing")
+        ch = text[pos]
+        if ch == '"':
+            return string()
+        if ch == "[":
+            pos += 1
+            items = []
+            if text[pos:pos + 1] == "]":
+                pos += 1
+                return items
+            while True:
+                items.append(value())
+                sep = text[pos:pos + 1]
+                pos += 1
+                if sep == "]":
+                    return items
+                if sep != ",":
+                    raise _not_canonical(f"{sep!r} where , or ] belongs")
+        if ch == "{":
+            pos += 1
+            members: dict = {}
+            prev = None
+            if text[pos:pos + 1] == "}":
+                pos += 1
+                return members
+            while True:
+                if text[pos:pos + 1] != '"':
+                    raise _not_canonical(f"a member name is missing at {pos}")
+                name = string()
+                if text[pos:pos + 1] != ":":
+                    raise _not_canonical(f"':' missing at {pos}")
+                pos += 1
+                # Strictly ascending by UTF-8 bytes, which is code-point
+                # order: this refuses an unsorted object AND a duplicate.
+                key = name.encode("utf-8", "surrogatepass")
+                if prev is not None and key <= prev:
+                    raise _not_canonical(
+                        f"member {name!r} does not follow its predecessor "
+                        f"in ascending order")
+                prev = key
+                members[name] = value()
+                sep = text[pos:pos + 1]
+                pos += 1
+                if sep == "}":
+                    return members
+                if sep != ",":
+                    raise _not_canonical(f"{sep!r} where , or }} belongs")
+        raise _not_canonical(
+            f"{ch!r} at {pos}; a block holds only strings, objects and arrays")
+
+    parsed = value()
+    if pos != len(text):
+        raise _not_canonical(f"{len(text) - pos} characters after the value")
+    return parsed
+
+
+def _forbidden(s: str) -> str | None:
+    for ch in s:
+        cp = ord(ch)
+        if (cp <= 0x1F or 0x7F <= cp <= 0x9F or 0x202A <= cp <= 0x202E
+                or 0x2066 <= cp <= 0x2069 or 0xD800 <= cp <= 0xDFFF
+                or 0xFDD0 <= cp <= 0xFDEF or (cp & 0xFFFE) == 0xFFFE):
+            return f"U+{cp:04X}"
+    return None
+
+
+def _grammar(block, relaxed: bool) -> None:
+    """The block's shape. A member this reader does not know is refused at
+    every depth, unless the header sets a may-ignore bit it does not
+    implement — then it is skipped whole."""
+    def bad(detail):
+        return BlockRefused("metadata-grammar-violation", detail)
+
+    def text(where, v):
+        if not isinstance(v, str):
+            raise bad(f"{where} is not a string")
+        if not v:
+            raise bad(f"{where} is empty")
+        hit = _forbidden(v)
+        if hit:
+            raise bad(f"{where} holds {hit}")
+
+    def members(where, obj, required, optional):
+        if not isinstance(obj, dict):
+            raise bad(f"{where} is not an object")
+        for k in required:
+            if k not in obj:
+                raise bad(f"{where} lacks {k}")
+        unknown = sorted(set(obj) - set(required) - set(optional))
+        if unknown and not relaxed:
+            raise bad(f"{where} has unknown member {unknown[0]!r}")
+
+    members("the block", block, ("channels", "provenance"), ())
+    channels = block["channels"]
+    if not isinstance(channels, dict):
+        raise bad("channels is not an object")
+    for name, desc in channels.items():
+        text("a channels key", name)
+        text(f"the description of {name!r}", desc)
+    prov = block["provenance"]
+    members("provenance", prov, ("writer", "writer_version", "sources"),
+            ("product", "firmware"))
+    for k in ("writer", "writer_version", "product", "firmware"):
+        if k in prov:
+            text(f"provenance.{k}", prov[k])
+    sources = prov["sources"]
+    if not isinstance(sources, list) or not sources:
+        raise bad("provenance.sources is not a non-empty array")
+    for i, src in enumerate(sources):
+        members(f"sources[{i}]", src, ("name", "sha256"), ())
+        text(f"sources[{i}].name", src["name"])
+        text(f"sources[{i}].sha256", src["sha256"])
+
+
+def judge_metadata(data: bytes, features: int, names: set,
+                   extents: list, channel_table_end: int,
+                   block_extents: list) -> dict | None:
+    """The block, as one unit, in the order spec/v1 fixes. Returns None when
+    bit 32 is clear — the pointer is then not read at all, whatever it holds —
+    the block's content when it passes, or raises BlockRefused."""
+    if not features & FEATURE_METADATA_BLOCK:
+        return None
+    offset, length = struct.unpack_from("<QQ", data, 100)
+    n = len(data)
+    # 1. within the file, and non-empty. Written so that no sum can wrap: a
+    #    reader in fixed-width arithmetic must not compute offset + length.
+    if length == 0 or offset > n or length > n - offset:
+        raise BlockRefused("metadata-extent-out-of-bounds",
+                           f"offset {offset} length {length} in {n} bytes")
+    end = offset + length
+    # 2. no overlap with the header, a table, an index or a block.
+    for (lo, hi, what) in extents:
+        if lo < end and offset < hi:
+            raise BlockRefused("metadata-extent-overlaps", what)
+    # 3. directly after the channel table, and before the first data block.
+    if offset != channel_table_end:
+        raise BlockRefused("metadata-misplaced",
+                           f"at {offset}; the channel table ends at "
+                           f"{channel_table_end}")
+    for fo in block_extents:
+        if fo < end:
+            raise BlockRefused("metadata-misplaced",
+                               f"a data block at {fo} precedes its end {end}")
+    # 4. the block's own bound.
+    if length > METADATA_BLOCK_MAX:
+        raise BlockRefused("metadata-too-long", f"{length} bytes")
+    raw = data[offset:end]
+    # 5. strict UTF-8 over the whole span.
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise BlockRefused("metadata-not-utf8", str(exc))
+    # 6. the canonical form.
+    block = _parse_canonical(text)
+    # 7. the grammar.
+    relaxed = bool(features >> 32 & ~(KNOWN_MAY_IGNORE >> 32))
+    _grammar(block, relaxed)
+    # 8. every key names a channel in the file, compared as whole strings.
+    for name in block["channels"]:
+        if name not in names:
+            raise BlockRefused("metadata-key-names-no-channel", repr(name))
+    # 9. provenance's two forms.
+    for i, src in enumerate(block["provenance"]["sources"]):
+        if not _SHA256_HEX.fullmatch(src["sha256"]):
+            raise BlockRefused("metadata-provenance-invalid",
+                               f"sources[{i}].sha256")
+        if ("/" in src["name"] or "\\" in src["name"]
+                or src["name"] in (".", "..")):
+            raise BlockRefused("metadata-provenance-invalid",
+                               f"sources[{i}].name is not a bare file name")
+    # 10. the value bounds, in UTF-8 bytes of the decoded value.
+    for name, desc in block["channels"].items():
+        if len(desc.encode("utf-8")) > DESCRIPTION_MAX:
+            raise BlockRefused("metadata-value-too-long",
+                               f"the description of {name!r}")
+    prov = block["provenance"]
+    strings = [prov[k] for k in ("writer", "writer_version", "product",
+                                 "firmware") if k in prov]
+    strings += [s["name"] for s in prov["sources"]]
+    for s in strings:
+        if len(s.encode("utf-8")) > PROVENANCE_STRING_MAX:
+            raise BlockRefused("metadata-value-too-long", "a provenance string")
+    return {"offset": offset, "length": length, "block": block,
+            "sha256": hashlib.sha256(raw).hexdigest()}
+
+
 def open_v1(data: bytes) -> dict:
     """Parse and validate a version-1 file, or raise CorruptFile."""
     # A truncated file and a file that is not one of ours are different
@@ -383,6 +640,14 @@ def open_v1(data: bytes) -> dict:
     #: blocks is refused for the earlier block's — and it can only be true if
     #: no block is touched while an entry anywhere is still unchecked.
     plan: list[dict] = []
+    #: Every extent the metadata block may not overlap: the header, the two
+    #: tables, each level table, each block index and each block.
+    extents: list[tuple] = [
+        (0, 128, "the header"),
+        (group_off, group_off + n_groups * GROUP_ENTRY_SIZE, "the group table"),
+        (channel_off, channel_off + n_channels * CHANNEL_ENTRY_SIZE,
+         "the channel table")]
+    block_starts: list[int] = []
     for ci in range(n_channels):
         base = channel_off + ci * CHANNEL_ENTRY_SIZE
         dtype_code = data[base + 64]
@@ -470,8 +735,13 @@ def open_v1(data: bytes) -> dict:
 
         timing_mode = groups[group_id]["timing_mode"]
         levels: list[list[tuple]] = []
+        extents.append((level_off, level_off + num_levels * LEVEL_ENTRY_SIZE,
+                        f"channel {ci}'s level table"))
         for lv in range(num_levels):
             block_count, allocated, index_off = _level_entry(data, level_off, lv)
+            extents.append((index_off,
+                            index_off + block_count * BLOCK_INDEX_ENTRY_SIZE,
+                            f"channel {ci} level {lv}'s block index"))
             entries = []
             for b in range(block_count):
                 e = index_off + b * BLOCK_INDEX_ENTRY_SIZE
@@ -503,6 +773,8 @@ def open_v1(data: bytes) -> dict:
                         f"block's shape implies")
                 if fo + cs > len(data):
                     raise CorruptFile("block-extent-past-eof")
+                extents.append((fo, fo + cs, f"channel {ci} level {lv} block {b}"))
+                block_starts.append(fo)
                 entries.append((fo, cs, us, sc, start_ts, crc))
             # A variable-rate channel's level-0 block starts are its blocks'
             # FIRST STORED STAMPS, so they carry the non-decreasing rule the
@@ -522,6 +794,19 @@ def open_v1(data: bytes) -> dict:
             levels.append(entries)
         plan.append({"ci": ci, "dtype": ch_dtype, "agg": aggregation_mode,
                      "timing_mode": timing_mode, "levels": levels})
+
+    # -- the end of step 1: the metadata block, as one unit ---------------
+    # After every channel, level and index entry, because its checks need
+    # every name and every extent, and before any block's CRC. A defect here
+    # refuses the BLOCK and not the file: the file is read on, and served
+    # with no description and no provenance.
+    try:
+        metadata = judge_metadata(data, features, set(seen_names), extents,
+                                  channel_off + n_channels * CHANNEL_ENTRY_SIZE,
+                                  block_starts)
+        metadata_refused = None
+    except BlockRefused as exc:
+        metadata, metadata_refused = None, exc.rejection_class
 
     # -- steps 2 to 8, one block at a time ---------------------------------
     for ch in plan:
@@ -629,7 +914,8 @@ def open_v1(data: bytes) -> dict:
                         prev_last_stamp = int(stamps[-1])
                 blocks += 1
     return {"branching_factor": bf, "block_samples": block_samples,
-            "profile": profile, "block_count": blocks}
+            "profile": profile, "block_count": blocks,
+            "metadata": metadata, "metadata_refused": metadata_refused}
 
 
 # --------------------------------------------------------------------------
@@ -1921,6 +2207,81 @@ def c_negative(v, c):
     raise AssertionError(f"{cls}: the malformed block was accepted")
 
 
+def _metadata_case_bytes(c) -> bytes:
+    data = bytearray((VECTORS / c["file"]).read_bytes())
+    if "patch" in c:
+        p = c["patch"]
+        off, width = int(p["offset"]), p["width_bytes"]
+        assert data[off:off + width].hex().upper() == p["original_hex"], (
+            "the base file does not hold the bytes the patch says it replaces")
+        data[off:off + width] = bytes.fromhex(p["patched_hex"])
+    return bytes(data)
+
+
+def c_metadata_conformance(v, c):
+    """Open the file whole, and serve exactly the block the case states."""
+    data = _metadata_case_bytes(c)
+    info = open_v1(data)
+    assert info["metadata_refused"] is None, (
+        f"the block was refused as {info['metadata_refused']}")
+    features, = struct.unpack_from("<Q", data, 92)
+    offset, length = struct.unpack_from("<QQ", data, 100)
+    assert bool(features & FEATURE_METADATA_BLOCK) == c["metadata_bit_set"]
+    assert (str(offset), str(length)) == (c["metadata_offset"],
+                                          c["metadata_length"])
+    if "features" in c:
+        assert str(features) == c["features"]
+        assert str(len(data)) == c["file_size_bytes"]
+        assert info["block_count"] == c["block_count"]
+    if c["metadata"] == "absent":
+        assert info["metadata"] is None, "a block was served"
+        return
+    meta = info["metadata"]
+    assert meta is not None, "no block was served"
+    assert meta["sha256"] == c["metadata_sha256"]
+    if "metadata_hex" in c:
+        assert data[offset:offset + length].hex().upper() == c["metadata_hex"]
+    if "served" in c:
+        # What a reader serves: the members it knows. Under an unknown
+        # may-ignore bit an unknown member is skipped, so it is not served.
+        block = meta["block"]
+        served = {"channels": block["channels"],
+                  "provenance": {k: block["provenance"][k]
+                                 for k in ("writer", "writer_version", "product",
+                                           "firmware", "sources")
+                                 if k in block["provenance"]}}
+        served["provenance"]["sources"] = [
+            {"name": s["name"], "sha256": s["sha256"]}
+            for s in served["provenance"]["sources"]]
+        assert served == c["served"], "the block does not say what the case says"
+    if "block_utf8_bytes" in c:
+        assert str(length) == c["block_utf8_bytes"]
+
+
+def c_metadata_negative(v, c):
+    """Refuse the block with the case's class, and the file only where the
+    case says the file is refused."""
+    data = _metadata_case_bytes(c)
+    if c["outcome"] == "file-refused":
+        try:
+            open_v1(data)
+        except CorruptFile as exc:
+            assert exc.rejection_class == c["rejection_class"], (
+                f"refused as {exc.rejection_class}, the case says "
+                f"{c['rejection_class']}")
+            return
+        raise AssertionError("the file was accepted")
+    assert c["outcome"] == "block-refused" and c["file_opens"] is True
+    info = open_v1(data)          # the FILE must open
+    assert info["metadata"] is None, "a refused block was served"
+    assert info["metadata_refused"] == c["rejection_class"], (
+        f"the block was refused as {info['metadata_refused']}, the case says "
+        f"{c['rejection_class']}")
+    if "metadata_hex" in c:
+        offset, length = struct.unpack_from("<QQ", data, 100)
+        assert data[offset:offset + length].hex().upper() == c["metadata_hex"]
+
+
 def c_codec(v, c):
     """decode(stream) == the expected payload, bit for bit.
 
@@ -1980,6 +2341,8 @@ CHECKS = {
     "v1-negative-vectors": c_negative,
     "v1-profile0-conformance-set": c_profile0,
     "v1-profile2-conformance-set": c_profile2,
+    "v1-metadata-block-conformance-set": c_metadata_conformance,
+    "v1-metadata-block-negatives": c_metadata_negative,
     "codec-decode-per-recipe": c_codec,
 }
 
@@ -2054,6 +2417,24 @@ def check_documented_counts(manifest: dict) -> list[str]:
           (VECTORS / "v1-format" / "README.md").read_text(),
           r"holds (\d+) files, of which (\d+) are built with their defect",
           "the door's counts", (golden, len(built)))
+
+    # The files whose metadata block alone is built with a defect: they open,
+    # so they are neither goldens nor built negatives, and both documents
+    # count them apart.
+    meta_built = {c["file"] for c in json.loads(
+        (VECTORS / "v1-format" / "v1-metadata-block-negatives.json")
+        .read_text())["cases"]
+        if c.get("outcome") == "block-refused" and "patch" not in c}
+    if not meta_built:
+        problems.append("v1-metadata-block-negatives names no built file")
+    _find(problems, "corpus/CONVENTIONS.md",
+          (CORPUS_ROOT / "CONVENTIONS.md").read_text(),
+          r"(\d+) more are built with a defect in their metadata block alone",
+          "the block-defect file count", (len(meta_built),))
+    _find(problems, "corpus/vectors/v1-format/README.md",
+          (VECTORS / "v1-format" / "README.md").read_text(),
+          r"and (\d+) with a defect in their metadata block alone",
+          "the door's block-defect count", (len(meta_built),))
 
     # The illustrative run: tied to the manifest where it can be, and
     # internally consistent everywhere else.
